@@ -1,0 +1,56 @@
+# Dependencies
+node_modules/
+.pnp
+.pnp.js
+
+# Testing & Pytest
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+.noserc
+
+# Python & Virtual Environs
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+.venv
+
+# Next.js & Vercel
+.next/
+out/
+build/
+dist/
+.vercel
+
+# Application Temp & Logs
+backend/temp/
+backend/logs/
+temp/
+logs/
+*.log
+*.xlsx
+!test_formula_fix.xlsx
+!test_sanitize.xlsx
+
+# Environment Variables & Secrets
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# OS & Editor Files
+.DS_Store
+Thumbs.db
+*.bak
+*.swp
+.idea/
+.vscode/

@@ -1,0 +1,13 @@
+node_modules
+frontend/node_modules
+.next
+frontend/.next
+backend/__pycache__
+backend/.pytest_cache
+.pytest_cache
+*.xlsx
+*.pdf
+temp
+logs
+backend/temp
+backend/logs
