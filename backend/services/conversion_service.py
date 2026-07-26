@@ -272,6 +272,11 @@ class ConversionService:
             output_excel_path = settings.OUTPUT_DIR / f"{self.job_id}_valmet_export.xlsx"
             generated_sheets = self.excel_generator.generate_workbook(mapped_sheets, output_excel_path)
 
+            ai_count = len(mapped_sheets.get("AI", []))
+            ao_count = len(mapped_sheets.get("AO", []))
+            di_count = len(mapped_sheets.get("DI", []))
+            do_count = len(mapped_sheets.get("DO", []))
+
             job_store.update_status(
                 self.job_id,
                 status="completed",
@@ -288,6 +293,10 @@ class ConversionService:
                 object_overrides=stats.object_overrides,
                 missing_parameters_after_merge=stats.missing_parameters_after_merge,
                 ignored_header_footer_lines=stats.headers_removed,
+                ai_count=ai_count,
+                ao_count=ao_count,
+                di_count=di_count,
+                do_count=do_count,
                 detected_element_types=[s.model_dump() for s in detected_summaries],
                 generated_sheets=generated_sheets,
                 preview_data=preview_data,
