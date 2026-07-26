@@ -100,10 +100,11 @@ class ConversionService:
                 res = service.execute_pipeline()
 
                 total_objects += res.total_io_found
-                ai_count += res.ai_count + res.ai800_count
-                ao_count += res.ao_count + res.ao800_count
+                # Roll extended families into summary counters for the UI
+                ai_count += res.ai_count + res.ai800_count + res.aic_count
+                ao_count += res.ao_count + res.ao800_count + res.aoc_count
                 di_count += res.di_count + res.di800_count
-                do_count += res.do_count + res.do800_count
+                do_count += res.do_count + res.do800_count + res.other_count
                 duplicates_removed += res.duplicates_removed
                 missing_descriptions += res.descriptions_missing
                 total_proc_time += res.processing_time_seconds

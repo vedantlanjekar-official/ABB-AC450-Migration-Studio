@@ -1,9 +1,10 @@
 """
 validator.py - Stage 10: Validation of EngineeringIO objects for PC Element Engine.
-Mandatory fields: io_family, io_type, card_number, channel_number, device_tag, loop_tag.
+Mandatory fields: io_family, category, card_number, device_tag, loop_tag.
+Channel may be 0 for no-channel address formats (e.g. =AOC264/tag).
 """
 
-from typing import List, Tuple
+from typing import List, Tuple, Set
 import re
 from pydantic import BaseModel, Field
 
@@ -26,24 +27,38 @@ class EngineeringIO(BaseModel):
 class Validator:
     """Validates extracted EngineeringIO objects."""
 
-    VALID_FAMILIES = {"AI800_", "AO800_", "DI800_", "DO800_", "AI", "AO", "DI", "DO"}
-    VALID_TYPES = {"AI", "AO", "DI", "DO"}
+    VALID_FAMILIES: Set[str] = {
+        "AI800_", "AO800_", "DI800_", "DO800_",
+        "AI", "AO", "DI", "DO",
+        "AOC", "ACC", "AIC", "DOC", "DIC",
+        "AICT", "DICT",
+    }
+
+    VALID_CATEGORIES: Set[str] = {
+        "AI800", "AO800", "DI800", "DO800",
+        "AI", "AO", "DI", "DO",
+        "AOC", "ACC", "AIC", "DOC", "DIC",
+        "AICT", "DICT",
+    }
 
     @classmethod
     def validate_object(cls, obj: EngineeringIO) -> Tuple[bool, List[str]]:
         """Validates a single EngineeringIO object and returns (is_valid, errors)."""
         errors: List[str] = []
 
-        if not obj.io_family or obj.io_family.upper() not in cls.VALID_FAMILIES:
+        family = (obj.io_family or "").upper()
+        if family not in cls.VALID_FAMILIES:
             errors.append(f"Invalid or missing io_family: '{obj.io_family}'")
 
-        if not obj.io_type or obj.io_type.upper() not in cls.VALID_TYPES:
-            errors.append(f"Invalid or missing io_type: '{obj.io_type}'")
+        category = (obj.category or "").upper()
+        if category not in cls.VALID_CATEGORIES:
+            errors.append(f"Invalid or missing category: '{obj.category}'")
 
         if obj.card_number <= 0:
             errors.append(f"Invalid card_number: {obj.card_number}")
 
-        if obj.channel_number <= 0:
+        # Channel 0 is valid for no-channel formats (=AOC264/tag, =AO199/tag)
+        if obj.channel_number < 0:
             errors.append(f"Invalid channel_number: {obj.channel_number}")
 
         if not obj.device_tag or not obj.device_tag.strip():

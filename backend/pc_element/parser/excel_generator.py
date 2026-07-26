@@ -1,7 +1,8 @@
 """
-excel_generator.py - Stage 11: Production-grade Excel Generator for PC Element Engineering I/O Lists.
-Exact column structure: Loop Tag | Tag Description | Device Tag | IO type | Controller | Process area.
-Enforces string cell sanitization to prevent openpyxl formula corruption in MS Excel.
+excel_generator.py - Stage 11: Excel Generator for PC Element Engineering I/O Lists.
+
+Columns:
+  Sr. No. | Loop Tag | Description | Device Tag | Category | Slot/Card | Channel
 """
 
 from typing import List, Any
@@ -25,7 +26,7 @@ def sanitize_cell_value(val: Any) -> Any:
 
 
 class ExcelGenerator:
-    """Generates Valmet-compatible Excel workbooks for hardwired I/O lists."""
+    """Generates Valmet-compatible Excel workbooks for PC Element I/O lists."""
 
     FAMILY_SORT_ORDER = {
         "AI800_": 1,
@@ -35,7 +36,14 @@ class ExcelGenerator:
         "DI800_": 5,
         "DI": 6,
         "DO800_": 7,
-        "DO": 8
+        "DO": 8,
+        "AOC": 9,
+        "ACC": 10,
+        "AIC": 11,
+        "DOC": 12,
+        "DIC": 13,
+        "AICT": 14,
+        "DICT": 15,
     }
 
     @classmethod
@@ -47,7 +55,8 @@ class ExcelGenerator:
                 cls.FAMILY_SORT_ORDER.get(x.io_family.upper(), 99),
                 x.card_number,
                 x.channel_number,
-                x.device_tag
+                x.loop_tag,
+                x.device_tag,
             )
         )
 
@@ -56,42 +65,36 @@ class ExcelGenerator:
         ws.title = "I_O_List"
         ws.views.sheetView[0].showGridLines = True
 
-        # Valmet Fills & Fonts
         header_fill = PatternFill(start_color="00805A", end_color="00805A", fill_type="solid")
         header_font = Font(name="Segoe UI", size=11, bold=True, color="FFFFFF")
-
         title_font = Font(name="Segoe UI", size=14, bold=True, color="004D36")
         subtitle_font = Font(name="Segoe UI", size=10, italic=True, color="4A5568")
-
         data_font = Font(name="Segoe UI", size=10, color="1A202C")
         zebra_fill = PatternFill(start_color="F7FAFC", end_color="F7FAFC", fill_type="solid")
 
         thin_side = Side(style="thin", color="CBD5E0")
         thin_border = Border(left=thin_side, right=thin_side, top=thin_side, bottom=thin_side)
-
         center_align = Alignment(horizontal="center", vertical="center")
         left_align = Alignment(horizontal="left", vertical="center")
 
-        # Row 1-2: Title Header
-        ws.merge_cells("A1:F1")
+        ws.merge_cells("A1:G1")
         ws["A1"] = "VALMET ENGINEERING I/O MIGRATION LIST"
         ws["A1"].font = title_font
         ws["A1"].alignment = left_align
 
-        ws.merge_cells("A2:F2")
-        ws["A2"] = "ABB Advant Controller AC450 - Hardwired I/O References"
+        ws.merge_cells("A2:G2")
+        ws["A2"] = "ABB Advant Controller AC450 — PC Element Hardwired I/O References"
         ws["A2"].font = subtitle_font
         ws["A2"].alignment = left_align
 
-        # Row 4: Exact column layout requested:
-        # Loop Tag | Tag Description | Device Tag | IO type | Controller | Process area
         headers = [
+            "Sr. No.",
             "Loop Tag",
-            "Tag Description",
+            "Description",
             "Device Tag",
-            "IO type",
-            "Controller",
-            "Process area"
+            "Category",
+            "Slot/Card",
+            "Channel",
         ]
 
         start_row = 4
@@ -103,35 +106,39 @@ class ExcelGenerator:
             cell.border = thin_border
         ws.row_dimensions[start_row].height = 26
 
-        # Data Rows
         current_row = start_row + 1
         for sr_no, obj in enumerate(sorted_objects, start=1):
+            channel_val = obj.channel_number if obj.channel_number > 0 else ""
             row_data = [
+                sr_no,
                 obj.loop_tag,
-                obj.description,
+                obj.description or "",
                 obj.device_tag,
-                obj.io_type,
-                obj.controller,
-                obj.process_area
+                obj.category,
+                obj.card_number,
+                channel_val,
             ]
 
             fill_to_apply = zebra_fill if (sr_no % 2 == 0) else None
 
             for col_idx, val in enumerate(row_data, start=1):
-                clean_val = sanitize_cell_value(val)
+                if col_idx == 1 or col_idx in (6, 7):
+                    clean_val = val if val != "" else ""
+                else:
+                    clean_val = sanitize_cell_value(val)
+                    if clean_val is None:
+                        clean_val = ""
                 cell = ws.cell(row=current_row, column=col_idx, value=clean_val)
                 cell.font = data_font
                 cell.border = thin_border
 
-                # Explicitly force String data_type to prevent Excel formula interpretation
                 if isinstance(clean_val, str):
                     cell.data_type = 's'
 
                 if fill_to_apply:
                     cell.fill = fill_to_apply
 
-                # Alignment
-                if col_idx == 4:  # IO type
+                if col_idx in (1, 5, 6, 7):
                     cell.alignment = center_align
                 else:
                     cell.alignment = left_align
@@ -139,7 +146,6 @@ class ExcelGenerator:
             ws.row_dimensions[current_row].height = 20
             current_row += 1
 
-        # Auto-fit column widths
         for col in ws.columns:
             max_len = 0
             col_letter = get_column_letter(col[0].column)
@@ -149,7 +155,7 @@ class ExcelGenerator:
                 val_str = str(cell.value or "")
                 if len(val_str) > max_len:
                     max_len = len(val_str)
-            ws.column_dimensions[col_letter].width = max(max_len + 4, 14)
+            ws.column_dimensions[col_letter].width = max(max_len + 4, 12)
 
         if os.path.dirname(output_path):
             os.makedirs(os.path.dirname(output_path), exist_ok=True)

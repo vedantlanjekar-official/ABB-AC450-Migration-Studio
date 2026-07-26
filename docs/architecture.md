@@ -46,9 +46,19 @@ The **ABB AC450 Engineering Converter** is designed as a decoupled enterprise we
    - Builds openpyxl workbooks with **one sheet per element type**.
    - Applies industrial formatting: Navy/Slate headers (`#1E293B`), zebra striping, auto column width, gridlines.
 
-## Extensibility & Future Phase Support
+## Dual Conversion Modules
 
-The application is structured to allow future extension without refactoring core components:
-- **PC Element Module**: Can be plugged into `backend/parser/pc_element_parser.py` using the same service & mapper architecture.
-- **Additional Exporters**: Exporters (CSV, XML, JSON) can implement a unified `BaseExporter` interface alongside `ExcelGenerator`.
-- **Database / Cloud Storage**: Abstracted behind service interfaces for seamless integration with PostgreSQL, Cloud Storage, or S3.
+`ConversionService` routes by `conversion_type`:
+
+| Type | Engine | Excel |
+|------|--------|-------|
+| **DB** | `backend/parser/*` + mapper | Multi-sheet Valmet workbook |
+| **PC** | `backend/pc_element/parser/*` | Single-sheet `I_O_List` |
+
+Full PC Element design, parsing rules, and verification results: [`docs/pc_element_module.md`](pc_element_module.md).
+
+## Extensibility
+
+- New ABB I/O prefixes: extend `grammar_parser.PREFIX_MAP` + detector regex + validator sets.
+- Additional exporters (CSV, XML, JSON) can sit beside `ExcelGenerator`.
+- Storage remains filesystem/temp — no database required.
