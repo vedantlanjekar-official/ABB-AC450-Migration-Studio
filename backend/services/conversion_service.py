@@ -121,7 +121,7 @@ class ConversionService:
                     raise Exception(f"PC Element extraction failed: {res.errors[0]}")
 
             preview_data = {
-                "Valmet PC Export": all_previews[:50]
+                "I_O_List": all_previews[:50]
             }
 
             # Phase 4: Completed
