@@ -30,7 +30,19 @@ export function useFileUpload() {
       setStage('processing');
     } catch (err: any) {
       console.error('Upload / process trigger error:', err);
-      const msg = err.response?.data?.detail || 'Failed to upload and start conversion process.';
+      let msg = 'Failed to upload and start conversion process.';
+      if (err.response?.data?.detail) {
+        const detail = err.response.data.detail;
+        if (typeof detail === 'string') {
+          msg = detail;
+        } else if (Array.isArray(detail)) {
+          msg = detail.map((d: any) => d.msg || JSON.stringify(d)).join('; ');
+        } else {
+          msg = JSON.stringify(detail);
+        }
+      } else if (err.message) {
+        msg = err.message;
+      }
       setError(msg);
     } finally {
       setIsUploading(false);

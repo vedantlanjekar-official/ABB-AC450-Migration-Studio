@@ -1,17 +1,29 @@
 import axios from 'axios';
 import { FileUploadResponse, ProcessStatusResponse } from '../types/converter';
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || '/api';
+const DEFAULT_PRODUCTION_API_URL = 'https://abb-ac450-migration-studio-backend.onrender.com/api';
+
+function getApiBaseUrl(): string {
+  const envUrl = process.env.NEXT_PUBLIC_API_URL;
+  if (envUrl && envUrl.startsWith('http')) {
+    return envUrl;
+  }
+  if (typeof window !== 'undefined' && window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1') {
+    return DEFAULT_PRODUCTION_API_URL;
+  }
+  return envUrl || 'http://localhost:8000/api';
+}
 
 export const apiClient = {
   async uploadFiles(files: File[]): Promise<FileUploadResponse> {
+    const baseUrl = getApiBaseUrl();
     const formData = new FormData();
     files.forEach((file) => {
       formData.append('files', file);
     });
 
     const response = await axios.post<FileUploadResponse>(
-      `${API_BASE_URL}/upload`,
+      `${baseUrl}/upload`,
       formData,
       {
         headers: {
@@ -23,27 +35,32 @@ export const apiClient = {
   },
 
   async triggerProcess(jobId: string, conversionType: 'DB' | 'PC' = 'DB'): Promise<void> {
-    await axios.post(`${API_BASE_URL}/process`, {
+    const baseUrl = getApiBaseUrl();
+    await axios.post(`${baseUrl}/process`, {
       job_id: jobId,
       conversion_type: conversionType,
     });
   },
 
   async getJobStatus(jobId: string): Promise<ProcessStatusResponse> {
+    const baseUrl = getApiBaseUrl();
     const response = await axios.get<ProcessStatusResponse>(
-      `${API_BASE_URL}/status/${jobId}`
+      `${baseUrl}/status/${jobId}`
     );
     return response.data;
   },
 
   getDownloadUrl(jobId: string): string {
-    return `${API_BASE_URL}/download/${jobId}`;
+    const baseUrl = getApiBaseUrl();
+    return `${baseUrl}/download/${jobId}`;
   },
 
   async getJobLog(jobId: string): Promise<string> {
-    const response = await axios.get<string>(`${API_BASE_URL}/logs/${jobId}`, {
+    const baseUrl = getApiBaseUrl();
+    const response = await axios.get<string>(`${baseUrl}/logs/${jobId}`, {
       responseType: 'text',
     });
     return response.data;
   },
 };
+
