@@ -1,4 +1,4 @@
-import asyncio
+import time
 from pathlib import Path
 from typing import List
 from backend.core.config import settings
@@ -16,6 +16,7 @@ from backend.schemas.api_schemas import ElementTypeSummary
 class ConversionService:
     """
     Orchestrates both DB Element Compiler Pipeline and PC Element Converter Pipeline across all uploaded PDF files.
+    Executes in a dedicated background worker thread pool to keep the FastAPI event loop 100% unblocked for status polling.
     """
 
     def __init__(self, job_id: str):
@@ -29,14 +30,14 @@ class ConversionService:
         self.pc_parser_service = PCParserService(job_id)
         self.pc_excel_generator = PCExcelGenerator(job_id)
 
-    async def run_conversion_pipeline(self, conversion_type: str = "DB") -> None:
+    def run_conversion_pipeline(self, conversion_type: str = "DB") -> None:
         """Runs DB or PC conversion pipeline across all uploaded files and updates job status."""
         if conversion_type.upper() == "PC":
-            await self._run_pc_conversion_pipeline()
+            self._run_pc_conversion_pipeline()
         else:
-            await self._run_db_conversion_pipeline()
+            self._run_db_conversion_pipeline()
 
-    async def _run_pc_conversion_pipeline(self) -> None:
+    def _run_pc_conversion_pipeline(self) -> None:
         """Executes PC Element extraction pipeline using backend.pc_element module."""
         try:
             job = job_store.get_job(self.job_id)
@@ -56,7 +57,7 @@ class ConversionService:
                 conversion_type="PC",
                 message=f"Reading {len(uploaded_filenames)} uploaded PC Element PDF document(s)..."
             )
-            await asyncio.sleep(0.1)
+            time.sleep(0.05)
 
             from backend.pc_element.parser.parser_service import PCParserService as ModularPCParserService
 
@@ -90,7 +91,7 @@ class ConversionService:
                     conversion_type="PC",
                     message=f"Scanning PC Diagram '{fname}' for hardwired I/O references..."
                 )
-                await asyncio.sleep(0.1)
+                time.sleep(0.05)
 
                 service = ModularPCParserService(
                     file_path=str(pdf_path),
@@ -157,7 +158,7 @@ class ConversionService:
                 message=f"PC Processing failed: {str(e)}"
             )
 
-    async def _run_db_conversion_pipeline(self) -> None:
+    def _run_db_conversion_pipeline(self) -> None:
         """Executes DB Element extraction pipeline."""
         try:
             job = job_store.get_job(self.job_id)
@@ -176,7 +177,7 @@ class ConversionService:
                 conversion_type="DB",
                 message=f"Reading {len(uploaded_filenames)} uploaded PDF document(s)..."
             )
-            await asyncio.sleep(0.1)
+            time.sleep(0.05)
 
             combined_line_records: List[LineRecord] = []
             page_offset = 0
@@ -208,7 +209,7 @@ class ConversionService:
                 conversion_type="DB",
                 message=f"Cleaning repeated page headers and footers across {len(combined_line_records)} line records..."
             )
-            await asyncio.sleep(0.1)
+            time.sleep(0.05)
 
             job_store.update_status(
                 self.job_id,
@@ -218,7 +219,7 @@ class ConversionService:
                 conversion_type="DB",
                 message="Building unified Default Library and Card/Object AST Tree..."
             )
-            await asyncio.sleep(0.1)
+            time.sleep(0.05)
 
             combined_file_name = ", ".join(uploaded_filenames) if uploaded_filenames else "document.pdf"
             all_parsed_elements, stats, warnings = self.parser_service.parse_line_records(
@@ -241,7 +242,7 @@ class ConversionService:
                 conversion_type="DB",
                 message=f"Applying merged family default profiles to {total_objects} objects..."
             )
-            await asyncio.sleep(0.1)
+            time.sleep(0.05)
 
             mapped_sheets = self.mapper.group_and_map(all_parsed_elements)
 
@@ -266,7 +267,7 @@ class ConversionService:
                 conversion_type="DB",
                 message="Building multi-sheet openpyxl Excel workbook..."
             )
-            await asyncio.sleep(0.1)
+            time.sleep(0.05)
 
             output_excel_path = settings.OUTPUT_DIR / f"{self.job_id}_valmet_export.xlsx"
             generated_sheets = self.excel_generator.generate_workbook(mapped_sheets, output_excel_path)
