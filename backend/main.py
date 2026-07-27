@@ -1,7 +1,10 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from backend.core.config import settings
+from backend.core.logging import get_logger
 from backend.api import upload, process, status, download, logs
+
+logger = get_logger()
 
 app = FastAPI(
     title=settings.PROJECT_NAME,
@@ -28,10 +31,31 @@ app.include_router(logs.router, prefix=settings.API_PREFIX)
 @app.get("/health")
 @app.get(f"{settings.API_PREFIX}/health")
 async def health_check():
+    filesystem_ok = True
+    filesystem_error = None
+    probe_path = settings.LOG_DIR / ".health_probe"
+    try:
+        settings.UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
+        settings.OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
+        settings.LOG_DIR.mkdir(parents=True, exist_ok=True)
+        probe_path.write_text("ok", encoding="utf-8")
+        probe_path.unlink(missing_ok=True)
+    except Exception as exc:
+        filesystem_ok = False
+        filesystem_error = str(exc)
+        logger.error(f"Health check filesystem probe failed: {exc}", exc_info=True)
+
     return {
-        "status": "online",
+        "status": "online" if filesystem_ok else "degraded",
         "project": settings.PROJECT_NAME,
-        "version": settings.VERSION
+        "version": settings.VERSION,
+        "filesystem": {
+            "writable": filesystem_ok,
+            "upload_dir": str(settings.UPLOAD_DIR),
+            "output_dir": str(settings.OUTPUT_DIR),
+            "log_dir": str(settings.LOG_DIR),
+            "error": filesystem_error,
+        },
     }
 
 if __name__ == "__main__":

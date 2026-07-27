@@ -2,11 +2,13 @@ import uuid
 from typing import List
 from fastapi import APIRouter, UploadFile, File, HTTPException, status
 from backend.core.config import settings
+from backend.core.logging import get_logger
 from backend.services.job_manager import job_store
 from backend.schemas.api_schemas import FileUploadResponse
 from backend.utils.file_utils import sanitize_filename
 
 router = APIRouter(prefix="/upload", tags=["Upload"])
+logger = get_logger()
 
 @router.post("", response_model=FileUploadResponse)
 async def upload_pdf_files(files: List[UploadFile] = File(...)):
@@ -20,6 +22,7 @@ async def upload_pdf_files(files: List[UploadFile] = File(...)):
     job_id = str(uuid.uuid4())
     job_upload_dir = settings.UPLOAD_DIR / job_id
     job_upload_dir.mkdir(parents=True, exist_ok=True)
+    logger.info(f"Upload started for job {job_id} — target dir {job_upload_dir}")
     
     saved_filenames = []
     
@@ -42,10 +45,12 @@ async def upload_pdf_files(files: List[UploadFile] = File(...)):
             
         with open(dest_path, "wb") as f:
             f.write(content)
+        logger.info(f"Saved upload {safe_name} ({len(content)} bytes) for job {job_id}")
             
         saved_filenames.append(safe_name)
 
     job_store.create_job(job_id, saved_filenames)
+    logger.info(f"Upload complete for job {job_id}: {saved_filenames}")
     
     return FileUploadResponse(
         job_id=job_id,

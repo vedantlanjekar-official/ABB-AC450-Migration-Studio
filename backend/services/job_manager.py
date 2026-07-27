@@ -1,18 +1,56 @@
 import uuid
+import json
+from pathlib import Path
 from typing import Dict, Any, List, Optional
 from datetime import datetime
+from backend.core.config import settings
+from backend.core.logging import get_logger
 from backend.schemas.api_schemas import ProcessStatusResponse, ElementTypeSummary
 
+_logger = get_logger()
+
+
 class JobManager:
-    """In-memory thread-safe status & logs manager for processing jobs."""
+    """Job status manager with in-memory cache and file-backed JSON persistence.
+
+    Render and other PaaS hosts may restart workers or route requests across
+    processes. Persisting job state to the temp directory keeps upload/process/status
+    consistent across the conversion lifecycle.
+    """
 
     def __init__(self):
         self._jobs: Dict[str, Dict[str, Any]] = {}
 
+    def _get_job_file(self, job_id: str) -> Path:
+        return settings.LOG_DIR / f"{job_id}_job.json"
+
+    def _save_job_to_disk(self, job_id: str) -> None:
+        job = self._jobs.get(job_id)
+        if not job:
+            return
+        try:
+            settings.LOG_DIR.mkdir(parents=True, exist_ok=True)
+            job_file = self._get_job_file(job_id)
+            with open(job_file, "w", encoding="utf-8") as f:
+                json.dump(job, f, indent=2, default=str)
+        except Exception as exc:
+            _logger.error(f"Failed to persist job {job_id} to disk: {exc}", exc_info=True)
+
+    def _load_job_from_disk(self, job_id: str) -> Optional[Dict[str, Any]]:
+        job_file = self._get_job_file(job_id)
+        if not job_file.exists():
+            return None
+        try:
+            with open(job_file, "r", encoding="utf-8") as f:
+                job_data = json.load(f)
+                self._jobs[job_id] = job_data
+                return job_data
+        except Exception as exc:
+            _logger.error(f"Failed to load job {job_id} from disk: {exc}", exc_info=True)
+            return None
+
     def create_job(self, job_id_or_files: Any, uploaded_files: Optional[List[str]] = None) -> str:
-        """
-        Creates a job entry. Accepts create_job(job_id, files) or create_job(files).
-        """
+        """Creates a job entry. Accepts create_job(job_id, files) or create_job(files)."""
         if isinstance(job_id_or_files, str) and uploaded_files is not None:
             job_id = job_id_or_files
             files = uploaded_files
@@ -20,7 +58,7 @@ class JobManager:
             job_id = str(uuid.uuid4())
             files = job_id_or_files
 
-        self._jobs[job_id] = {
+        job_data = {
             "job_id": job_id,
             "status": "idle",
             "progress_percentage": 0,
@@ -48,24 +86,46 @@ class JobManager:
             "created_at": datetime.utcnow().isoformat(),
             "updated_at": datetime.utcnow().isoformat()
         }
+
+        self._jobs[job_id] = job_data
+        self._save_job_to_disk(job_id)
+        _logger.info(f"Created job {job_id} with {len(files)} uploaded file(s): {files}")
         return job_id
 
     def get_job(self, job_id: str) -> Optional[Dict[str, Any]]:
+        if job_id not in self._jobs:
+            self._load_job_from_disk(job_id)
         return self._jobs.get(job_id)
 
     def update_status(self, job_id: str, **kwargs):
-        if job_id in self._jobs:
-            self._jobs[job_id].update(kwargs)
-            self._jobs[job_id]["updated_at"] = datetime.utcnow().isoformat()
+        job = self.get_job(job_id)
+        if job:
+            job.update(kwargs)
+            job["updated_at"] = datetime.utcnow().isoformat()
+            self._jobs[job_id] = job
+            self._save_job_to_disk(job_id)
+            _logger.info(
+                f"Job {job_id} status={job.get('status')} "
+                f"progress={job.get('progress_percentage')}% "
+                f"phase={job.get('current_phase')}"
+            )
 
     def add_warning(self, job_id: str, warning: str):
-        if job_id in self._jobs:
-            if warning not in self._jobs[job_id]["warnings"]:
-                self._jobs[job_id]["warnings"].append(warning)
+        job = self.get_job(job_id)
+        if job:
+            if warning not in job["warnings"]:
+                job["warnings"].append(warning)
+                job["updated_at"] = datetime.utcnow().isoformat()
+                self._save_job_to_disk(job_id)
+                _logger.warning(f"Job {job_id} warning: {warning}")
 
     def add_error(self, job_id: str, error: str):
-        if job_id in self._jobs:
-            self._jobs[job_id]["errors"].append(error)
+        job = self.get_job(job_id)
+        if job:
+            job["errors"].append(error)
+            job["updated_at"] = datetime.utcnow().isoformat()
+            self._save_job_to_disk(job_id)
+            _logger.error(f"Job {job_id} error: {error}")
 
     def get_status_response(self, job_id: str) -> Optional[ProcessStatusResponse]:
         job = self.get_job(job_id)
@@ -111,5 +171,6 @@ class JobManager:
             errors=job.get("errors", []),
             excel_file_path=job.get("excel_file_path")
         )
+
 
 job_store = JobManager()

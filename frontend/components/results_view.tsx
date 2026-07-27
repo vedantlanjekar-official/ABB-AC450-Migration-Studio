@@ -29,6 +29,7 @@ export function ResultsView() {
 
   const {
     job_id,
+    status,
     conversion_type = 'DB',
     total_objects,
     default_sections_found,
@@ -74,24 +75,35 @@ export function ResultsView() {
   };
 
   const isPC = conversion_type === 'PC';
+  const isFailed = status === 'failed';
 
   return (
     <div className="space-y-6">
       {/* Light Professional Header Banner */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 p-6 bg-white border border-slate-200 rounded-2xl shadow-xs">
         <div className="flex items-center gap-4">
-          <div className="p-3 bg-valmet-lightgreen text-valmet-green rounded-xl border border-valmet-green/30">
-            <CheckCircle2 className="w-7 h-7" />
+          <div className={`p-3 rounded-xl border ${
+            isFailed
+              ? 'bg-red-50 text-red-600 border-red-200'
+              : 'bg-valmet-lightgreen text-valmet-green border-valmet-green/30'
+          }`}>
+            {isFailed ? <AlertTriangle className="w-7 h-7" /> : <CheckCircle2 className="w-7 h-7" />}
           </div>
           <div>
             <h2 className="text-xl font-bold text-slate-900 tracking-tight">
-              {isPC ? 'PC Element IO Extraction Complete' : 'DB Element Conversion Complete'}
+              {isFailed
+                ? 'Conversion Failed'
+                : isPC
+                ? 'PC Element IO Extraction Complete'
+                : 'DB Element Conversion Complete'}
             </h2>
+            {isFailed && statusResponse.message && (
+              <p className="text-sm text-red-600 mt-1">{statusResponse.message}</p>
+            )}
           </div>
         </div>
 
         <div className="flex items-center gap-3">
-          {/* View Execution Log Button: Grey text, white background */}
           <button
             onClick={handleFetchLogs}
             disabled={loadingLog}
@@ -101,15 +113,16 @@ export function ResultsView() {
             <span>{loadingLog ? 'Loading Log...' : 'View Execution Log'}</span>
           </button>
 
-          {/* Download Excel Button: Green text, white background, sleek design with FileSpreadsheet icon */}
-          <a
-            href={downloadUrl}
-            download
-            className="flex items-center gap-2 px-5 py-2.5 bg-white hover:bg-valmet-lightgreen/50 text-valmet-green border border-valmet-green rounded-xl text-xs font-extrabold transition-all shadow-xs active:scale-95 group"
-          >
-            <FileSpreadsheet className="w-4 h-4 text-valmet-green group-hover:scale-110 transition-transform" />
-            <span>Download Excel (.xlsx)</span>
-          </a>
+          {!isFailed && (
+            <a
+              href={downloadUrl}
+              download
+              className="flex items-center gap-2 px-5 py-2.5 bg-white hover:bg-valmet-lightgreen/50 text-valmet-green border border-valmet-green rounded-xl text-xs font-extrabold transition-all shadow-xs active:scale-95 group"
+            >
+              <FileSpreadsheet className="w-4 h-4 text-valmet-green group-hover:scale-110 transition-transform" />
+              <span>Download Excel (.xlsx)</span>
+            </a>
+          )}
 
           <button
             onClick={resetSession}
@@ -122,7 +135,7 @@ export function ResultsView() {
       </div>
 
       {/* Light Audit Metrics Panel */}
-      {isPC ? (
+      {!isFailed && (isPC ? (
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
           <div className="p-4 bg-white border border-slate-200 rounded-xl shadow-xs">
             <div className="flex items-center gap-1.5 text-slate-500 text-xs font-medium mb-1">
@@ -264,6 +277,24 @@ export function ResultsView() {
             </div>
           </div>
         </div>
+      ))}
+
+      {/* Compiler Errors */}
+      {statusResponse.errors && statusResponse.errors.length > 0 && (
+        <div className="p-4 bg-red-50 border border-red-200 rounded-xl text-red-800">
+          <div className="flex items-center gap-2 text-red-900 text-xs font-bold mb-2">
+            <AlertTriangle className="w-4 h-4 text-red-600" />
+            <span>Conversion Errors ({statusResponse.errors.length})</span>
+          </div>
+          <ul className="text-xs text-red-700 space-y-1 max-h-28 overflow-y-auto">
+            {statusResponse.errors.map((entry, idx) => (
+              <li key={idx} className="flex items-start gap-1.5 font-mono">
+                <span className="text-red-500">•</span>
+                <span>{entry}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
       )}
 
       {/* Compiler Warnings */}
@@ -285,6 +316,7 @@ export function ResultsView() {
       )}
 
       {/* Excel Sheet Style Preview Table Component */}
+      {!isFailed && (
       <div className="bg-white border border-slate-300 rounded-xl shadow-sm overflow-hidden">
         {/* Ribbon / Tab Header */}
         <div className="bg-slate-100 border-b border-slate-300 p-3 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
@@ -376,6 +408,7 @@ export function ResultsView() {
           )}
         </div>
       </div>
+      )}
     </div>
   );
 }

@@ -1,6 +1,7 @@
 import time
 from pathlib import Path
 from typing import List
+from datetime import datetime
 from backend.core.config import settings
 from backend.core.logging import get_logger
 from backend.parser.pdf_reader import PDFReader, LineRecord
@@ -22,6 +23,7 @@ class ConversionService:
     def __init__(self, job_id: str):
         self.job_id = job_id
         self.logger = get_logger(job_id)
+        self._pipeline_started_at: datetime | None = None
         self.pdf_reader = PDFReader(job_id)
         self.parser_service = ParserService(job_id)
         self.mapper = ElementMapper(job_id)
@@ -30,8 +32,24 @@ class ConversionService:
         self.pc_parser_service = PCParserService(job_id)
         self.pc_excel_generator = PCExcelGenerator(job_id)
 
+    def _log_stage(self, stage: str, detail: str = "") -> None:
+        """Write a structured pipeline stage marker to the job log."""
+        elapsed = ""
+        if self._pipeline_started_at:
+            elapsed = f" (+{(datetime.utcnow() - self._pipeline_started_at).total_seconds():.2f}s)"
+        message = f"[PIPELINE STAGE] {stage}{elapsed}"
+        if detail:
+            message = f"{message} — {detail}"
+        self.logger.info(message)
+
     def run_conversion_pipeline(self, conversion_type: str = "DB") -> None:
         """Runs DB or PC conversion pipeline across all uploaded files and updates job status."""
+        self._pipeline_started_at = datetime.utcnow()
+        self._log_stage("START", f"conversion_type={conversion_type.upper()}")
+        self.logger.info(
+            f"Pipeline environment: upload_dir={settings.UPLOAD_DIR}, "
+            f"output_dir={settings.OUTPUT_DIR}, log_dir={settings.LOG_DIR}"
+        )
         if conversion_type.upper() == "PC":
             self._run_pc_conversion_pipeline()
         else:
@@ -168,6 +186,10 @@ class ConversionService:
 
             uploaded_filenames = job.get("uploaded_files", [])
             job_upload_dir = settings.UPLOAD_DIR / self.job_id
+            self._log_stage(
+                "INIT",
+                f"files={uploaded_filenames}, upload_dir={job_upload_dir}, dir_exists={job_upload_dir.exists()}",
+            )
 
             job_store.update_status(
                 self.job_id,
@@ -178,6 +200,7 @@ class ConversionService:
                 message=f"Reading {len(uploaded_filenames)} uploaded PDF document(s)..."
             )
             time.sleep(0.05)
+            self._log_stage("STAGE 1", "PDF document extraction starting")
 
             combined_line_records: List[LineRecord] = []
             page_offset = 0
@@ -185,10 +208,14 @@ class ConversionService:
             for fname in uploaded_filenames:
                 pdf_path = job_upload_dir / fname
                 if not pdf_path.exists():
-                    job_store.add_warning(self.job_id, f"File not found: {fname}")
+                    msg = f"File not found: {fname} (expected at {pdf_path})"
+                    self._log_stage("STAGE 1 ERROR", msg)
+                    job_store.add_warning(self.job_id, msg)
                     continue
 
+                self._log_stage("STAGE 1", f"Extracting lines from {fname} ({pdf_path.stat().st_size} bytes)")
                 file_records = self.pdf_reader.extract_line_records(pdf_path)
+                self._log_stage("STAGE 1", f"Extracted {len(file_records)} line(s) from {fname}")
                 if file_records:
                     max_page_in_file = max(r.page_number for r in file_records)
                     for rec in file_records:
@@ -210,6 +237,7 @@ class ConversionService:
                 message=f"Cleaning repeated page headers and footers across {len(combined_line_records)} line records..."
             )
             time.sleep(0.05)
+            self._log_stage("STAGE 2-3", f"Document cleaning complete — {len(combined_line_records)} combined line record(s)")
 
             job_store.update_status(
                 self.job_id,
@@ -220,11 +248,18 @@ class ConversionService:
                 message="Building unified Default Library and Card/Object AST Tree..."
             )
             time.sleep(0.05)
+            self._log_stage("STAGE 4-7", "AST hierarchy and default library building starting")
 
             combined_file_name = ", ".join(uploaded_filenames) if uploaded_filenames else "document.pdf"
             all_parsed_elements, stats, warnings = self.parser_service.parse_line_records(
                 combined_line_records,
                 file_name=combined_file_name
+            )
+            self._log_stage(
+                "STAGE 4-7",
+                f"Parsed {len(all_parsed_elements)} object(s), "
+                f"{stats.raw_default_blocks_found} default block(s), "
+                f"{stats.inherited_parameters} inherited parameter(s)",
             )
 
             for w in warnings:
@@ -233,6 +268,7 @@ class ConversionService:
             total_objects = len(all_parsed_elements)
             if total_objects == 0:
                 job_store.add_warning(self.job_id, "No ABB AC450 DB Element objects detected in provided PDF(s).")
+                self._log_stage("STAGE 4-7 WARNING", "Zero DB elements detected after parsing")
 
             job_store.update_status(
                 self.job_id,
@@ -243,8 +279,10 @@ class ConversionService:
                 message=f"Applying merged family default profiles to {total_objects} objects..."
             )
             time.sleep(0.05)
+            self._log_stage("STAGE 8-9", f"Grouping and mapping {total_objects} object(s)")
 
             mapped_sheets = self.mapper.group_and_map(all_parsed_elements)
+            self._log_stage("STAGE 8-9", f"Mapped {len(mapped_sheets)} worksheet type(s): {list(mapped_sheets.keys())}")
 
             detected_summaries = []
             preview_data = {}
@@ -268,9 +306,19 @@ class ConversionService:
                 message="Building multi-sheet openpyxl Excel workbook..."
             )
             time.sleep(0.05)
+            self._log_stage("STAGE 10", "Excel workbook generation starting")
 
+            settings.OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
             output_excel_path = settings.OUTPUT_DIR / f"{self.job_id}_valmet_export.xlsx"
             generated_sheets = self.excel_generator.generate_workbook(mapped_sheets, output_excel_path)
+            excel_exists = output_excel_path.exists()
+            excel_size = output_excel_path.stat().st_size if excel_exists else 0
+            self._log_stage(
+                "STAGE 10",
+                f"Excel written to {output_excel_path} (exists={excel_exists}, size={excel_size} bytes)",
+            )
+            if not excel_exists:
+                raise FileNotFoundError(f"Excel workbook was not created at {output_excel_path}")
 
             ai_count = len(mapped_sheets.get("AI", []))
             ao_count = len(mapped_sheets.get("AO", []))
@@ -303,9 +351,11 @@ class ConversionService:
                 excel_file_path=str(output_excel_path),
                 message=f"Conversion complete! Processed {total_objects} objects ({stats.inherited_parameters} inherited params) across {len(generated_sheets)} sheets."
             )
+            self._log_stage("COMPLETE", f"DB conversion finished — {total_objects} object(s), {len(generated_sheets)} sheet(s)")
             self.logger.info(f"DB Conversion Pipeline finished successfully for job {self.job_id}")
 
         except Exception as e:
+            self._log_stage("FAILED", str(e))
             self.logger.error(f"DB Conversion Pipeline error for job {self.job_id}: {e}", exc_info=True)
             job_store.add_error(self.job_id, str(e))
             job_store.update_status(
