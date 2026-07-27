@@ -37,13 +37,6 @@ class ExcelGenerator:
         "DI": 6,
         "DO800_": 7,
         "DO": 8,
-        "AOC": 9,
-        "ACC": 10,
-        "AIC": 11,
-        "DOC": 12,
-        "DIC": 13,
-        "AICT": 14,
-        "DICT": 15,
     }
 
     @classmethod

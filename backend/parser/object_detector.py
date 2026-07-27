@@ -4,8 +4,13 @@ from typing import Optional, Tuple
 class ObjectDetector:
     """
     Identifies the start and end boundaries of actual ABB DB element objects
-    (e.g., AI1.1, AI1.2, AO2.1, PIDCON1, MOTCON1, VALVECON1, DS1, DAT1, TEXT1).
+    (e.g., AI1.1, AI1.2, AO2.1, AI8001.1, DI8003.2).
     """
+
+    OBJECT_800_HEADER_REGEX = re.compile(
+        r'^\s*(AI800|AO800|DI800|DO800)\s*(\d+(?:\.\d+)*)\b',
+        re.IGNORECASE
+    )
 
     OBJECT_HEADER_REGEX = re.compile(
         r'^\s*([A-Z]{2,12})\s*(\d+(?:\.\d+)*)\b'
@@ -31,7 +36,9 @@ class ObjectDetector:
         if not line_str or self.DEFAULT_PREFIX_REGEX.match(line_str):
             return None
 
-        match = self.OBJECT_HEADER_REGEX.match(line_str)
+        match = self.OBJECT_800_HEADER_REGEX.match(line_str)
+        if not match:
+            match = self.OBJECT_HEADER_REGEX.match(line_str)
         if match:
             elem_type = match.group(1).upper()
             elem_index = match.group(2)

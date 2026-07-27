@@ -16,11 +16,11 @@ class TokenAssembler:
 
     PREFIX_START = re.compile(
         r'(?i)^(?:P-)?=?-?(?:AI800_|AO800_|DI800_|DO800_|AI800|AO800|DI800|DO800|'
-        r'AICT|DICT|AOC|ACC|AIC|DOC|DIC|AI|AO|DI|DO)$'
+        r'AI|AO|DI|DO)$'
     )
     PREFIX_INLINE = re.compile(
         r'(?i)(?:P-)?=?-?(?:AI800_|AO800_|DI800_|DO800_|AI800|AO800|DI800|DO800|'
-        r'AICT|DICT|AOC|ACC|AIC|DOC|DIC|AI|AO|DI|DO)'
+        r'AI|AO|DI|DO)'
     )
 
     @classmethod
@@ -71,7 +71,7 @@ class TokenAssembler:
                         chunk[-1:].isdigit() and nxt[:1].isdigit()
                     ):
                         # keep tight for address fragments like AI800_ + 22
-                        if re.search(r'(?i)(AI|AO|DI|DO|AOC|AIC|DOC)$', chunk) and nxt[:1].isdigit():
+                        if re.search(r'(?i)(AI800|AO800|DI800|DO800|AI|AO|DI|DO)$', chunk) and nxt[:1].isdigit():
                             chunk += nxt
                         elif chunk.endswith(("_", ".", ":", "/", "=", "-")) or nxt.startswith((".", ":", "/", "-")):
                             chunk += nxt

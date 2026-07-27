@@ -84,37 +84,52 @@ def test_mv_and_err_are_distinct_rows():
 
 def test_complete_device_tag_keeps_attributes():
     """Complete device tags retain :ATTR suffixes; loop tag drops only the extension."""
-    r = GrammarParser.parse_reference("=AOC264:17/949DKA050.KEY:SELECTED")
+    r = GrammarParser.parse_reference("=AI800_22.5:22/M49FI1201.MV:ERR")
     assert r is not None
-    assert r.device_tag == "949DKA050.KEY:SELECTED"
-    assert r.loop_tag == "949DKA050"
-    assert r.card_number == 264
-    assert r.channel_number == 17
+    assert r.device_tag == "M49FI1201.MV:ERR"
+    assert r.loop_tag == "M49FI1201"
+    assert r.card_number == 22
+    assert r.channel_number == 5
 
-    r2 = GrammarParser.parse_reference("P-=AOC262:19/M49DKA050.KEY:MAN")
+    r2 = GrammarParser.parse_reference("P-=AO2.3/M49DKA050.KEY:MAN")
     assert r2 is not None
     assert r2.device_tag == "M49DKA050.KEY:MAN"
     assert r2.loop_tag == "M49DKA050"
+    assert r2.category == "AO"
 
-    r3 = GrammarParser.parse_reference("=AIC793:55/M49KN050.PWR:CALC_VAL")
+    r3 = GrammarParser.parse_reference("=DI5.12/M49KN050.PWR:CALC_VAL")
     assert r3 is not None
     assert r3.device_tag == "M49KN050.PWR:CALC_VAL"
     assert r3.loop_tag == "M49KN050"
+    assert r3.category == "DI"
+
+
+def test_unsupported_categories_are_ignored():
+    """AIC/AOC/DIC/DOC and other non-I/O families must not be parsed."""
+    for ref in (
+        "=AOC264:17/949DKA050.KEY:SELECTED",
+        "=AIC793:55/M49KN050.PWR:CALC_VAL",
+        "=DOC10:1/TAG.OUT",
+        "=DIC5:2/TAG.IN",
+        "=ACC1/TAG.X",
+        "=AICT1.1/TAG.MV",
+    ):
+        assert GrammarParser.parse_reference(ref) is None
 
 
 def test_dedup_keeps_all_address_variants():
-    """KEY / KEY:SELECTED / KEY:MAN are distinct engineering references."""
+    """MV / MV:ERR are distinct engineering references."""
     refs = [
-        GrammarParser.parse_reference("=AOC264/949DKA050.KEY"),
-        GrammarParser.parse_reference("=AOC264:17/949DKA050.KEY:SELECTED"),
-        GrammarParser.parse_reference("=AOC264:19/949DKA050.KEY:MAN"),
+        GrammarParser.parse_reference("=AI800_22.5/M49FI1201.MV"),
+        GrammarParser.parse_reference("=AI800_22.5:22/M49FI1201.MV:ERR"),
+        GrammarParser.parse_reference("=AO2.3/945FC400.OUT"),
     ]
     assert all(r is not None for r in refs)
     unique, dups = DuplicateDetector.deduplicate_references(refs)
     assert len(unique) == 3
     assert dups == 0
     tags = {r.device_tag for r in unique}
-    assert tags == {"949DKA050.KEY", "949DKA050.KEY:SELECTED", "949DKA050.KEY:MAN"}
+    assert tags == {"M49FI1201.MV", "M49FI1201.MV:ERR", "945FC400.OUT"}
 
 
 def test_dedup_removes_exact_duplicates_only():
@@ -127,7 +142,7 @@ def test_dedup_removes_exact_duplicates_only():
     assert dups == 1
 
 
-def test_validator_accepts_extended_and_zero_channel():
+def test_validator_rejects_unsupported_categories():
     obj = EngineeringIO(
         io_family="AOC",
         io_type="AOC",
@@ -137,6 +152,22 @@ def test_validator_accepts_extended_and_zero_channel():
         loop_tag="949DKA050",
         device_tag="949DKA050.KEY",
         source_reference="=AOC264/949DKA050.KEY",
+    )
+    ok, errors = Validator.validate_object(obj)
+    assert not ok
+    assert any("category" in e.lower() or "family" in e.lower() for e in errors)
+
+
+def test_validator_accepts_supported_zero_channel():
+    obj = EngineeringIO(
+        io_family="AO",
+        io_type="AO",
+        category="AO",
+        card_number=199,
+        channel_number=0,
+        loop_tag="M49ARA104",
+        device_tag="M49ARA104.CA41",
+        source_reference="=AO199/M49ARA104.CA41",
     )
     ok, errors = Validator.validate_object(obj)
     assert ok, errors
@@ -154,13 +185,13 @@ def test_excel_generation_columns(tmp_path):
         description="Felt Water Tank",
     )
     obj2 = EngineeringIO(
-        io_family="AOC",
-        io_type="AOC",
-        category="AOC",
-        card_number=264,
-        channel_number=17,
-        loop_tag="949DKA050",
-        device_tag="949DKA050.KEY:SELECTED",
+        io_family="AO",
+        io_type="AO",
+        category="AO",
+        card_number=2,
+        channel_number=3,
+        loop_tag="945FC400",
+        device_tag="945FC400.OUT",
         description="",
     )
 
@@ -193,18 +224,20 @@ def test_pc_element_parser_service_pipeline(tmp_path):
             page_number=1,
             text=(
                 "-AI800_2.1/M49M021.CURR\n"
+                "=AO2.3/945FC400.OUT\n"
+                "=DI5.12/940M03M1.RUN\n"
                 "=AOC264:17/949DKA050.KEY:SELECTED\n"
-                "=AOC264:19/949DKA050.KEY:MAN\n"
-                "=AOC264/949DKA050.KEY\n"
+                "=AIC793:55/M49KN050.PWR:CALC_VAL\n"
                 "Felt Water Tank Level\n"
                 "PM2\\Node22\n"
                 "White Water System"
             ),
             raw_lines=[
                 "-AI800_2.1/M49M021.CURR",
+                "=AO2.3/945FC400.OUT",
+                "=DI5.12/940M03M1.RUN",
                 "=AOC264:17/949DKA050.KEY:SELECTED",
-                "=AOC264:19/949DKA050.KEY:MAN",
-                "=AOC264/949DKA050.KEY",
+                "=AIC793:55/M49KN050.PWR:CALC_VAL",
                 "Felt Water Tank Level",
                 "PM2\\Node22",
                 "White Water System",
@@ -224,9 +257,14 @@ def test_pc_element_parser_service_pipeline(tmp_path):
         res = service.execute_pipeline()
 
         assert len(res.errors) == 0
-        assert res.total_io_found == 4  # AI800 + 3 AOC variants
+        assert res.total_io_found == 3  # AI800 + AO + DI; AOC/AIC skipped
         assert res.ai800_count == 1
-        assert res.aoc_count == 3
+        assert res.ao_count == 1
+        assert res.di_count == 1
+        assert res.aoc_count == 0
+        assert res.aic_count == 0
+        cats = {row["Category"] for row in res.preview_data}
+        assert cats == {"AI800", "AO", "DI"}
         assert set(res.preview_data[0].keys()) >= {
             "Sr. No.", "Loop Tag", "Description", "Device Tag",
             "Category", "Slot/Card", "Channel",
@@ -252,11 +290,11 @@ def test_reference_o2_pc32_full_coverage():
     if not os.path.exists(pdf):
         pytest.skip("O2-PC32.pdf not available")
 
-    # Include CARD.CHANNEL:TERMINAL/TAG form in ground truth
+    # Include CARD.CHANNEL:TERMINAL/TAG form in ground truth — only 8 supported families
     STRICT = re.compile(
         r'''(?ix)
         (?:[-+]?\s*P\s*-?\s*=?\s*|[=+\-]+\s*)?
-        (?P<prefix>AI800_|AO800_|DI800_|DO800_|AI800|AO800|DI800|DO800|AICT|DICT|AOC|ACC|AIC|DOC|DIC|AI|AO|DI|DO)
+        (?P<prefix>AI800_|AO800_|DI800_|DO800_|AI800|AO800|DI800|DO800|AI|AO|DI|DO)
         \s*_?\s*(?P<card>\d{1,4})
         (?:
             \s*\.\s*(?P<channel>\d{1,3})\s*:\s*(?P<terminal>\d{1,4})

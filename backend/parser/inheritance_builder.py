@@ -15,18 +15,18 @@ class InheritanceBuilder:
     Combines raw DEFAULT blocks into family inheritance profiles.
     
     Dynamic Family Grouping Rules:
-      - AI Family  = DEFAULT AI (Hardware) + DEFAULT AIS (Software)
-      - AO Family  = DEFAULT AO (Hardware) + DEFAULT AOS (Software)
-      - DI Family  = DEFAULT DI (Hardware) + DEFAULT DIS (Software)
-      - DO Family  = DEFAULT DO (Hardware) + DEFAULT DOS (Software)
-      - AIC Family = DEFAULT AIC + DEFAULT AICS
-      - AOC Family = DEFAULT AOC + DEFAULT AOCS
-      - DIC Family = DEFAULT DIC + DEFAULT DICS
-      - DOC Family = DEFAULT DOC + DEFAULT DOCS
+      - AI Family    = DEFAULT AI (Hardware) + DEFAULT AIS (Software)
+      - AO Family    = DEFAULT AO (Hardware) + DEFAULT AOS (Software)
+      - DI Family    = DEFAULT DI (Hardware) + DEFAULT DIS (Software)
+      - DO Family    = DEFAULT DO (Hardware) + DEFAULT DOS (Software)
+      - AI800 Family = DEFAULT AI800 + DEFAULT AI800S
+      - AO800 Family = DEFAULT AO800 + DEFAULT AO800S
+      - DI800 Family = DEFAULT DI800 + DEFAULT DI800S
+      - DO800 Family = DEFAULT DO800 + DEFAULT DO800S
       - Single-block Families = DEFAULT <FAMILY>
     """
 
-    KNOWN_FAMILIES = ["AI", "AO", "DI", "DO", "AIC", "AOC", "DIC", "DOC"]
+    KNOWN_FAMILIES = ["AI", "AO", "DI", "DO", "AI800", "AO800", "DI800", "DO800"]
     SOFTWARE_SUFFIXES = ["S", "CS", "DS"]
 
     def __init__(self, job_id: str = None):

@@ -82,9 +82,9 @@ DB and PC share upload, job store, status polling, and download. Parser stacks a
 
 For every detected reference:
 
-1. **Category** — `AI`, `AO`, `DI`, `DO`, `AI800`, `AO800`, `DI800`, `DO800`, plus diagram types `AOC`, `ACC`, `AIC`, `DOC`, `DIC`, `AICT`, `DICT`
+1. **Category** — only `AI`, `AO`, `DI`, `DO`, `AI800`, `AO800`, `DI800`, `DO800` (AIC/AOC/DIC/DOC/ACC/AICT/DICT and all other types are ignored)
 2. **Slot/Card** — numeric address before `.` / `:` / `/`
-3. **Channel / Port** — after `.` or `:`; `0` when omitted (`=AOC262/tag`)
+3. **Channel / Port** — after `.` or `:`; `0` when omitted
 4. **Device Tag** — text after `/`, with colon attributes stripped (`KEY:SELECTED` → `KEY`)
 5. **Loop Tag** — device tag without final `.EXTENSION`
 6. **Description** — from nearby PDF text when present; otherwise blank

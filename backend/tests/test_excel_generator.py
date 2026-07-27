@@ -5,6 +5,7 @@ from backend.excel.excel_generator import ExcelGenerator
 from backend.parser.pdf_text_extractor import PDFTextExtractor
 from backend.parser.parser_service import ParserService
 from backend.mapper.element_mapper import ElementMapper
+from backend.mapper.record_clubber import RecordClubber
 
 def test_excel_workbook_generation(tmp_path):
     mapped_sheets = {
@@ -12,8 +13,8 @@ def test_excel_workbook_generation(tmp_path):
             {"Tag": "AI1.1", "Index": "1.1", "NAME": "PRESS_01", "UNIT": "BAR", "RANGEMAX": 100.0},
             {"Tag": "AI1.2", "Index": "1.2", "NAME": "PRESS_02", "UNIT": "BAR", "RANGEMAX": 200.0}
         ],
-        "PIDCON": [
-            {"Tag": "PIDCON1", "Index": "1", "NAME": "CTRL_01", "GAIN": 2.5, "MODE": "AUTO"}
+        "DI": [
+            {"Tag": "DI3.1", "Index": "3.1", "NAME": "LIMIT_01", "INV": 0}
         ]
     }
     
@@ -23,54 +24,63 @@ def test_excel_workbook_generation(tmp_path):
     
     assert out_file.exists()
     assert "AI" in sheets
-    assert "PIDCON" in sheets
+    assert "DI" in sheets
     
     wb = openpyxl.load_workbook(out_file)
     assert "AI" in wb.sheetnames
-    assert "PIDCON" in wb.sheetnames
+    assert "DI" in wb.sheetnames
     
     ws_ai = wb["AI"]
     assert ws_ai.cell(row=1, column=1).value == "Tag"
     assert ws_ai.cell(row=2, column=1).value == "AI1.1"
     assert ws_ai.cell(row=2, column=3).value == "PRESS_01"
 
-def test_excel_default_values_printed_in_blank_cells(tmp_path):
+def test_excel_single_clubbed_worksheet(tmp_path):
+    """DB export must produce one consolidated Clubbed_IO worksheet."""
     sample_pdf = Path(__file__).resolve().parent.parent.parent / "examples" / "sample_ac450_db.pdf"
     extractor = PDFTextExtractor("test_excel_defaults")
     pages = extractor.extract_text_pages(sample_pdf)
-    
+
     parser = ParserService("test_excel_defaults")
     elements, stats, _ = parser.parse_document_pages(pages, "sample_ac450_db.pdf")
-    
+
+    clubbed = RecordClubber("test_excel_defaults").club_elements(elements)
     mapper = ElementMapper("test_excel_defaults")
-    mapped_sheets = mapper.group_and_map(elements)
-    
+    clubbed_rows = mapper.map_clubbed(clubbed)
+
+    categories = {r["Category"] for r in clubbed_rows}
+    assert categories.issubset(
+        {"AI", "AO", "DI", "DO", "AI800", "AO800", "DI800", "DO800"}
+    )
+    assert "PIDCON" not in categories
+
     out_excel = tmp_path / "valmet_defaults_export.xlsx"
     generator = ExcelGenerator("test_excel_defaults")
-    generator.generate_workbook(mapped_sheets, out_excel)
-    
+    generator.generate_workbook({"Clubbed_IO": clubbed_rows}, out_excel)
+
     wb = openpyxl.load_workbook(out_excel)
-    ws_ai = wb["AI"]
-    
-    # Read headers
-    headers = [ws_ai.cell(row=1, column=col).value for col in range(1, ws_ai.max_column + 1)]
+    assert wb.sheetnames == ["Clubbed_IO"]
+    ws = wb["Clubbed_IO"]
+
+    headers = [ws.cell(row=1, column=col).value for col in range(1, ws.max_column + 1)]
+    assert "Category" in headers
     assert "TYPE" in headers
     assert "SCANT" in headers
     assert "DEC" in headers
     assert "ERR_TR" in headers
-    
-    # Get column indices (1-based)
+
     type_col = headers.index("TYPE") + 1
     scant_col = headers.index("SCANT") + 1
     dec_col = headers.index("DEC") + 1
-    
-    # AI1.1 is row 2
-    # TYPE was omitted in AI1.1 object text, inherited from DEFAULT AI ("ANALOG_INPUT")
-    # SCANT was omitted in AI1.1 object text, inherited from DEFAULT AI ("1s")
-    # DEC was omitted in AI1.1 object text, inherited from DEFAULT AIS (2)
-    assert ws_ai.cell(row=2, column=type_col).value == "ANALOG_INPUT"
-    assert ws_ai.cell(row=2, column=scant_col).value == "1s"
-    assert ws_ai.cell(row=2, column=dec_col).value == 2
+
+    ai1_1_row = next(
+        r for r in range(2, ws.max_row + 1)
+        if ws.cell(row=r, column=headers.index("Tag") + 1).value == "AI1.1"
+    )
+    # AI1.1 inherited TYPE/SCANT/DEC from defaults
+    assert ws.cell(row=ai1_1_row, column=type_col).value == "ANALOG_INPUT"
+    assert ws.cell(row=ai1_1_row, column=scant_col).value == "1s"
+    assert ws.cell(row=ai1_1_row, column=dec_col).value == 2
 
 def test_excel_no_blank_cells_for_inherited_defaults():
     from backend.models.db_element import DBElement
@@ -92,8 +102,8 @@ def test_excel_no_blank_cells_for_inherited_defaults():
     ]
 
     mapper = ElementMapper("test_defaults_filling")
-    sheets = mapper.group_and_map(elements)
-    ai_rows = sheets["AI"]
+    rows = mapper.map_clubbed(elements)
+    ai_rows = [r for r in rows if r["Category"] == "AI"]
 
     row_1 = next(r for r in ai_rows if r["Tag"] == "AI1.1")
     row_2 = next(r for r in ai_rows if r["Tag"] == "AI1.2")

@@ -192,10 +192,6 @@ class PCParserService:
                     result.di_count += 1
                 elif f == "DO":
                     result.do_count += 1
-                elif f in ("AOC", "ACC"):
-                    result.aoc_count += 1
-                elif f == "AIC":
-                    result.aic_count += 1
                 else:
                     result.other_count += 1
 

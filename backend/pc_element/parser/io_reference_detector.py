@@ -22,7 +22,6 @@ class IOReferenceDetector:
     _PREFIXES = (
         r'AI800_|AO800_|DI800_|DO800_|'
         r'AI800|AO800|DI800|DO800|'
-        r'AICT|DICT|AOC|ACC|AIC|DOC|DIC|'
         r'AI|AO|DI|DO'
     )
 
@@ -55,7 +54,7 @@ class IOReferenceDetector:
     )
 
     KEYWORD_REGEX = re.compile(
-        r'(?:AI|AO|DI|DO|AOC|ACC|AIC|AICT|DOC|DIC|DICT)(?:800)?',
+        r'(?:AI800|AO800|DI800|DO800|AI|AO|DI|DO)',
         re.IGNORECASE,
     )
     FRAG_PREFIX = re.compile(

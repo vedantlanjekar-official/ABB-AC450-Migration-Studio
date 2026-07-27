@@ -1,7 +1,7 @@
 """
 validator.py - Stage 10: Validation of EngineeringIO objects for PC Element Engine.
 Mandatory fields: io_family, category, card_number, device_tag, loop_tag.
-Channel may be 0 for no-channel address formats (e.g. =AOC264/tag).
+Only the eight supported I/O families are accepted.
 """
 
 from typing import List, Tuple, Set
@@ -30,15 +30,11 @@ class Validator:
     VALID_FAMILIES: Set[str] = {
         "AI800_", "AO800_", "DI800_", "DO800_",
         "AI", "AO", "DI", "DO",
-        "AOC", "ACC", "AIC", "DOC", "DIC",
-        "AICT", "DICT",
     }
 
     VALID_CATEGORIES: Set[str] = {
         "AI800", "AO800", "DI800", "DO800",
         "AI", "AO", "DI", "DO",
-        "AOC", "ACC", "AIC", "DOC", "DIC",
-        "AICT", "DICT",
     }
 
     @classmethod
@@ -57,7 +53,6 @@ class Validator:
         if obj.card_number <= 0:
             errors.append(f"Invalid card_number: {obj.card_number}")
 
-        # Channel 0 is valid for no-channel formats (=AOC264/tag, =AO199/tag)
         if obj.channel_number < 0:
             errors.append(f"Invalid channel_number: {obj.channel_number}")
 

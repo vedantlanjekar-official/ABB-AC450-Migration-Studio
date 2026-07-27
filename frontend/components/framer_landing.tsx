@@ -132,7 +132,7 @@ export function FramerLanding() {
           <FeatureItem
             icon={Database}
             title="Database Element Conversion"
-            description="Converts AI, AO, DI, DO, PIDCON, MOTCON and all engineering database objects accurately into structured schemas."
+            description="Converts AI, AO, DI, DO, AI800, AO800, DI800 and DO800 I/O database objects accurately into structured schemas."
           />
           <FeatureItem
             icon={Cpu}

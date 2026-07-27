@@ -152,7 +152,7 @@ class DescriptionMapper:
             if idx + 1 < len(lines):
                 next_line = lines[idx + 1]
                 if len(next_line) >= 3 and not cls._is_invalid_description(next_line):
-                    if not re.search(r'\b(?:AI|AO|DI|DO|AOC|ACC|AIC)', next_line, re.IGNORECASE):
+                    if not re.search(r'\b(?:AI800|AO800|DI800|DO800|AI|AO|DI|DO)', next_line, re.IGNORECASE):
                         return next_line
 
         if page_words:
@@ -169,7 +169,7 @@ class DescriptionMapper:
         if len(upper) < 3 or len(upper) > 80:
             return True
 
-        if re.search(r'\b(?:AI|AO|DI|DO|AOC|ACC|AIC|DOC|DIC)(?:800)?', upper):
+        if re.search(r'\b(?:AI800|AO800|DI800|DO800|AI|AO|DI|DO)\b', upper):
             return True
 
         for kw in cls.INVALID_DESC_KEYWORDS:

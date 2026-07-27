@@ -9,6 +9,8 @@ from backend.core.logging import get_logger
 from backend.parser.pdf_reader import PDFReader, LineRecord
 from backend.parser.parser_service import ParserService
 from backend.mapper.element_mapper import ElementMapper
+from backend.mapper.record_clubber import RecordClubber
+from backend.mapper.output_formatter import OutputFormatter
 from backend.excel.excel_generator import ExcelGenerator
 from backend.pc_parser.pdf_reader import PCPDFReader, PCLineRecord
 from backend.pc_parser.parser_service import PCParserService
@@ -29,6 +31,8 @@ class ConversionService:
         self.pdf_reader = PDFReader(job_id)
         self.parser_service = ParserService(job_id)
         self.mapper = ElementMapper(job_id)
+        self.record_clubber = RecordClubber(job_id)
+        self.output_formatter = OutputFormatter(job_id)
         self.excel_generator = ExcelGenerator(job_id)
         self.pc_pdf_reader = PCPDFReader(job_id)
         self.pc_parser_service = PCParserService(job_id)
@@ -326,8 +330,19 @@ class ConversionService:
             time.sleep(0.05)
             self._log_stage("STAGE 8-9", f"Grouping and mapping {total_objects} object(s)")
 
-            mapped_sheets = self.mapper.group_and_map(all_parsed_elements)
-            self._log_stage("STAGE 8-9", f"Mapped {len(mapped_sheets)} worksheet type(s): {list(mapped_sheets.keys())}")
+            # Club records by Loop Tag (matching only — does not define final sheet order)
+            clubbed_elements = self.record_clubber.club_elements(all_parsed_elements)
+            self._log_stage("STAGE 8-9", f"Record clubbing applied to {len(clubbed_elements)} object(s)")
+
+            clubbed_rows = self.mapper.map_clubbed(clubbed_elements)
+            # Presentation layer: engineering section order + sequential Index (pairs preserved)
+            formatted_rows = self.output_formatter.format_clubbed_rows(clubbed_rows)
+            mapped_sheets = {"Clubbed_IO": formatted_rows} if formatted_rows else {}
+            self._log_stage(
+                "STAGE 8-9",
+                f"Formatted {len(formatted_rows)} row(s) into engineering sequence "
+                f"(AI→AO, DO→DI, AI800→AO800, DO800→DI800)",
+            )
 
             detected_summaries = []
             preview_data = {}
@@ -348,7 +363,7 @@ class ConversionService:
                 progress_percentage=90,
                 current_phase="Generating Valmet Excel Workbook (Stage 9)",
                 conversion_type="DB",
-                message="Building multi-sheet openpyxl Excel workbook..."
+                message="Building consolidated openpyxl Excel workbook..."
             )
             time.sleep(0.05)
             self._log_stage("STAGE 10", "Excel workbook generation starting")
@@ -365,10 +380,11 @@ class ConversionService:
             if not excel_exists:
                 raise FileNotFoundError(f"Excel workbook was not created at {output_excel_path}")
 
-            ai_count = len(mapped_sheets.get("AI", []))
-            ao_count = len(mapped_sheets.get("AO", []))
-            di_count = len(mapped_sheets.get("DI", []))
-            do_count = len(mapped_sheets.get("DO", []))
+            clubbed_rows = mapped_sheets.get("Clubbed_IO", [])
+            ai_count = sum(1 for r in clubbed_rows if r.get("Category") == "AI")
+            ao_count = sum(1 for r in clubbed_rows if r.get("Category") == "AO")
+            di_count = sum(1 for r in clubbed_rows if r.get("Category") == "DI")
+            do_count = sum(1 for r in clubbed_rows if r.get("Category") == "DO")
 
             job_store.update_status(
                 self.job_id,
@@ -394,9 +410,9 @@ class ConversionService:
                 generated_sheets=generated_sheets,
                 preview_data=preview_data,
                 excel_file_path=str(output_excel_path),
-                message=f"Conversion complete! Processed {total_objects} objects ({stats.inherited_parameters} inherited params) across {len(generated_sheets)} sheets."
+                message=f"Conversion complete! Processed {total_objects} objects ({stats.inherited_parameters} inherited params) in consolidated worksheet."
             )
-            self._log_stage("COMPLETE", f"DB conversion finished — {total_objects} object(s), {len(generated_sheets)} sheet(s)")
+            self._log_stage("COMPLETE", f"DB conversion finished — {total_objects} object(s), 1 worksheet")
             self.logger.info(f"DB Conversion Pipeline finished successfully for job {self.job_id}")
 
         except Exception as e:

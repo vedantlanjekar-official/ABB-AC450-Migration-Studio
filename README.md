@@ -79,7 +79,7 @@ Transitioning control system configurations to modern targets like **Valmet DNA*
 - **Immediate Validation**: Real-time frontend data grid preview enables control engineers to inspect extracted elements prior to exporting.
 
 ### 1.3 Key Features & Capabilities
-- **Generic & Extensible DB Element Parser**: Detects element types (`AI`, `AO`, `DI`, `DO`, `PIDCON`, `MOTCON`, `VALVECON`, `DS`, `DAT`, `TEXT`, `MANSTN`, `RATIOSTN`, `TTDVAR`) dynamically without rigid schemas.
+- **Focused DB Element I/O Parser**: Extracts only the eight supported engineering I/O families (`AI`, `AO`, `DI`, `DO`, `AI800`, `AO800`, `DI800`, `DO800`). All other object types (e.g. `AIC`, `AOC`, `DAT`, `PIDCON`, `MANSTN`, `TEXT`) are ignored.
 - **Inheritance Resolution**: Automatically extracts baseline parameter values from `.DEFAULT` sections and applies them to specific instances unless explicitly overridden.
 - **Dynamic Multi-Sheet Excel Builder**: Employs OpenPyXL and XlsxWriter to format workbooks with zebra striping, auto column width, and industrial header themes.
 - **Live 6-Stage Progress Tracking**: Backend job state monitor feeds live percentage progress, element counts, timing logs, and warnings to the client UI.
@@ -446,9 +446,10 @@ ABB-AC450-Migration-Studio/
     "detected_element_types": [
       { "element_type": "AI", "count": 48 },
       { "element_type": "AO", "count": 24 },
-      { "element_type": "PIDCON", "count": 16 }
+      { "element_type": "DI", "count": 36 },
+      { "element_type": "DO", "count": 18 }
     ],
-    "generated_sheets": ["AI", "AO", "PIDCON", "MOTCON"],
+    "generated_sheets": ["AI", "AO", "DI", "DO"],
     "warnings": [],
     "errors": [],
     "excel_file_path": "/tmp/abb_ac450/outputs/8f3a4b9d/valmet_export.xlsx"

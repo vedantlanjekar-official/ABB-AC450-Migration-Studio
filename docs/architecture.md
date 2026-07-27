@@ -29,10 +29,10 @@ The **ABB AC450 Engineering Converter** is designed as a decoupled enterprise we
    - Primary engine: `pdfplumber` for structured layout & coordinate retention.
    - Fallback engine: `PyMuPDF` (`fitz`) for scanned or legacy PDF text stream rendering.
 
-2. **Generic DB Element Parser (`backend/parser/db_element_parser.py`)**:
+2. **DB Element I/O Parser (`backend/parser/db_element_parser.py`)**:
    - Header Regex Pattern: `^\s*([A-Z]{2,12})\s*(\d+(?:\.\d+)*)\b`
-   - Dynamically identifies element types (e.g., `AI`, `AO`, `PIDCON`, `MOTCON`, `VALVECON`, `DS`, `DAT`, `TEXT`, `MANSTN`, `RATIOSTN`, `TTDVAR`).
-   - Isolates object boundaries without hardcoding schemas.
+   - Extracts only supported I/O families: `AI`, `AO`, `DI`, `DO`, `AI800`, `AO800`, `DI800`, `DO800`.
+   - Unsupported object types (`AIC`, `AOC`, `DAT`, `PIDCON`, `MANSTN`, `TEXT`, etc.) are skipped during extraction.
 
 3. **Parameter Extractor (`backend/extractor/parameter_extractor.py`)**:
    - Parses colon-prefixed parameter key-value pairs (`:KEY VALUE`).
@@ -41,9 +41,20 @@ The **ABB AC450 Engineering Converter** is designed as a decoupled enterprise we
 4. **Element Grouping Engine (`backend/mapper/element_mapper.py`)**:
    - Aggregates parsed objects by `element_type`.
    - Collects all unique parameter keys across all elements in a group to form full tabular column structures.
+   - Adds derived `Loop Tag` column (NAME with final suffix removed).
 
-5. **Dynamic Excel Generator (`backend/excel/excel_generator.py`)**:
-   - Builds openpyxl workbooks with **one sheet per element type**.
+5. **Record Clubbing (`backend/mapper/record_clubber.py`)**:
+   - Matches on common Loop Tag only (strip suffix: `940FQ390.MV` + `940FQ390.OUT` → `940FQ390`).
+   - Within each club: `AI→AO`, `DO→DI`, `AI800→AO800`, `DO800→DI800`; valve `SV1→GSO→GSC`.
+   - Unpaired records kept (no placeholders). Matching/clubbing is unchanged by presentation.
+
+6. **Output Formatter (`backend/mapper/output_formatter.py`)**:
+   - Post-clubbing presentation layer (row order only) immediately before Excel write.
+   - Sequence: all `AI→AO` groups → `DO→DI` → `AI800→AO800` → `DO800→DI800`.
+   - Preserves pair adjacency; renumbers `Index` to `1..N` for final sheet order.
+
+7. **Dynamic Excel Generator (`backend/excel/excel_generator.py`)**:
+   - Builds a single consolidated **Clubbed_IO** worksheet with consecutive paired rows.
    - Applies industrial formatting: Navy/Slate headers (`#1E293B`), zebra striping, auto column width, gridlines.
 
 ## Dual Conversion Modules

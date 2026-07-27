@@ -18,9 +18,15 @@ class ObjectNode:
 class ObjectParser:
     """
     Stage 6 — Actual Engineering Object Node Parser Module.
-    Parses Node Type 4 (Signal Objects e.g., AI1.4, AI2.14, AO3.8, PIDCON1).
+    Parses Node Type 4 (Signal Objects e.g., AI1.4, AI2.14, AO3.8, AI8001.1).
     Objects are exportable engineering element nodes.
     """
+
+    # 800-series families include digits in the type name — match before letter-only types
+    OBJECT_800_HEADER_REGEX = re.compile(
+        r'^\s*(AI800|AO800|DI800|DO800)\s*(\d+(?:\.\d+)*)\b',
+        re.IGNORECASE
+    )
 
     OBJECT_HEADER_REGEX = re.compile(
         r'^\s*([A-Z]{2,12})\s*(\d+(?:\.\d+)*)\b',
@@ -38,8 +44,12 @@ class ObjectParser:
     def is_object_header(self, line: str) -> Optional[Tuple[str, str, str]]:
         """
         Checks if line is an Object header (e.g. AI1.4 -> family="AI", index="1.4", identifier="AI1.4").
+        Prefers AI800/AO800/DI800/DO800 over shorter AI/AO/DI/DO prefixes.
         """
-        match = self.OBJECT_HEADER_REGEX.match(line.strip())
+        line_str = line.strip()
+        match = self.OBJECT_800_HEADER_REGEX.match(line_str)
+        if not match:
+            match = self.OBJECT_HEADER_REGEX.match(line_str)
         if match:
             family = match.group(1).upper()
             index = match.group(2)

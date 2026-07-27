@@ -27,7 +27,6 @@ class CompletenessAuditor:
         (?P<prefix>
             AI800_|AO800_|DI800_|DO800_|
             AI800|AO800|DI800|DO800|
-            AICT|DICT|AOC|ACC|AIC|DOC|DIC|
             AI|AO|DI|DO
         )
         \s*_?\s*
@@ -90,10 +89,10 @@ class CompletenessAuditor:
 
         warnings: List[str] = []
         # Category balance heuristics
-        analog_in = cat_counts.get("AI", 0) + cat_counts.get("AI800", 0) + cat_counts.get("AIC", 0)
-        analog_out = cat_counts.get("AO", 0) + cat_counts.get("AO800", 0) + cat_counts.get("AOC", 0)
-        dig_in = cat_counts.get("DI", 0) + cat_counts.get("DI800", 0) + cat_counts.get("DIC", 0)
-        dig_out = cat_counts.get("DO", 0) + cat_counts.get("DO800", 0) + cat_counts.get("DOC", 0)
+        analog_in = cat_counts.get("AI", 0) + cat_counts.get("AI800", 0)
+        analog_out = cat_counts.get("AO", 0) + cat_counts.get("AO800", 0)
+        dig_in = cat_counts.get("DI", 0) + cat_counts.get("DI800", 0)
+        dig_out = cat_counts.get("DO", 0) + cat_counts.get("DO800", 0)
 
         if dig_out > 0 and dig_in == 0:
             warnings.append(

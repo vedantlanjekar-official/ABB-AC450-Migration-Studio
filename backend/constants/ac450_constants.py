@@ -1,19 +1,19 @@
 import re
 
 # Regex for detecting ABB AC450 DB Element Headers
-# Example tags: AI1.4, AO2.6, PIDCON3, MOTCON10, VALVECON2, DS5, DAT1, DIC1, DOC1, AIC1, AOC1, TEXT1, MANSTN1, RATIOSTN1, TTDVAR1
-# Generic matching pattern:
-# Group 1: Element type string (uppercase letters, e.g. AI, AO, PIDCON, MOTCON, VALVECON, DS, DAT, TEXT)
+# Supported tags: AI1.4, AO2.6, DI3.1, DO4.2, AI8001.1, AO8002.1, DI8003.1, DO8004.1
+# Group 1: Element type string (uppercase letters)
 # Group 2: Index number (e.g. 1.4, 2.6, 3, 100.1)
+# Prefer 800-series prefixes (contain digits) before letter-only AI/AO/DI/DO
 ELEMENT_HEADER_PATTERN = re.compile(
-    r'^\s*([A-Z]{2,12})\s*(\d+(?:\.\d+)*)\s*$',
-    re.MULTILINE
+    r'^\s*(AI800|AO800|DI800|DO800|[A-Z]{2,12})\s*(\d+(?:\.\d+)*)\s*$',
+    re.MULTILINE | re.IGNORECASE
 )
 
 # Alternative inline header pattern (e.g., when tag appears on a line with parameters or trailing text)
 ELEMENT_INLINE_HEADER_PATTERN = re.compile(
-    r'^\s*([A-Z]{2,12})(\d+(?:\.\d+)*)\b',
-    re.MULTILINE
+    r'^\s*(AI800|AO800|DI800|DO800|[A-Z]{2,12})(\d+(?:\.\d+)*)\b',
+    re.MULTILINE | re.IGNORECASE
 )
 
 # Regex for detecting colon parameters inside an element block
@@ -25,9 +25,16 @@ PARAM_COLON_PATTERN = re.compile(
     re.DOTALL
 )
 
-# Common AC450 Element Types (for display ordering / tab prioritization)
+# Only these eight I/O engineering tag families are extracted, validated, and exported.
+# Explicitly ignored (examples): AIC, AOC, DAT, DIC, DOC, DS, MANSTN, MMCX,
+# PIDCON/PIDCONJS, SEQ, TTDLOG, TEXT, RATIOSTN, MOTCON, VALVECON, and any other type.
+SUPPORTED_DB_ELEMENT_TYPES = frozenset({
+    "AI", "AO", "DI", "DO",
+    "AI800", "AO800", "DI800", "DO800",
+})
+
+# Display ordering / tab prioritization (must match the extraction whitelist)
 KNOWN_ELEMENT_TYPES = [
-    "AI", "AIC", "AO", "AOC", "DI", "DIC", "DO", "DOC",
-    "DAT", "DS", "PIDCON", "MOTCON", "VALVECON", "MANSTN",
-    "RATIOSTN", "TEXT", "TTDVAR"
+    "AI", "AO", "DI", "DO",
+    "AI800", "AO800", "DI800", "DO800",
 ]

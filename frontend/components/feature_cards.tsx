@@ -12,7 +12,7 @@ const features = [
   {
     icon: Database,
     title: 'DB Element Extraction',
-    desc: 'Generic AC450 object boundary detection for AI, AO, PIDCON, MOTCON, VALVECON, DS, DAT & more.',
+    desc: 'AC450 I/O object boundary detection for AI, AO, DI, DO, AI800, AO800, DI800 & DO800.',
   },
   {
     icon: Cpu,

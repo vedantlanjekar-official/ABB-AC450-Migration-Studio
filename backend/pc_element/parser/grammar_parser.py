@@ -1,15 +1,13 @@
 """
 grammar_parser.py - Stage 4 & 5: Engineering Grammar & Classification of ABB PC Element I/O References.
 
-Supports all ABB AC450 PC Element categories including 800-Series, standard I/O, and
-extended controller module types (AOC, AIC, ACC, DOC, DIC, AICT, DICT).
+Supports only the eight required I/O families:
+  AI, AO, DI, DO, AI800, AO800, DI800, DO800.
 
 Reference formats handled:
   Standard:       =AI1.1/940LC391.MV
   800-Series:     =AI800_1.1/940LC391.MV
   Channel+Port:   =AI800_22.5:22/M49FI1201.MV:ERR
-  Port-style:     =AOC264:17/949DKA050.KEY:SELECTED
-  No-channel:     =AOC264/949DKA050.KEY
   P-prefix:       P-=AO0191/M49ARA104.CA41
 """
 
@@ -19,11 +17,11 @@ from pydantic import BaseModel, Field
 
 
 class ParsedIOReference(BaseModel):
-    io_family: str        # e.g., "AI800_", "AOC", "AI", "AO", "DI", "DO"
+    io_family: str        # e.g., "AI800_", "AI", "AO", "DI", "DO"
     io_type: str          # Simplified family used for sorting/grouping
-    category: str         # Excel Category code: AI, AO, AI800, AOC, etc.
+    category: str         # Excel Category code: AI, AO, AI800, etc.
     card_number: int
-    channel_number: int   # 0 if no channel specified (e.g., =AOC264/tag)
+    channel_number: int   # 0 if no channel specified
     loop_tag: str
     device_tag: str
     source_reference: str
@@ -33,7 +31,7 @@ class ParsedIOReference(BaseModel):
 class GrammarParser:
     """Engineering Grammar Parser for ABB AC450 PC Element I/O References."""
 
-    # (io_family, io_type, category_code)
+    # (io_family, io_type, category_code) — only the eight supported I/O families
     PREFIX_MAP: Dict[str, Tuple[str, str, str]] = {
         "AI800_": ("AI800_", "AI", "AI800"),
         "AO800_": ("AO800_", "AO", "AO800"),
@@ -43,13 +41,6 @@ class GrammarParser:
         "AO800":  ("AO800_", "AO", "AO800"),
         "DI800":  ("DI800_", "DI", "DI800"),
         "DO800":  ("DO800_", "DO", "DO800"),
-        "AICT":   ("AICT", "AICT", "AICT"),
-        "DICT":   ("DICT", "DICT", "DICT"),
-        "AOC":    ("AOC", "AOC", "AOC"),
-        "ACC":    ("ACC", "ACC", "ACC"),
-        "AIC":    ("AIC", "AIC", "AIC"),
-        "DOC":    ("DOC", "DOC", "DOC"),
-        "DIC":    ("DIC", "DIC", "DIC"),
         "AI":     ("AI", "AI", "AI"),
         "AO":     ("AO", "AO", "AO"),
         "DI":     ("DI", "DI", "DI"),
@@ -59,15 +50,12 @@ class GrammarParser:
     _PREFIX_ORDER = [
         "AI800_", "AO800_", "DI800_", "DO800_",
         "AI800", "AO800", "DI800", "DO800",
-        "AICT", "DICT",
-        "AOC", "ACC", "AIC", "DOC", "DIC",
         "AI", "AO", "DI", "DO",
     ]
 
     _PREFIX_ALT = (
         r'AI800_|AO800_|DI800_|DO800_|'
         r'AI800|AO800|DI800|DO800|'
-        r'AICT|DICT|AOC|ACC|AIC|DOC|DIC|'
         r'AI|AO|DI|DO'
     )
 

@@ -19,6 +19,12 @@ class CardParser:
     CARD NODES ARE NOT OBJECTS AND ARE NEVER EXPORTED TO EXCEL.
     """
 
+    # 800-series card headers (e.g. AI8001 AI800) — match before letter-only families
+    CARD_800_HEADER_REGEX = re.compile(
+        r'^\s*((?:AI800|AO800|DI800|DO800)\d+)\s+(AI800|AO800|DI800|DO800)\b',
+        re.IGNORECASE
+    )
+
     CARD_HEADER_REGEX = re.compile(
         r'^\s*([A-Z]{2,12}\d+)\s+([A-Z]{2,12})\b',
         re.IGNORECASE
@@ -36,7 +42,10 @@ class CardParser:
         """
         Checks if line is a Card Definition header (e.g., AI1 AI -> card_name="AI1", family="AI").
         """
-        match = self.CARD_HEADER_REGEX.match(line.strip())
+        line_str = line.strip()
+        match = self.CARD_800_HEADER_REGEX.match(line_str)
+        if not match:
+            match = self.CARD_HEADER_REGEX.match(line_str)
         if match:
             card_name = match.group(1).upper()
             family = match.group(2).upper()

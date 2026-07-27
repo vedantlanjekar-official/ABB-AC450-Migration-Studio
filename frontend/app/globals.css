@@ -12,6 +12,14 @@ body {
   font-feature-settings: "cv02", "cv03", "cv04", "cv11";
 }
 
+/* Valmet Brand Utilities */
+.text-valmet-green { color: #2E7D32 !important; }
+.text-valmet-darkgreen { color: #1B5E20 !important; }
+.bg-valmet-green { background-color: #2E7D32 !important; }
+.bg-valmet-darkgreen { background-color: #1B5E20 !important; }
+.bg-valmet-lightgreen { background-color: #E8F5E9 !important; }
+.border-valmet-green { border-color: #2E7D32 !important; }
+
 /* Custom industrial scrollbar */
 ::-webkit-scrollbar {
   width: 6px;

@@ -3,6 +3,7 @@ import re
 from pathlib import Path
 from typing import List, Dict, Any, Tuple
 from backend.models.db_element import DBElement
+from backend.constants.ac450_constants import SUPPORTED_DB_ELEMENT_TYPES
 from backend.parser.pdf_reader import PDFReader, LineRecord
 from backend.parser.document_cleaner import DocumentCleaner
 from backend.parser.family_detector import FamilyDetector
@@ -154,14 +155,20 @@ class ParserService:
                 continue
 
             # 2. Check DEFAULT header (Node Type 1 / 2)
+            # Keep defaults only for supported I/O families (and their *S software variants).
             match_def = self.family_detector.DEFAULT_FAMILY_REGEX.match(line_str)
             if match_def or line_str.upper().startswith("DEFAULT"):
                 raw_name = match_def.group(1).upper() if match_def else line_str.split()[1].strip(":-_").upper() if len(line_str.split()) >= 2 else ""
                 if raw_name and raw_name not in ("OF", "DEFAULTS", "BLOCK", "SECTION"):
                     flush_active_block()
+                    normalized_family = self.family_detector.normalize_family_name(raw_name)
+                    if normalized_family not in SUPPORTED_DB_ELEMENT_TYPES:
+                        current_block_type = None
+                        current_buffer = []
+                        continue
                     current_block_type = "DEFAULT"
                     current_block_name = raw_name
-                    current_family = self.family_detector.detect_family(line_str) or current_family
+                    current_family = normalized_family or current_family
                     current_buffer = [rec]
                     continue
 
@@ -170,6 +177,10 @@ class ParserService:
             if card_hdr:
                 c_name, c_fam = card_hdr
                 flush_active_block()
+                if c_fam.upper() not in SUPPORTED_DB_ELEMENT_TYPES:
+                    current_block_type = None
+                    current_buffer = []
+                    continue
                 current_block_type = "CARD"
                 current_block_name = c_name
                 current_card_name = c_name
@@ -178,11 +189,16 @@ class ParserService:
                 current_buffer = [rec]
                 continue
 
-            # 4. Check Signal Object header (Node Type 4 e.g. AI1.1, AI2.14, AO3.8, PIDCON1)
+            # 4. Check Signal Object header (Node Type 4 e.g. AI1.1, AI2.14, AO3.8, AI8001.1)
+            # Skip every object whose family is outside the eight supported I/O types.
             obj_hdr = self.object_parser.is_object_header(line_str)
             if obj_hdr:
                 family, index, identifier = obj_hdr
                 flush_active_block()
+                if family.upper() not in SUPPORTED_DB_ELEMENT_TYPES:
+                    current_block_type = None
+                    current_buffer = []
+                    continue
                 current_block_type = "OBJECT"
                 current_object_info = obj_hdr
                 current_family = family

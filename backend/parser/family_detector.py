@@ -5,8 +5,10 @@ from backend.core.logging import get_logger
 class FamilyDetector:
     """
     Stage 3 — Dynamic Family Boundary Detector Module.
-    Identifies element family transitions (AI, AO, DI, DO, AIC, AOC, DIC, DOC, PIDCON, MOTCON, VALVECON, DS, DAT, TEXT, TTDVAR)
-    from default headers (including variant headers like DEFAULT DAT(B), DEFAULT TEXT(20)), card definitions, and object declarations.
+    Identifies element family transitions for supported I/O types
+    (AI, AO, DI, DO, AI800, AO800, DI800, DO800) from default headers,
+    card definitions, and object declarations. Unsupported families may still
+    be detected here but are filtered out by ParserService / ElementValidator.
     """
 
     DEFAULT_FAMILY_REGEX = re.compile(
@@ -15,12 +17,12 @@ class FamilyDetector:
     )
 
     CARD_FAMILY_REGEX = re.compile(
-        r'^\s*([A-Z]{2,12}\d+)\s+([A-Z]{2,12}(?:\([A-Z0-9_]+\))?)\b',
+        r'^\s*((?:AI800|AO800|DI800|DO800|[A-Z]{2,12})\d+)\s+((?:AI800|AO800|DI800|DO800|[A-Z]{2,12})(?:\([A-Z0-9_]+\))?)\b',
         re.IGNORECASE
     )
 
     OBJECT_FAMILY_REGEX = re.compile(
-        r'^\s*([A-Z]{2,12})\d+(?:\.\d+)*\b',
+        r'^\s*(AI800|AO800|DI800|DO800|[A-Z]{2,12})\d+(?:\.\d+)*\b',
         re.IGNORECASE
     )
 
@@ -30,12 +32,16 @@ class FamilyDetector:
     def normalize_family_name(self, raw_name: str) -> str:
         """
         Normalizes raw default block or object family names into standard family keys.
-        e.g., DAT(B) -> DAT, DAT(I) -> DAT, DAT(R) -> DAT, DAT(IL) -> DAT, TEXT(20) -> TEXT,
-              AIS -> AI, AOS -> AO, DIS -> DI, DOS -> DO, AICS -> AIC, AOCS -> AOC.
+        e.g., AIS -> AI, AOS -> AO, DIS -> DI, DOS -> DO,
+              AI800S -> AI800, AO800S -> AO800.
         """
         if not raw_name:
             return ""
         clean = re.sub(r'\(.*?\)', '', raw_name.strip()).strip().upper()
+        # Prefer known 800-series base names before stripping trailing S
+        for fam_800 in ("AI800", "AO800", "DI800", "DO800"):
+            if clean == fam_800 or clean == f"{fam_800}S":
+                return fam_800
         if len(clean) > 2 and clean.endswith("S") and clean not in ("DS", "TEXT"):
             return clean[:-1]
         return clean
