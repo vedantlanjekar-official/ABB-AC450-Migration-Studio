@@ -2,9 +2,12 @@
 io_reference_detector.py - Multi-strategy I/O candidate detection.
 
 Strategies:
-  1. Regex scan across all fused text layers
+  1. Regex scan across keyword-filtered lines / text layers
   2. Spatial token assembly from word coordinates
   3. Line-pair stitching for split PREFIX / TAG forms
+
+NOTE: Patterns are intentionally ReDoS-safe. Nested `*` lead groups previously
+hung the production worker on large DB-style PDF text blobs.
 """
 
 from typing import List, Set, Dict, Any, Optional
@@ -23,23 +26,24 @@ class IOReferenceDetector:
         r'AI|AO|DI|DO'
     )
 
-    _LEAD = r'(?:[-+]?\s*P\s*-?\s*=?\s*|[=+\-]+\s*)*'
-    _TAG = r'[A-Za-z0-9_][A-Za-z0-9_\-]*(?:\.[A-Za-z0-9_]+)?(?::[A-Za-z0-9_]+)?'
+    # Single optional lead fragment — must NOT use nested star quantifiers.
+    _LEAD = r'(?:[+\-=P\s]{0,8})?'
+    _TAG = r'[A-Za-z0-9_][A-Za-z0-9_\-]{0,48}(?:\.[A-Za-z0-9_]{1,24})?(?::[A-Za-z0-9_]{1,24})?'
 
     PATTERN_CHANNEL_PORT = re.compile(
-        _LEAD + r'(?:' + _PREFIXES + r')\s*_?\s*\d{1,4}\s*\.\s*\d{1,3}\s*:\s*\d{1,4}\s*/\s*' + _TAG,
+        _LEAD + r'(?:' + _PREFIXES + r')_?\d{1,4}\.\d{1,3}:\d{1,4}/' + _TAG,
         re.IGNORECASE,
     )
     PATTERN_STANDARD = re.compile(
-        _LEAD + r'(?:' + _PREFIXES + r')\s*_?\s*\d{1,4}\s*\.\s*\d{1,3}\s*/\s*' + _TAG,
+        _LEAD + r'(?:' + _PREFIXES + r')_?\d{1,4}\.\d{1,3}/' + _TAG,
         re.IGNORECASE,
     )
     PATTERN_PORT = re.compile(
-        _LEAD + r'(?:' + _PREFIXES + r')\s*\d{1,4}\s*:\s*\d{1,4}\s*/\s*' + _TAG,
+        _LEAD + r'(?:' + _PREFIXES + r')\d{1,4}:\d{1,4}/' + _TAG,
         re.IGNORECASE,
     )
     PATTERN_NO_CHANNEL = re.compile(
-        _LEAD + r'(?:' + _PREFIXES + r')\s*\d{1,4}\s*/\s*' + _TAG,
+        _LEAD + r'(?:' + _PREFIXES + r')\d{1,4}/' + _TAG,
         re.IGNORECASE,
     )
 
@@ -51,16 +55,20 @@ class IOReferenceDetector:
     )
 
     KEYWORD_REGEX = re.compile(
-        r'\b(?:AI|AO|DI|DO|AOC|ACC|AIC|AICT|DOC|DIC|DICT)(?:800)?\b',
+        r'(?:AI|AO|DI|DO|AOC|ACC|AIC|AICT|DOC|DIC|DICT)(?:800)?',
         re.IGNORECASE,
     )
     FRAG_PREFIX = re.compile(
-        r'(?ix)(?:P\s*-?\s*)?[=-]?\s*(' + _PREFIXES + r')\s*_?\s*'
+        r'(?ix)(?:P-?)?[=-]?(?:' + _PREFIXES + r')_?'
         r'(\d{1,4}(?:[.:]\d{1,4}(?::\d{1,4})?)?)'
     )
     FRAG_TAG = re.compile(
-        r'(?ix)^\s*/\s*([A-Za-z0-9_][A-Za-z0-9_\-.]*(?::[A-Za-z0-9_]+)?)'
+        r'(?ix)^\s*/\s*([A-Za-z0-9_][A-Za-z0-9_\-.]{0,48}(?::[A-Za-z0-9_]{1,24})?)'
     )
+
+    # Hard caps to keep production memory/CPU bounded on free-tier hosts.
+    MAX_SOURCE_CHARS = 20000
+    MAX_LINE_CHARS = 500
 
     @classmethod
     def detect_candidates_in_page(
@@ -73,55 +81,59 @@ class IOReferenceDetector:
         """Return unique raw candidate strings from all available page signals."""
         candidates: Set[str] = set()
 
-        sources: List[str] = list(lines) + [page_text]
+        # Prefer short line sources; never scan giant fused CAD blobs whole.
+        sources: List[str] = []
+        for line in lines or []:
+            line_str = (line or "").strip()
+            if not line_str or len(line_str) > cls.MAX_LINE_CHARS:
+                continue
+            if cls.KEYWORD_REGEX.search(line_str) or "/" in line_str:
+                sources.append(line_str)
+
+        # Optionally add truncated page text only if keyword hits exist.
+        page_str = (page_text or "").strip()
+        if page_str and cls.KEYWORD_REGEX.search(page_str):
+            sources.append(page_str[: cls.MAX_SOURCE_CHARS])
+
         if text_layers:
-            # Skip layers that concatenate CAD glyphs into device tags
             for name, blob in text_layers.items():
                 if name in ("words_joined", "spatial"):
                     continue
-                sources.append(blob)
+                blob_str = (blob or "").strip()
+                if not blob_str or not cls.KEYWORD_REGEX.search(blob_str):
+                    continue
+                sources.append(blob_str[: cls.MAX_SOURCE_CHARS])
 
-        for text in sources:
-            text_str = (text or "").strip()
-            if not text_str:
-                continue
+        for text_str in sources:
             for pattern in cls.ALL_PATTERNS:
-                for m in pattern.findall(text_str):
-                    cleaned = m.strip().rstrip(".,;")
+                for m in pattern.finditer(text_str):
+                    cleaned = m.group(0).strip().rstrip(".,;")
                     if len(cleaned) >= 5 and "/" in cleaned:
                         candidates.add(cleaned)
 
         # Line-pair stitching: PREFIX addr on one line, /TAG on next
-        for i, line in enumerate(lines):
+        for i, line in enumerate(lines or []):
             pm = cls.FRAG_PREFIX.search(line or "")
             if not pm:
                 continue
             if "/" in (line or "")[pm.end(): pm.end() + 3]:
                 continue
             for j in range(i + 1, min(i + 3, len(lines))):
-                tm = cls.FRAG_TAG.search(lines[j] or "")
+                tm = cls.FRAG_TAG.match(lines[j] or "")
                 if tm:
-                    candidates.add(f"={pm.group(1)}{pm.group(2)}/{tm.group(1)}")
+                    stitched = f"{(line or '').strip()}{(lines[j] or '').strip()}"
+                    if len(stitched) >= 5 and "/" in stitched:
+                        candidates.add(stitched)
                     break
 
-        # TokenAssembler reserved for OCR-fragment recovery on low-density pages only
-        _ = words
-
-        # Keyword lines as last resort (short lines only)
-        for line in lines:
-            line_str = (line or "").strip()
-            if not line_str or not cls.KEYWORD_REGEX.search(line_str):
-                continue
-            if "/" not in line_str:
-                continue
-            embedded = False
-            for pattern in cls.ALL_PATTERNS:
-                for m in pattern.findall(line_str):
-                    cleaned = m.strip().rstrip(".,;")
-                    if len(cleaned) >= 5 and "/" in cleaned:
+        # Spatial assembly from word coordinates (bounded)
+        if words:
+            try:
+                for cand in TokenAssembler.assemble_candidates(words[:5000]):
+                    cleaned = (cand or "").strip().rstrip(".,;")
+                    if len(cleaned) >= 5 and "/" in cleaned and cls.KEYWORD_REGEX.search(cleaned):
                         candidates.add(cleaned)
-                        embedded = True
-            if not embedded and len(line_str) < 120:
-                candidates.add(line_str)
+            except Exception:
+                pass
 
         return sorted(c for c in candidates if len(c) >= 5)

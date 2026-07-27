@@ -20,7 +20,7 @@ PROCESSING_STATUSES = {
 }
 
 # Jobs with no heartbeat for this long are considered dead (worker crash / OOM).
-STALE_JOB_SECONDS = 180
+STALE_JOB_SECONDS = 120
 
 
 class JobManager:
