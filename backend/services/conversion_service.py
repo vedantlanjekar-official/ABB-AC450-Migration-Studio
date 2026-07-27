@@ -2,6 +2,8 @@ import time
 from pathlib import Path
 from typing import List
 from datetime import datetime
+import threading
+import gc
 from backend.core.config import settings
 from backend.core.logging import get_logger
 from backend.parser.pdf_reader import PDFReader, LineRecord
@@ -41,6 +43,29 @@ class ConversionService:
         if detail:
             message = f"{message} — {detail}"
         self.logger.info(message)
+        try:
+            job_store.heartbeat(self.job_id, message=f"{stage}: {detail}" if detail else stage)
+        except Exception:
+            pass
+
+    def _run_with_heartbeat(self, label: str, fn, *args, **kwargs):
+        """Run a long blocking call while emitting heartbeats so stale detection stays quiet."""
+        stop = threading.Event()
+
+        def _beat():
+            while not stop.wait(15):
+                try:
+                    job_store.heartbeat(self.job_id, message=f"Still working: {label}...")
+                except Exception:
+                    pass
+
+        thread = threading.Thread(target=_beat, daemon=True, name=f"hb-{self.job_id[:8]}")
+        thread.start()
+        try:
+            return fn(*args, **kwargs)
+        finally:
+            stop.set()
+            thread.join(timeout=1)
 
     def run_conversion_pipeline(self, conversion_type: str = "DB") -> None:
         """Runs DB or PC conversion pipeline across all uploaded files and updates job status."""
@@ -65,6 +90,10 @@ class ConversionService:
 
             uploaded_filenames = job.get("uploaded_files", [])
             job_upload_dir = settings.UPLOAD_DIR / self.job_id
+            self._log_stage(
+                "PC INIT",
+                f"files={uploaded_filenames}, upload_dir={job_upload_dir}, dir_exists={job_upload_dir.exists()}",
+            )
 
             # Phase 1: Reading PDF
             job_store.update_status(
@@ -111,12 +140,21 @@ class ConversionService:
                 )
                 time.sleep(0.05)
 
+                self._log_stage("PC STAGE", f"Executing PC parser pipeline for {fname}")
                 service = ModularPCParserService(
                     file_path=str(pdf_path),
                     job_id=self.job_id,
                     output_dir=str(settings.OUTPUT_DIR)
                 )
-                res = service.execute_pipeline()
+                res = self._run_with_heartbeat(
+                    f"PC parse {fname}",
+                    service.execute_pipeline,
+                )
+                self._log_stage(
+                    "PC STAGE",
+                    f"PC parser finished for {fname}: io={res.total_io_found}, errors={len(res.errors)}",
+                )
+                gc.collect()
 
                 total_objects += res.total_io_found
                 # Roll extended families into summary counters for the UI
@@ -214,8 +252,13 @@ class ConversionService:
                     continue
 
                 self._log_stage("STAGE 1", f"Extracting lines from {fname} ({pdf_path.stat().st_size} bytes)")
-                file_records = self.pdf_reader.extract_line_records(pdf_path)
+                file_records = self._run_with_heartbeat(
+                    f"PDF extract {fname}",
+                    self.pdf_reader.extract_line_records,
+                    pdf_path,
+                )
                 self._log_stage("STAGE 1", f"Extracted {len(file_records)} line(s) from {fname}")
+                gc.collect()
                 if file_records:
                     max_page_in_file = max(r.page_number for r in file_records)
                     for rec in file_records:
@@ -251,9 +294,11 @@ class ConversionService:
             self._log_stage("STAGE 4-7", "AST hierarchy and default library building starting")
 
             combined_file_name = ", ".join(uploaded_filenames) if uploaded_filenames else "document.pdf"
-            all_parsed_elements, stats, warnings = self.parser_service.parse_line_records(
+            all_parsed_elements, stats, warnings = self._run_with_heartbeat(
+                "DB AST parse",
+                self.parser_service.parse_line_records,
                 combined_line_records,
-                file_name=combined_file_name
+                file_name=combined_file_name,
             )
             self._log_stage(
                 "STAGE 4-7",

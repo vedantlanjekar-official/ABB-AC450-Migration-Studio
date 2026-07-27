@@ -36,7 +36,24 @@ class PDFReader:
             raise FileNotFoundError(f"PDF file not found at path: {file_path}")
 
     def read_all_pages(self) -> List[PageContent]:
-        """Fuse pdfplumber + PyMuPDF layers per page for maximum recall."""
+        """Fuse pdfplumber + PyMuPDF layers per page for maximum recall.
+
+        On memory-constrained hosts (Render free), prefer PyMuPDF-only when
+        PC_LIGHT_PDF_READ=1 to avoid loading both engines for large drawings.
+        """
+        light_mode = os.environ.get("PC_LIGHT_PDF_READ", "1").strip() in (
+            "1", "true", "TRUE", "yes", "YES",
+        )
+
+        if light_mode:
+            logger.info("PC PDF reader using light mode (PyMuPDF primary)")
+            try:
+                fitz_pages = self._read_with_pymupdf()
+                if fitz_pages and any(len((p.text or "").strip()) >= self.MIN_CHARS_PER_PAGE for p in fitz_pages):
+                    return self._maybe_ocr(fitz_pages)
+            except Exception as exc:
+                logger.warning(f"Light PyMuPDF read failed ({exc}); falling back to full merge")
+
         plumber_pages: List[PageContent] = []
         try:
             plumber_pages = self._read_with_pdfplumber()
@@ -121,9 +138,22 @@ class PDFReader:
         )
 
     def _maybe_ocr(self, pages: List[PageContent]) -> List[PageContent]:
-        """Optional OCR fallback when most pages have almost no selectable text."""
+        """Optional OCR fallback when most pages have almost no selectable text.
+
+        Disabled by default in production (Render free tier OOMs on pixmap+OCR).
+        Set ENABLE_PC_OCR=1 to enable.
+        """
         if not pages:
             return pages
+        if os.environ.get("ENABLE_PC_OCR", "").strip() not in ("1", "true", "TRUE", "yes", "YES"):
+            low = sum(1 for p in pages if p.low_text_density)
+            if low:
+                logger.info(
+                    f"Skipping OCR for {low} low-density page(s) "
+                    "(set ENABLE_PC_OCR=1 to enable)"
+                )
+            return pages
+
         low = sum(1 for p in pages if p.low_text_density)
         if low < max(1, len(pages) // 2):
             return pages

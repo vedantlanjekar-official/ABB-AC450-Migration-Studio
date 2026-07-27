@@ -2,12 +2,25 @@ import uuid
 import json
 from pathlib import Path
 from typing import Dict, Any, List, Optional
-from datetime import datetime
+from datetime import datetime, timedelta
 from backend.core.config import settings
 from backend.core.logging import get_logger
 from backend.schemas.api_schemas import ProcessStatusResponse, ElementTypeSummary
 
 _logger = get_logger()
+
+PROCESSING_STATUSES = {
+    "queued",
+    "reading_pdf",
+    "extracting_text",
+    "detecting_elements",
+    "parsing_parameters",
+    "grouping_elements",
+    "generating_excel",
+}
+
+# Jobs with no heartbeat for this long are considered dead (worker crash / OOM).
+STALE_JOB_SECONDS = 180
 
 
 class JobManager:
@@ -96,6 +109,63 @@ class JobManager:
         if job_id not in self._jobs:
             self._load_job_from_disk(job_id)
         return self._jobs.get(job_id)
+
+    def _parse_updated_at(self, job: Dict[str, Any]) -> Optional[datetime]:
+        raw = job.get("updated_at")
+        if not raw:
+            return None
+        try:
+            return datetime.fromisoformat(str(raw).replace("Z", ""))
+        except Exception:
+            return None
+
+    def is_processing(self, job_id: str) -> bool:
+        job = self.get_job(job_id)
+        return bool(job and job.get("status") in PROCESSING_STATUSES)
+
+    def is_stale(self, job_id: str, max_age_seconds: int = STALE_JOB_SECONDS) -> bool:
+        """True when a job is marked processing but has not heartbeated recently."""
+        job = self.get_job(job_id)
+        if not job or job.get("status") not in PROCESSING_STATUSES:
+            return False
+        updated = self._parse_updated_at(job)
+        if not updated:
+            return True
+        return datetime.utcnow() - updated > timedelta(seconds=max_age_seconds)
+
+    def heartbeat(self, job_id: str, message: Optional[str] = None) -> None:
+        """Touch updated_at so status polling knows the worker is still alive."""
+        job = self.get_job(job_id)
+        if not job:
+            return
+        if message:
+            job["message"] = message
+        job["updated_at"] = datetime.utcnow().isoformat()
+        self._jobs[job_id] = job
+        self._save_job_to_disk(job_id)
+
+    def mark_stale_failed(self, job_id: str) -> Optional[Dict[str, Any]]:
+        """Mark a stuck processing job as failed so the UI can recover."""
+        job = self.get_job(job_id)
+        if not job or not self.is_stale(job_id):
+            return job
+        error = (
+            "Conversion worker stopped unexpectedly (timeout or server restart). "
+            "Please upload again and retry."
+        )
+        if error not in job.get("errors", []):
+            job.setdefault("errors", []).append(error)
+        job.update({
+            "status": "failed",
+            "progress_percentage": 100,
+            "current_phase": "Failed",
+            "message": error,
+            "updated_at": datetime.utcnow().isoformat(),
+        })
+        self._jobs[job_id] = job
+        self._save_job_to_disk(job_id)
+        _logger.error(f"Marked stale job {job_id} as failed")
+        return job
 
     def update_status(self, job_id: str, **kwargs):
         job = self.get_job(job_id)

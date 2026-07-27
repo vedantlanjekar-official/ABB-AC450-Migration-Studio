@@ -20,7 +20,13 @@ async def download_excel_export(job_id: str):
 
     excel_path_str = job.get("excel_file_path")
     if not excel_path_str or not Path(excel_path_str).exists():
-        raise HTTPException(status_code=404, detail="Generated Excel export file not found.")
+        raise HTTPException(
+            status_code=404,
+            detail=(
+                "Generated Excel export file not found. "
+                "The server may have restarted after conversion — please run the conversion again."
+            ),
+        )
 
     export_filename = f"ABB_AC450_Valmet_Export_{job_id[:8]}.xlsx"
 

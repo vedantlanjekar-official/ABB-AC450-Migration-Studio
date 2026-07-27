@@ -12,3 +12,7 @@ services:
         value: 3.11.0
       - key: PORT
         value: 10000
+      - key: PC_LIGHT_PDF_READ
+        value: "1"
+      - key: ENABLE_PC_OCR
+        value: "0"
