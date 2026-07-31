@@ -3,20 +3,54 @@
 import React from 'react'
 import { useConverterStore } from '../store/converter_store'
 import { useStatusPolling } from '../hooks/use_status_polling'
-import { Loader2, FileSearch, ShieldCheck, Cpu, Database, Network, Box, FileSpreadsheet, CheckCircle2, Sliders, Layers } from 'lucide-react'
+import {
+  Loader2,
+  FileSearch,
+  ShieldCheck,
+  Cpu,
+  Database,
+  Network,
+  Box,
+  FileSpreadsheet,
+  CheckCircle2,
+  Sliders,
+  Layers,
+  GitCompare,
+  Search,
+  LayoutTemplate,
+} from 'lucide-react'
 
 export const ProcessingView: React.FC = () => {
-  // Activate automatic status polling
   useStatusPolling()
 
-  const { statusResponse } = useConverterStore()
+  const { statusResponse, conversionType } = useConverterStore()
+
+  const activeType = statusResponse?.conversion_type || conversionType
+  const isCompare = activeType === 'COMPARE'
+  const isArrangement = activeType === 'IO_ARRANGE'
+  const isTemplate = activeType === 'ENG_TEMPLATE'
 
   const progress = statusResponse?.progress_percentage || 10
-  const phase = statusResponse?.current_phase || 'Executing 10-Stage Compiler Parser Engine...'
-  const message = statusResponse?.message || 'Reading uploaded PDF document(s)...'
+  const phase =
+    statusResponse?.current_phase ||
+    (isTemplate
+      ? 'Mapping clubbed records into ABB template...'
+      : isArrangement
+      ? 'Generating paired ABB I/O addresses...'
+      : isCompare
+      ? 'Excel Comparison & Validation...'
+      : 'Executing 10-Stage Compiler Parser Engine...')
+  const message =
+    statusResponse?.message ||
+    (isTemplate
+      ? 'Reading generated engineering workbook...'
+      : isArrangement
+      ? 'Reading generated engineering workbook...'
+      : isCompare
+      ? 'Reading uploaded Excel worksheets...'
+      : 'Reading uploaded PDF document(s)...')
 
-  // 10 distinct, uncombined stages using Valmet green color scheme
-  const stages = [
+  const pdfStages = [
     { num: 1, title: 'Stage 1: PDF Document Extraction & Page Loading', icon: FileSearch, minProgress: 10 },
     { num: 2, title: 'Stage 2: Header & Footer Noise Filtering', icon: ShieldCheck, minProgress: 20 },
     { num: 3, title: 'Stage 3: Multi-Page Document Merging & Alignment', icon: Network, minProgress: 30 },
@@ -29,6 +63,37 @@ export const ProcessingView: React.FC = () => {
     { num: 10, title: 'Stage 10: Valmet-Compatible Excel Workbook Generation', icon: FileSpreadsheet, minProgress: 100 },
   ]
 
+  const compareStages = [
+    { num: 1, title: 'Stage 1: Upload & Read Excel Workbooks', icon: FileSpreadsheet, minProgress: 20 },
+    { num: 2, title: 'Stage 2: Locate $(DEVICETAG) in Both Files', icon: Search, minProgress: 40 },
+    { num: 3, title: 'Stage 3: Extract & Deduplicate Tag Values', icon: Layers, minProgress: 55 },
+    { num: 4, title: 'Stage 4: Compare Both Tag Sets', icon: GitCompare, minProgress: 70 },
+    { num: 5, title: 'Stage 5: Generate Comparison_Report.xlsx', icon: FileSpreadsheet, minProgress: 100 },
+  ]
+
+  const arrangementStages = [
+    { num: 1, title: 'Stage 1: Read Generated DB / PB/PC Excel', icon: FileSpreadsheet, minProgress: 25 },
+    { num: 2, title: 'Stage 2: Detect Device Tag & Category Columns', icon: Search, minProgress: 45 },
+    { num: 3, title: 'Stage 3: Preserve and Group Category Records', icon: Layers, minProgress: 55 },
+    { num: 4, title: 'Stage 4: Generate Paired ABB Card Addresses', icon: Network, minProgress: 80 },
+    { num: 5, title: 'Stage 5: Export I/O Address Arrangement', icon: FileSpreadsheet, minProgress: 100 },
+  ]
+
+  const templateStages = [
+    { num: 1, title: 'Stage 1: Read Generated DB / PB/PC Excel', icon: FileSpreadsheet, minProgress: 25 },
+    { num: 2, title: 'Stage 2: Detect Club Headers & Category Columns', icon: Search, minProgress: 40 },
+    { num: 3, title: 'Stage 3: Collapse Adjacent Compatible Clubs', icon: LayoutTemplate, minProgress: 70 },
+    { num: 4, title: 'Stage 4: Export ABB_Engineering_Template.xlsx', icon: FileSpreadsheet, minProgress: 100 },
+  ]
+
+  const stages = isTemplate
+    ? templateStages
+    : isArrangement
+    ? arrangementStages
+    : isCompare
+    ? compareStages
+    : pdfStages
+
   return (
     <div className="max-w-3xl mx-auto space-y-6 animate-in fade-in duration-500">
       <div className="rounded-2xl border border-slate-200 bg-white p-8 shadow-sm">
@@ -37,13 +102,18 @@ export const ProcessingView: React.FC = () => {
             <Loader2 className="w-8 h-8 text-valmet-green animate-spin" />
           </div>
           <h2 className="text-2xl font-bold text-slate-900 tracking-tight">
-            Executing 10-Stage Compiler Parser Engine
+            {isTemplate
+              ? 'ABB Engineering Template Generator'
+              : isArrangement
+              ? 'I/O Address Arrangement Generator'
+              : isCompare
+              ? 'Excel Comparison & Validation'
+              : 'Executing 10-Stage Compiler Parser Engine'}
           </h2>
           <p className="text-xs sm:text-sm text-slate-500 mt-1 font-medium">{phase}</p>
         </div>
 
         <div className="space-y-6 pt-2">
-          {/* Progress Bar with Valmet Green */}
           <div className="space-y-2">
             <div className="flex justify-between text-xs font-semibold text-slate-700 uppercase tracking-wider font-mono">
               <span className="truncate pr-2">{message}</span>
@@ -57,16 +127,23 @@ export const ProcessingView: React.FC = () => {
             </div>
           </div>
 
-          {/* 10 Separate Compiler Pipeline Stages */}
           <div className="space-y-3 pt-2">
             <h4 className="text-xs font-bold uppercase tracking-wider text-slate-500 font-mono">
-              Compiler Pipeline Stages (10 Separate Stages)
+              {isTemplate
+                ? 'Engineering Template Pipeline Stages'
+                : isArrangement
+                ? 'I/O Arrangement Pipeline Stages'
+                : isCompare
+                ? 'Comparison Pipeline Stages'
+                : 'Compiler Pipeline Stages (10 Separate Stages)'}
             </h4>
             <div className="grid grid-cols-1 gap-2">
               {stages.map((stg) => {
                 const Icon = stg.icon
                 const isDone = progress >= stg.minProgress
-                const isActive = progress >= stg.minProgress - 9 && !isDone
+                const prev = stages.find((s) => s.num === stg.num - 1)
+                const isActive =
+                  !isDone && progress >= (prev?.minProgress ?? 0)
 
                 return (
                   <div

@@ -10,6 +10,8 @@ export type ConversionStatus =
 
 export type PipelineStage = 'upload' | 'processing' | 'results';
 
+export type ConversionType = 'DB' | 'PC' | 'COMPARE' | 'IO_ARRANGE' | 'ENG_TEMPLATE';
+
 export interface FileUploadResponse {
   job_id: string;
   uploaded_files: string[];
@@ -29,7 +31,7 @@ export interface ProcessStatusResponse {
   progress_percentage: number;
   current_phase: string;
   message: string;
-  conversion_type?: 'DB' | 'PC';
+  conversion_type?: ConversionType;
   total_objects: number;
   default_sections_found: number;
   hardware_default_blocks: number;
@@ -48,10 +50,16 @@ export interface ProcessStatusResponse {
   duplicate_records?: number;
   missing_descriptions?: number;
   processing_time_seconds: number;
+  worksheet1_records?: number;
+  worksheet2_records?: number;
+  matched_records?: number;
+  unmatched_records?: number;
   detected_element_types: ElementTypeSummary[];
   generated_sheets: string[];
   preview_data: Record<string, Record<string, unknown>[]>;
   warnings: string[];
   errors: string[];
   excel_file_path: string | null;
+  /** ISO timestamp; refreshed by backend heartbeats during long-running stages. */
+  updated_at?: string | null;
 }

@@ -11,7 +11,7 @@ logger = get_logger()
 
 @router.post("")
 async def start_conversion_process(request: ProcessRequest):
-    """Triggers DB or PC conversion in a background worker thread for the given job_id."""
+    """Trigger the selected PDF or standalone Excel workflow in a worker thread."""
     job = job_store.get_job(request.job_id)
     if not job:
         raise HTTPException(status_code=404, detail=f"Job ID {request.job_id} not found.")

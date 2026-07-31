@@ -55,53 +55,101 @@ def test_user_examples_extraction():
 
 
 def test_channel_port_err_format():
-    """CARD.CHANNEL:TERMINAL/TAG:ERR format from O2-PC32 page 8/34."""
+    """CARD.CHANNEL:TERMINAL/TAG:ERR — Device Tag drops the :ERR attribute."""
     r = GrammarParser.parse_reference("=AI800_22.5:22/M49FI1201.MV:ERR")
     assert r is not None
     assert r.category == "AI800"
     assert r.card_number == 22
     assert r.channel_number == 5
-    assert r.device_tag == "M49FI1201.MV:ERR"
+    assert r.device_tag == "M49FI1201.MV"
     assert r.loop_tag == "M49FI1201"
 
     r2 = GrammarParser.parse_reference("=AI800_2.1:22/M49M021.CURR:ERR")
     assert r2 is not None
     assert r2.card_number == 2
     assert r2.channel_number == 1
-    assert r2.device_tag == "M49M021.CURR:ERR"
+    assert r2.device_tag == "M49M021.CURR"
     assert r2.loop_tag == "M49M021"
 
 
-def test_mv_and_err_are_distinct_rows():
+def test_mv_and_err_collapse_to_same_device_tag():
+    """MV and MV:ERR normalize to the same Device Tag and dedupe when address matches."""
     refs = [
         GrammarParser.parse_reference("=AI800_22.5/M49FI1201.MV"),
         GrammarParser.parse_reference("=AI800_22.5:22/M49FI1201.MV:ERR"),
     ]
     unique, dups = DuplicateDetector.deduplicate_references(refs)
-    assert len(unique) == 2
-    assert dups == 0
+    assert len(unique) == 1
+    assert dups == 1
+    assert unique[0].device_tag == "M49FI1201.MV"
 
 
-def test_complete_device_tag_keeps_attributes():
-    """Complete device tags retain :ATTR suffixes; loop tag drops only the extension."""
-    r = GrammarParser.parse_reference("=AI800_22.5:22/M49FI1201.MV:ERR")
-    assert r is not None
-    assert r.device_tag == "M49FI1201.MV:ERR"
-    assert r.loop_tag == "M49FI1201"
-    assert r.card_number == 22
-    assert r.channel_number == 5
+def test_device_tag_strips_colon_attributes():
+    """Device Tag keeps only the engineering tag — colon attributes are discarded."""
+    cases = [
+        ("=AI800_22.5:22/M49FI1201.MV:ERR", "M49FI1201.MV", "M49FI1201"),
+        ("P-=AO2.3/M49DKA050.KEY:MAN", "M49DKA050.KEY", "M49DKA050"),
+        ("=DI5.12/M49KN050.PWR:CALC_VAL", "M49KN050.PWR", "M49KN050"),
+        ("=DO1.1/940M02M1.STRT:MAN", "940M02M1.STRT", "940M02M1"),
+        ("=DO1.2/940M02M1.STRT:SELECTED", "940M02M1.STRT", "940M02M1"),
+        ("=AI1.1/940LC391.MV:AUTO", "940LC391.MV", "940LC391"),
+        ("=AO2.1/940FC400.OUT:REMOTE", "940FC400.OUT", "940FC400"),
+        ("=DI3.1/940XV101.RUN:ENABLE", "940XV101.RUN", "940XV101"),
+    ]
+    for source, expected_device, expected_loop in cases:
+        r = GrammarParser.parse_reference(source)
+        assert r is not None, source
+        assert r.device_tag == expected_device, source
+        assert r.loop_tag == expected_loop, source
+        assert ":" not in r.device_tag, source
 
-    r2 = GrammarParser.parse_reference("P-=AO2.3/M49DKA050.KEY:MAN")
-    assert r2 is not None
-    assert r2.device_tag == "M49DKA050.KEY:MAN"
-    assert r2.loop_tag == "M49DKA050"
-    assert r2.category == "AO"
 
-    r3 = GrammarParser.parse_reference("=DI5.12/M49KN050.PWR:CALC_VAL")
-    assert r3 is not None
-    assert r3.device_tag == "M49KN050.PWR:CALC_VAL"
-    assert r3.loop_tag == "M49KN050"
-    assert r3.category == "DI"
+def test_device_tag_preserves_full_engineering_suffixes():
+    """Device Tags must be captured in full — no suffix whitelist, no length cap."""
+    cases = [
+        ("=DI1.1/940XA1899.FAULT", "940XA1899.FAULT", "940XA1899"),
+        ("=DO2.1/945PB25M1.START2", "945PB25M1.START2", "945PB25M1"),
+        ("=DI3.1/940XA1899.FAULT:ERR", "940XA1899.FAULT", "940XA1899"),
+        ("=DO4.1/945PB25M1.START2:MAN", "945PB25M1.START2", "945PB25M1"),
+        ("=AI1.1/940XA100.ALARM", "940XA100.ALARM", "940XA100"),
+        ("=AO1.1/940XV200.CLOSE", "940XV200.CLOSE", "940XV200"),
+        ("=DI1.1/M49M021.READY", "M49M021.READY", "M49M021"),
+        ("=DO1.1/940M02M1.STOP", "940M02M1.STOP", "940M02M1"),
+        ("=DI1.1/940M02M1.RUN", "940M02M1.RUN", "940M02M1"),
+        ("=AI1.1/940LC391.MV", "940LC391.MV", "940LC391"),
+        ("=AO1.1/940FC400.OUT", "940FC400.OUT", "940FC400"),
+        ("=DO1.1/940XV101.SV1", "940XV101.SV1", "940XV101"),
+        ("=DO1.2/940XV101.SV2", "940XV101.SV2", "940XV101"),
+        ("=DO1.3/940XV101.GSO", "940XV101.GSO", "940XV101"),
+        ("=DO1.4/940XV101.GSC", "940XV101.GSC", "940XV101"),
+        ("=DI1.1/940XV101.OPEN", "940XV101.OPEN", "940XV101"),
+        ("=DI1.2/940XV101.CLOSE", "940XV101.CLOSE", "940XV101"),
+        ("=DI1.3/940XV101.SELECTED", "940XV101.SELECTED", "940XV101"),
+        ("=DI1.4/940XV101.MAN", "940XV101.MAN", "940XV101"),
+        ("=DI1.5/940XV101.AUTO", "940XV101.AUTO", "940XV101"),
+        ("=DI1.6/940XV101.REMOTE", "940XV101.REMOTE", "940XV101"),
+        ("=DI1.7/940XV101.TRIP", "940XV101.TRIP", "940XV101"),
+        ("=DI1.8/940XV101.ALARM", "940XV101.ALARM", "940XV101"),
+    ]
+    for source, expected_device, expected_loop in cases:
+        r = GrammarParser.parse_reference(source)
+        assert r is not None, source
+        assert r.device_tag == expected_device, f"{source} -> {r.device_tag}"
+        assert r.loop_tag == expected_loop, source
+
+
+def test_clean_device_tag_no_character_limit_or_suffix_list():
+    """clean_device_tag must not truncate and must not rely on suffix whitelists."""
+    assert GrammarParser.clean_device_tag("940XA1899.FAULT") == "940XA1899.FAULT"
+    assert GrammarParser.clean_device_tag("945PB25M1.START2") == "945PB25M1.START2"
+    assert GrammarParser.clean_device_tag("940XV101.SELECTED") == "940XV101.SELECTED"
+    assert GrammarParser.clean_device_tag("940XV101.SELECTED:ERR") == "940XV101.SELECTED"
+    # Exact as printed — no assumed short-suffix glue stripping
+    assert GrammarParser.clean_device_tag("940LC391.MVBLOCK") == "940LC391.MVBLOCK"
+    assert GrammarParser.clean_device_tag("945FC400.OUTXYZ") == "945FC400.OUTXYZ"
+    # Very long suffix still preserved in full
+    long_tag = "940XA1899." + ("A" * 40) + "12"
+    assert GrammarParser.clean_device_tag(long_tag) == long_tag
 
 
 def test_unsupported_categories_are_ignored():
@@ -117,8 +165,8 @@ def test_unsupported_categories_are_ignored():
         assert GrammarParser.parse_reference(ref) is None
 
 
-def test_dedup_keeps_all_address_variants():
-    """MV / MV:ERR are distinct engineering references."""
+def test_dedup_collapses_colon_attribute_variants():
+    """Device Tags that differ only by a colon attribute are the same engineering tag."""
     refs = [
         GrammarParser.parse_reference("=AI800_22.5/M49FI1201.MV"),
         GrammarParser.parse_reference("=AI800_22.5:22/M49FI1201.MV:ERR"),
@@ -126,10 +174,11 @@ def test_dedup_keeps_all_address_variants():
     ]
     assert all(r is not None for r in refs)
     unique, dups = DuplicateDetector.deduplicate_references(refs)
-    assert len(unique) == 3
-    assert dups == 0
+    assert len(unique) == 2
+    assert dups == 1
     tags = {r.device_tag for r in unique}
-    assert tags == {"M49FI1201.MV", "M49FI1201.MV:ERR", "945FC400.OUT"}
+    assert tags == {"M49FI1201.MV", "945FC400.OUT"}
+    assert all(":" not in t for t in tags)
 
 
 def test_dedup_removes_exact_duplicates_only():
@@ -200,18 +249,58 @@ def test_excel_generation_columns(tmp_path):
     wb = openpyxl.load_workbook(out_file)
     ws = wb["I_O_List"]
 
-    headers = [ws.cell(row=4, column=c).value for c in range(1, 8)]
+    headers = [ws.cell(row=1, column=c).value for c in range(1, 15)]
     assert headers == [
-        "Sr. No.", "Loop Tag", "Description", "Device Tag",
-        "Category", "Slot/Card", "Channel",
+        "Sr. No.", "$(TAG)", "$(NAME_40)", "$(DEVICETAG)",
+        "AI", "AO", "DI", "DO", "AI800_", "AO800_", "DI800_", "DO800_",
+        "Slot/Card", "Channel",
     ]
+    assert ws["A1"].fill.fgColor.rgb.endswith("1E293B")
+    assert ws["A1"].font.name == "Calibri"
+    assert ws["A1"].font.bold is True
+    assert ws["A2"].font.name == "Calibri"
+    assert ws["A2"].fill.fgColor.rgb.endswith("FFFFFF")
+    assert ws["A3"].fill.fgColor.rgb.endswith("F8FAFC")
 
-    row5 = [ws.cell(row=5, column=c).value for c in range(1, 8)]
-    assert row5[1] == "82LIC660"
-    assert row5[3] == "82LIC660.MV"
-    assert row5[4] == "AI800"
-    assert row5[5] == 5
-    assert row5[6] == 10
+    # Row 1: AI800 → AI800_ = 1, others blank
+    row2 = [ws.cell(row=2, column=c).value for c in range(1, 15)]
+    assert row2[1] == "82LIC660"
+    assert row2[3] == "82LIC660.MV"
+    assert row2[4:12] == [None, None, None, None, 1, None, None, None]
+    assert row2[12] == 5
+    assert row2[13] == 10
+
+    # Row 2: AO → AO = 1
+    row3 = [ws.cell(row=3, column=c).value for c in range(1, 15)]
+    assert row3[3] == "945FC400.OUT"
+    assert row3[4:12] == [None, 1, None, None, None, None, None, None]
+
+
+def test_category_mapper_indicators():
+    from backend.pc_element.parser.category_mapper import (
+        build_category_indicator_values,
+        apply_category_columns,
+        CATEGORY_INDICATOR_COLUMNS,
+    )
+
+    ai = build_category_indicator_values("AI")
+    assert ai["AI"] == 1
+    assert all(ai[c] == "" for c in CATEGORY_INDICATOR_COLUMNS if c != "AI")
+
+    di800 = build_category_indicator_values("DI800_")
+    assert di800["DI800_"] == 1
+    assert di800["DI"] == ""
+
+    row = apply_category_columns({
+        "Device Tag": "940M02M1.RUN",
+        "Category": "DI800_",
+        "Slot/Card": 2,
+    })
+    assert "Category" not in row
+    assert row["DI800_"] == 1
+    assert row["Device Tag"] == "940M02M1.RUN"
+    assert row["Slot/Card"] == 2
+    assert [row[c] for c in CATEGORY_INDICATOR_COLUMNS] == ["", "", "", "", "", "", 1, ""]
 
 
 def test_pc_element_parser_service_pipeline(tmp_path):
@@ -263,11 +352,15 @@ def test_pc_element_parser_service_pipeline(tmp_path):
         assert res.di_count == 1
         assert res.aoc_count == 0
         assert res.aic_count == 0
-        cats = {row["Category"] for row in res.preview_data}
-        assert cats == {"AI800", "AO", "DI"}
+        # Category column replaced by eight indicators; section order preserved
+        assert "Category" not in res.preview_data[0]
+        assert [row["AO"] for row in res.preview_data] == [1, "", ""]
+        assert [row["DI"] for row in res.preview_data] == ["", 1, ""]
+        assert [row["AI800_"] for row in res.preview_data] == ["", "", 1]
         assert set(res.preview_data[0].keys()) >= {
             "Sr. No.", "Loop Tag", "Description", "Device Tag",
-            "Category", "Slot/Card", "Channel",
+            "AI", "AO", "DI", "DO", "AI800_", "AO800_", "DI800_", "DO800_",
+            "Slot/Card", "Channel",
         }
 
 
@@ -318,7 +411,7 @@ def test_reference_o2_pc32_full_coverage():
                 card = int(m.group("card"))
                 ch = m.group("channel") or m.group("channel2") or m.group("port")
                 channel = int(ch) if ch else 0
-                tag = m.group("tag").upper()
+                tag = GrammarParser.clean_device_tag(m.group("tag"))
                 gt.add((prefix, card, channel, tag))
 
     out = tempfile.mkdtemp()
@@ -351,6 +444,6 @@ def test_reference_o2_pc32_full_coverage():
     missing = sorted(gt - out_keys)
     assert len(missing) == 0, f"Missing {len(missing)} refs, e.g. {missing[:15]}"
     assert res.total_io_found >= len(gt)
-    # Must include the previously-missed ERR variants
-    err_tags = {k for k in out_keys if k[3].endswith(":ERR")}
-    assert len(err_tags) >= 15, f"Expected >=15 :ERR tags, got {len(err_tags)}"
+    # Device Tags must be clean engineering tags (no colon attributes)
+    colon_tags = {k for k in out_keys if ":" in k[3]}
+    assert len(colon_tags) == 0, f"Device Tags must not contain colon attributes: {list(colon_tags)[:10]}"

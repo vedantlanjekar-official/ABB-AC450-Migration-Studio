@@ -117,30 +117,32 @@ class ParserService:
                 else:
                     raw_defaults[current_block_name] = parsed_params
 
-            elif current_block_type in ("CARD", "OBJECT") and (current_object_info or current_block_name):
-                has_name = any(re.search(r'^\s*:NAME\b', rec.text, re.IGNORECASE) for rec in current_buffer)
-                
-                family, index, identifier = current_object_info if current_object_info else (current_family, "1", current_block_name)
+            elif current_block_type == "CARD" and (current_object_info or current_block_name):
+                # Card definitions are AST parents only — NEVER exported as signal rows,
+                # even when they carry a :NAME parameter.
+                family, index, identifier = current_object_info if current_object_info else (
+                    current_family, "1", current_block_name
+                )
+                card_node = self.card_parser.parse_card_records(
+                    card_name=identifier,
+                    family=family or "AI",
+                    records=current_buffer
+                )
+                raw_cards.append(card_node)
+                current_card_name = identifier
 
-                # Card Node: Lacks :NAME parameter AND index has no dot (e.g. AI1, AI2, AO1, DI1)
-                if not has_name and "." not in index:
-                    card_node = self.card_parser.parse_card_records(
-                        card_name=identifier,
-                        family=family or "AI",
-                        records=current_buffer
-                    )
-                    raw_cards.append(card_node)
-                    current_card_name = identifier
-                else:
-                    # Actual Signal Object Node: Has :NAME or dot index (e.g. AI1.1, PIDCON1, MOTCON1)
-                    obj_node = self.object_parser.parse_object_records(
-                        family=family,
-                        card_name=current_card_name,
-                        identifier=identifier,
-                        index=index,
-                        records=current_buffer
-                    )
-                    raw_objects.append(obj_node)
+            elif current_block_type == "OBJECT" and (current_object_info or current_block_name):
+                family, index, identifier = current_object_info if current_object_info else (
+                    current_family, "1", current_block_name
+                )
+                obj_node = self.object_parser.parse_object_records(
+                    family=family,
+                    card_name=current_card_name,
+                    identifier=identifier,
+                    index=index,
+                    records=current_buffer
+                )
+                raw_objects.append(obj_node)
 
             current_buffer = []
 

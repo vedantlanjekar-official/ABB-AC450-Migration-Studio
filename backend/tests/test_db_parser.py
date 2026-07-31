@@ -169,3 +169,121 @@ AO8002.1
     assert "MANSTN1" not in tags
     assert "TEXT1" not in tags
     assert types == {"AI", "DI800", "AO800"}
+
+
+def test_underscore_800_series_detection_and_export():
+    """
+    Production DB listings use AI800_1.1 / AI800_1 AI810 notation.
+    Cards must not export; channels must export as AI800/AO800/DI800/DO800.
+    """
+    pages = [
+        {
+            "page_number": 1,
+            "text": """
+AI800_1   AI810
+  :ADDR 100
+  :NAME   AI800_1
+
+AI800_1.1
+  :NAME "940LC391.MV"
+  :UNIT "bar"
+
+AI800_1.2
+  :NAME "940LC392.MV"
+
+AO800_3   AO810
+  :ADDR 200
+
+AO800_3.1
+  :NAME "940FC400.OUT"
+
+DI800_2   DI820
+  :ADDR 300
+
+DI800_2.1
+  :NAME "100XV101.RUN"
+
+DO800_2   DO820
+  :ADDR 400
+
+DO800_2.1
+  :NAME "100XV101.OUT"
+
+DO800_10.8
+  :NAME "82M073.MSTR"
+"""
+        }
+    ]
+
+    service = ParserService("test_job_800_underscore")
+    elements, stats, warnings = service.parse_document_pages(
+        pages, file_name="underscore_800.pdf"
+    )
+
+    tags = {e.tag for e in elements}
+    by_tag = {e.tag: e for e in elements}
+    types = {e.element_type.upper() for e in elements}
+
+    # Channels exported with underscore engineering references
+    assert "AI800_1.1" in tags
+    assert "AI800_1.2" in tags
+    assert "AO800_3.1" in tags
+    assert "DI800_2.1" in tags
+    assert "DO800_2.1" in tags
+    assert "DO800_10.8" in tags
+
+    # Card definitions must NEVER be exported as signal rows
+    assert "AI800_1" not in tags
+    assert "AO800_3" not in tags
+    assert "DI800_2" not in tags
+    assert "DO800_2" not in tags
+
+    assert types == {"AI800", "AO800", "DI800", "DO800"}
+    assert by_tag["AI800_1.1"].element_type == "AI800"
+    assert by_tag["AI800_1.1"].element_index == "1.1"
+    assert by_tag["AI800_1.1"].get_parameter("NAME") == "940LC391.MV"
+    # Card ADDR inherited onto channel
+    assert by_tag["AI800_1.1"].get_parameter("ADDR") == 100
+    assert by_tag["AO800_3.1"].get_parameter("ADDR") == 200
+
+    from backend.mapper.record_clubber import RecordClubber
+    from backend.mapper.element_mapper import ElementMapper
+    from backend.mapper.output_formatter import OutputFormatter
+
+    clubbed = RecordClubber("test_job_800_underscore").club_elements(elements)
+    rows = OutputFormatter("test_job_800_underscore").format_clubbed_rows(
+        ElementMapper("test_job_800_underscore").map_clubbed(clubbed)
+    )
+    assert sum(1 for r in rows if r.get("AI800_") == 1) == 2
+    assert sum(1 for r in rows if r.get("AO800_") == 1) == 1
+    assert sum(1 for r in rows if r.get("DI800_") == 1) == 1
+    assert sum(1 for r in rows if r.get("DO800_") == 1) == 2
+    # AI800→AO800 pairing by Loop Tag
+    assert any(r.get("AI800_") == 1 and r["Loop Tag"] == "940LC391" for r in rows)
+    assert any(r.get("AO800_") == 1 and r["Loop Tag"] == "940FC400" for r in rows)
+
+
+def test_object_parser_recognizes_all_800_header_forms():
+    from backend.parser.object_parser import ObjectParser
+
+    p = ObjectParser("hdr")
+    assert p.is_object_header("AI800_1.1") == ("AI800", "1.1", "AI800_1.1")
+    assert p.is_object_header("DO800_10.8") == ("DO800", "10.8", "DO800_10.8")
+    assert p.is_object_header("AI8001.1") == ("AI800", "1.1", "AI8001.1")
+    assert p.is_object_header("AI800 1.1") == ("AI800", "1.1", "AI8001.1")
+    assert p.is_object_header("AI 8001.1") == ("AI800", "1.1", "AI8001.1")
+    assert p.is_object_header("AI1.4") == ("AI", "1.4", "AI1.4")
+
+
+def test_card_parser_recognizes_underscore_800_cards():
+    from backend.parser.card_parser import CardParser
+
+    p = CardParser("card")
+    assert p.is_card_header("AI800_1   AI810") == ("AI800_1", "AI800")
+    assert p.is_card_header("AO800_3 AO810") == ("AO800_3", "AO800")
+    assert p.is_card_header("DI800_2 DI820") == ("DI800_2", "DI800")
+    assert p.is_card_header("DO800_10 DO820") == ("DO800_10", "DO800")
+    assert p.is_card_header("AI8001 AI800") == ("AI8001", "AI800")
+    assert p.is_card_header("AI1 AI") == ("AI1", "AI")
+    # Must not treat channel objects as cards
+    assert p.is_card_header("AI800_1.1") is None

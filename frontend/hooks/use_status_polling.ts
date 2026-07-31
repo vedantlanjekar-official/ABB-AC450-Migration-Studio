@@ -4,7 +4,10 @@ import { apiClient } from '../services/api_client';
 import { ProcessStatusResponse } from '../types/converter';
 
 const POLL_INTERVAL_MS = 1000;
-const STUCK_JOB_TIMEOUT_MS = 3 * 60 * 1000;
+/** Large DB PDFs routinely take 4–10+ minutes (AST parse alone can exceed 4 min). */
+const STUCK_JOB_TIMEOUT_MS = 20 * 60 * 1000;
+/** Fail only when the backend stops sending any status/heartbeat signal. */
+const NO_ACTIVITY_TIMEOUT_MS = 5 * 60 * 1000;
 
 function buildFailedStatus(jobId: string, message: string, detail: string): ProcessStatusResponse {
   return {
@@ -34,11 +37,22 @@ function buildFailedStatus(jobId: string, message: string, detail: string): Proc
   };
 }
 
+function activityKey(res: ProcessStatusResponse): string {
+  // Prefer updated_at — heartbeats refresh it every ~15s without changing progress %.
+  return [
+    res.updated_at ?? '',
+    res.progress_percentage ?? 0,
+    res.current_phase ?? '',
+    res.message ?? '',
+    res.status ?? '',
+  ].join('|');
+}
+
 export function useStatusPolling() {
   const { stage, jobId, setStatusResponse, setStage } = useConverterStore();
   const pollCountRef = useRef(0);
   const startedAtRef = useRef<number | null>(null);
-  const lastProgressRef = useRef<{ progress: number; at: number } | null>(null);
+  const lastActivityRef = useRef<{ key: string; at: number } | null>(null);
 
   useEffect(() => {
     if (stage !== 'processing' || !jobId) return;
@@ -46,7 +60,7 @@ export function useStatusPolling() {
     let isSubscribed = true;
     pollCountRef.current = 0;
     startedAtRef.current = Date.now();
-    lastProgressRef.current = null;
+    lastActivityRef.current = null;
 
     const failAndStop = (message: string, detail: string) => {
       if (!isSubscribed) return;
@@ -62,7 +76,7 @@ export function useStatusPolling() {
 
       if (startedAtRef.current && now - startedAtRef.current > STUCK_JOB_TIMEOUT_MS) {
         failAndStop(
-          'Conversion timed out after 3 minutes. The backend may have restarted during processing. Please retry.',
+          'Conversion timed out after 20 minutes. The backend may have restarted during processing. Please retry.',
           'Conversion timed out waiting for backend completion.'
         );
         return;
@@ -79,16 +93,15 @@ export function useStatusPolling() {
           return;
         }
 
-        const progress = res.progress_percentage ?? 0;
-        if (
-          !lastProgressRef.current ||
-          lastProgressRef.current.progress !== progress
-        ) {
-          lastProgressRef.current = { progress, at: now };
-        } else if (now - lastProgressRef.current.at > 120000) {
+        // Heartbeats update message without changing progress_percentage —
+        // treat any status/message/phase change as proof the worker is alive.
+        const key = activityKey(res);
+        if (!lastActivityRef.current || lastActivityRef.current.key !== key) {
+          lastActivityRef.current = { key, at: now };
+        } else if (now - lastActivityRef.current.at > NO_ACTIVITY_TIMEOUT_MS) {
           failAndStop(
-            'Conversion appears stuck with no progress. Please retry the upload.',
-            `No progress for 2 minutes (stuck at ${progress}%).`
+            'Conversion appears stuck with no backend activity. Please retry the upload.',
+            `No status/heartbeat activity for 5 minutes (stuck at ${res.progress_percentage ?? 0}%).`
           );
         }
       } catch (err: unknown) {

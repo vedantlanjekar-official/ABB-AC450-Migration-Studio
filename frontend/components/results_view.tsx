@@ -15,7 +15,9 @@ import {
   Eye,
   ShieldCheck,
   Clock,
-  FileSpreadsheet
+  FileSpreadsheet,
+  GitCompare,
+  LayoutTemplate,
 } from 'lucide-react';
 import { apiClient } from '../services/api_client';
 
@@ -45,6 +47,11 @@ export function ResultsView() {
     do_count = 0,
     duplicate_records = 0,
     processing_time_seconds,
+    worksheet1_records = 0,
+    worksheet2_records = 0,
+    matched_records = 0,
+    unmatched_records = 0,
+    detected_element_types,
     generated_sheets,
     preview_data,
     warnings,
@@ -75,6 +82,9 @@ export function ResultsView() {
   };
 
   const isPC = conversion_type === 'PC';
+  const isCompare = conversion_type === 'COMPARE';
+  const isArrangement = conversion_type === 'IO_ARRANGE';
+  const isTemplate = conversion_type === 'ENG_TEMPLATE';
   const isFailed = status === 'failed';
 
   return (
@@ -92,7 +102,19 @@ export function ResultsView() {
           <div>
             <h2 className="text-xl font-bold text-slate-900 tracking-tight">
               {isFailed
-                ? 'Conversion Failed'
+                ? isTemplate
+                  ? 'ABB Engineering Template Failed'
+                  : isArrangement
+                  ? 'I/O Address Arrangement Failed'
+                  : isCompare
+                  ? 'Excel Comparison Failed'
+                  : 'Conversion Failed'
+                : isTemplate
+                ? 'ABB Engineering Template Complete'
+                : isArrangement
+                ? 'I/O Address Arrangement Complete'
+                : isCompare
+                ? 'Excel Comparison Complete'
                 : isPC
                 ? 'PC Element IO Extraction Complete'
                 : 'DB Element Conversion Complete'}
@@ -103,7 +125,7 @@ export function ResultsView() {
           </div>
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-3 flex-wrap justify-end">
           <button
             onClick={handleFetchLogs}
             disabled={loadingLog}
@@ -116,26 +138,182 @@ export function ResultsView() {
           {!isFailed && (
             <a
               href={downloadUrl}
-              download
+              download={
+                isTemplate
+                  ? 'ABB_Engineering_Template.xlsx'
+                  : isArrangement
+                  ? 'IO_Address_Arrangement.xlsx'
+                  : isCompare
+                  ? 'Comparison_Report.xlsx'
+                  : undefined
+              }
               className="flex items-center gap-2 px-5 py-2.5 bg-white hover:bg-valmet-lightgreen/50 text-valmet-green border border-valmet-green rounded-xl text-xs font-extrabold transition-all shadow-xs active:scale-95 group"
             >
               <FileSpreadsheet className="w-4 h-4 text-valmet-green group-hover:scale-110 transition-transform" />
-              <span>Download Excel (.xlsx)</span>
+              <span>
+                {isTemplate
+                  ? 'Download ABB Engineering Template'
+                  : isArrangement
+                  ? 'Download I/O Address Arrangement'
+                  : isCompare
+                  ? 'Download Comparison_Report.xlsx'
+                  : 'Download Excel (.xlsx)'}
+              </span>
             </a>
           )}
 
           <button
             onClick={resetSession}
             className="p-2.5 text-slate-400 hover:text-slate-700 hover:bg-slate-100 rounded-xl transition-all border border-slate-200"
-            title="Convert Another File"
+            title="Start Another Job"
           >
             <RotateCcw className="w-4 h-4" />
           </button>
         </div>
       </div>
 
-      {/* Light Audit Metrics Panel */}
-      {!isFailed && (isPC ? (
+      {/* Metrics Panel */}
+      {!isFailed && (isTemplate ? (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+          <div className="p-4 bg-white border border-slate-200 rounded-xl shadow-xs">
+            <div className="flex items-center gap-1.5 text-slate-500 text-xs font-medium mb-1">
+              <LayoutTemplate className="w-3.5 h-3.5 text-valmet-green" />
+              <span>Template Rows</span>
+            </div>
+            <div className="text-xl font-bold text-slate-900 font-mono">
+              {(total_objects || 0).toLocaleString()}
+            </div>
+            <div className="text-[10px] text-slate-400 mt-0.5">ABB engineering rows</div>
+          </div>
+
+          <div className="p-4 bg-white border border-slate-200 rounded-xl shadow-xs">
+            <div className="flex items-center gap-1.5 text-slate-500 text-xs font-medium mb-1">
+              <Layers className="w-3.5 h-3.5 text-blue-600" />
+              <span>Paired Clubs</span>
+            </div>
+            <div className="text-xl font-bold text-blue-600 font-mono">
+              {(matched_records || 0).toLocaleString()}
+            </div>
+            <div className="text-[10px] text-slate-400 mt-0.5">Adjacent compatible pairs</div>
+          </div>
+
+          <div className="p-4 bg-white border border-slate-200 rounded-xl shadow-xs">
+            <div className="flex items-center gap-1.5 text-slate-500 text-xs font-medium mb-1">
+              <TableIcon className="w-3.5 h-3.5 text-amber-600" />
+              <span>Singleton Rows</span>
+            </div>
+            <div className="text-xl font-bold text-amber-600 font-mono">
+              {(unmatched_records || 0).toLocaleString()}
+            </div>
+            <div className="text-[10px] text-slate-400 mt-0.5">Single-slot template rows</div>
+          </div>
+
+          <div className="p-4 bg-white border border-slate-200 rounded-xl shadow-xs">
+            <div className="flex items-center gap-1.5 text-slate-500 text-xs font-medium mb-1">
+              <Clock className="w-3.5 h-3.5 text-valmet-green" />
+              <span>Processing Time</span>
+            </div>
+            <div className="text-xl font-bold text-valmet-green font-mono">
+              {processing_time_seconds || 0}s
+            </div>
+            <div className="text-[10px] text-slate-400 mt-0.5">No re-clubbing performed</div>
+          </div>
+        </div>
+      ) : isArrangement ? (
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+          <div className="p-4 bg-white border border-slate-200 rounded-xl shadow-xs">
+            <div className="flex items-center gap-1.5 text-slate-500 text-xs font-medium mb-1">
+              <Layers className="w-3.5 h-3.5 text-valmet-green" />
+              <span>Records Arranged</span>
+            </div>
+            <div className="text-xl font-bold text-slate-900 font-mono">
+              {(total_objects || 0).toLocaleString()}
+            </div>
+            <div className="text-[10px] text-slate-400 mt-0.5">Device Tags preserved</div>
+          </div>
+
+          <div className="p-4 bg-white border border-slate-200 rounded-xl shadow-xs">
+            <div className="flex items-center gap-1.5 text-slate-500 text-xs font-medium mb-1">
+              <FileSpreadsheet className="w-3.5 h-3.5 text-blue-600" />
+              <span>Category Sheets</span>
+            </div>
+            <div className="text-xl font-bold text-blue-600 font-mono">
+              {generated_sheets.length}
+            </div>
+            <div className="text-[10px] text-slate-400 mt-0.5">
+              {detected_element_types.map((item) => `${item.element_type}: ${item.count}`).join(' · ')}
+            </div>
+          </div>
+
+          <div className="p-4 bg-white border border-slate-200 rounded-xl shadow-xs">
+            <div className="flex items-center gap-1.5 text-slate-500 text-xs font-medium mb-1">
+              <Clock className="w-3.5 h-3.5 text-valmet-green" />
+              <span>Processing Time</span>
+            </div>
+            <div className="text-xl font-bold text-valmet-green font-mono">
+              {processing_time_seconds || 0}s
+            </div>
+            <div className="text-[10px] text-slate-400 mt-0.5">Paired ABB card layout</div>
+          </div>
+        </div>
+      ) : isCompare ? (
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
+          <div className="p-4 bg-white border border-slate-200 rounded-xl shadow-xs">
+            <div className="flex items-center gap-1.5 text-slate-500 text-xs font-medium mb-1">
+              <FileSpreadsheet className="w-3.5 h-3.5 text-valmet-green" />
+              <span>Worksheet 1 Records</span>
+            </div>
+            <div className="text-xl font-bold text-slate-900 font-mono">
+              {(worksheet1_records || 0).toLocaleString()}
+            </div>
+            <div className="text-[10px] text-slate-400 mt-0.5">$(DEVICETAG) values</div>
+          </div>
+
+          <div className="p-4 bg-white border border-slate-200 rounded-xl shadow-xs">
+            <div className="flex items-center gap-1.5 text-slate-500 text-xs font-medium mb-1">
+              <Layers className="w-3.5 h-3.5 text-blue-600" />
+              <span>Worksheet 2 Records</span>
+            </div>
+            <div className="text-xl font-bold text-blue-600 font-mono">
+              {(worksheet2_records || 0).toLocaleString()}
+            </div>
+            <div className="text-[10px] text-slate-400 mt-0.5">$(DEVICETAG) values</div>
+          </div>
+
+          <div className="p-4 bg-white border border-slate-200 rounded-xl shadow-xs">
+            <div className="flex items-center gap-1.5 text-slate-500 text-xs font-medium mb-1">
+              <CheckCircle2 className="w-3.5 h-3.5 text-valmet-green" />
+              <span>Matched Records</span>
+            </div>
+            <div className="text-xl font-bold text-valmet-green font-mono">
+              {(matched_records || 0).toLocaleString()}
+            </div>
+            <div className="text-[10px] text-slate-400 mt-0.5">Present in both files</div>
+          </div>
+
+          <div className="p-4 bg-white border border-slate-200 rounded-xl shadow-xs">
+            <div className="flex items-center gap-1.5 text-slate-500 text-xs font-medium mb-1">
+              <GitCompare className="w-3.5 h-3.5 text-amber-600" />
+              <span>Unmatched Records</span>
+            </div>
+            <div className="text-xl font-bold text-amber-600 font-mono">
+              {(unmatched_records || 0).toLocaleString()}
+            </div>
+            <div className="text-[10px] text-slate-400 mt-0.5">Unique to either source</div>
+          </div>
+
+          <div className="p-4 bg-white border border-slate-200 rounded-xl shadow-xs">
+            <div className="flex items-center gap-1.5 text-slate-500 text-xs font-medium mb-1">
+              <Clock className="w-3.5 h-3.5 text-valmet-green" />
+              <span>Processing Time</span>
+            </div>
+            <div className="text-xl font-bold text-valmet-green font-mono">
+              {processing_time_seconds || 0}s
+            </div>
+            <div className="text-[10px] text-slate-400 mt-0.5">Comparison runtime</div>
+          </div>
+        </div>
+      ) : isPC ? (
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
           <div className="p-4 bg-white border border-slate-200 rounded-xl shadow-xs">
             <div className="flex items-center gap-1.5 text-slate-500 text-xs font-medium mb-1">
@@ -389,7 +567,7 @@ export function ResultsView() {
                         className={`px-3.5 py-2 border-r border-slate-200 whitespace-nowrap ${
                           col === 'Tag' || col === 'Loop Tag'
                             ? 'font-bold text-valmet-darkgreen bg-valmet-lightgreen/40'
-                            : col === 'Device Tag'
+                            : col === 'Device Tag' || col === '$(DEVICETAG)'
                             ? 'font-bold text-slate-900'
                             : 'text-slate-700'
                         }`}

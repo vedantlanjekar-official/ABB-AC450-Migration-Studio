@@ -27,7 +27,12 @@ class IOReferenceDetector:
 
     # Single optional lead fragment — must NOT use nested star quantifiers.
     _LEAD = r'(?:[+\-=P\s]{0,8})?'
-    _TAG = r'[A-Za-z0-9_][A-Za-z0-9_\-]{0,48}(?:\.[A-Za-z0-9_]{1,24})?(?::[A-Za-z0-9_]{1,24})?'
+    # Detection-side tag — no character-length caps; stop only at delimiters.
+    _TAG = (
+        r'[A-Za-z0-9_][A-Za-z0-9_\-]*'
+        r'(?:\.[A-Za-z0-9_]+)*'
+        r'(?::[A-Za-z0-9_]+)?'
+    )
 
     PATTERN_CHANNEL_PORT = re.compile(
         _LEAD + r'(?:' + _PREFIXES + r')_?\d{1,4}\.\d{1,3}:\d{1,4}/' + _TAG,
@@ -54,7 +59,13 @@ class IOReferenceDetector:
     )
 
     KEYWORD_REGEX = re.compile(
-        r'(?:AI800|AO800|DI800|DO800|AI|AO|DI|DO)',
+        r'\b(?:AI800_|AO800_|DI800_|DO800_|AI800|AO800|DI800|DO800|AI|AO|DI|DO)\b',
+        re.IGNORECASE,
+    )
+    # Require I/O-like prefix near a slash before treating "/" alone as a scan trigger
+    IO_NEAR_SLASH = re.compile(
+        r'(?:AI800_|AO800_|DI800_|DO800_|AI800|AO800|DI800|DO800|AI|AO|DI|DO)'
+        r'.{0,24}/',
         re.IGNORECASE,
     )
     FRAG_PREFIX = re.compile(
@@ -62,7 +73,8 @@ class IOReferenceDetector:
         r'(\d{1,4}(?:[.:]\d{1,4}(?::\d{1,4})?)?)'
     )
     FRAG_TAG = re.compile(
-        r'(?ix)^\s*/\s*([A-Za-z0-9_][A-Za-z0-9_\-.]{0,48}(?::[A-Za-z0-9_]{1,24})?)'
+        r'(?ix)^\s*/\s*([A-Za-z0-9_][A-Za-z0-9_\-.]*'
+        r'(?::[A-Za-z0-9_]+)?)'
     )
 
     # Hard caps to keep production memory/CPU bounded on free-tier hosts.
@@ -84,10 +96,18 @@ class IOReferenceDetector:
         sources: List[str] = []
         for line in lines or []:
             line_str = (line or "").strip()
-            if not line_str or len(line_str) > cls.MAX_LINE_CHARS:
+            if not line_str:
                 continue
-            if cls.KEYWORD_REGEX.search(line_str) or "/" in line_str:
-                sources.append(line_str)
+            # Split overlong fused CAD lines instead of skipping them entirely
+            chunks = [line_str]
+            if len(line_str) > cls.MAX_LINE_CHARS:
+                chunks = re.split(r'(?=(?:[=+\-]|\bP-))', line_str)
+            for chunk in chunks:
+                chunk = (chunk or "").strip()
+                if not chunk or len(chunk) > cls.MAX_LINE_CHARS:
+                    continue
+                if cls.KEYWORD_REGEX.search(chunk) or cls.IO_NEAR_SLASH.search(chunk):
+                    sources.append(chunk)
 
         # Optionally add truncated page text only if keyword hits exist.
         page_str = (page_text or "").strip()
@@ -96,7 +116,8 @@ class IOReferenceDetector:
 
         if text_layers:
             for name, blob in text_layers.items():
-                if name in ("words_joined", "spatial"):
+                # Include words_joined — spatial layer is handled via TokenAssembler
+                if name == "spatial":
                     continue
                 blob_str = (blob or "").strip()
                 if not blob_str or not cls.KEYWORD_REGEX.search(blob_str):
@@ -132,7 +153,10 @@ class IOReferenceDetector:
                     cleaned = (cand or "").strip().rstrip(".,;")
                     if len(cleaned) >= 5 and "/" in cleaned and cls.KEYWORD_REGEX.search(cleaned):
                         candidates.add(cleaned)
-            except Exception:
-                pass
+            except Exception as exc:
+                import logging
+                logging.getLogger("pc_element_parser").warning(
+                    "Spatial token assembly failed: %s", exc
+                )
 
         return sorted(c for c in candidates if len(c) >= 5)

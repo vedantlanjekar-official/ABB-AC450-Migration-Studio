@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { FileUploadResponse, ProcessStatusResponse } from '../types/converter';
+import { FileUploadResponse, ProcessStatusResponse, ConversionType } from '../types/converter';
 
 const PRODUCTION_API_URL = 'https://abb-ac450-migration-studio-backend.onrender.com/api';
 const LOCAL_API_URL = 'http://127.0.0.1:8000/api';
@@ -54,7 +54,7 @@ export const apiClient = {
     return response.data;
   },
 
-  async triggerProcess(jobId: string, conversionType: 'DB' | 'PC' = 'DB'): Promise<void> {
+  async triggerProcess(jobId: string, conversionType: ConversionType = 'DB'): Promise<void> {
     const baseUrl = getApiBaseUrl();
     await axiosClient.post(`${baseUrl}/process`, {
       job_id: jobId,

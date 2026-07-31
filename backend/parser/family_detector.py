@@ -17,14 +17,23 @@ class FamilyDetector:
     )
 
     CARD_FAMILY_REGEX = re.compile(
-        r'^\s*((?:AI800|AO800|DI800|DO800|[A-Z]{2,12})\d+)\s+((?:AI800|AO800|DI800|DO800|[A-Z]{2,12})(?:\([A-Z0-9_]+\))?)\b',
+        r'^\s*((?:AI800|AO800|DI800|DO800)_\d+|(?:AI800|AO800|DI800|DO800|[A-Z]{2,12})\d+)\s+'
+        r'((?:AI|AO|DI|DO)8\d{2}|AI800|AO800|DI800|DO800|[A-Z]{2,12})(?:\([A-Z0-9_]+\))?\b',
         re.IGNORECASE
     )
 
     OBJECT_FAMILY_REGEX = re.compile(
-        r'^\s*(AI800|AO800|DI800|DO800|[A-Z]{2,12})\d+(?:\.\d+)*\b',
+        r'^\s*(AI800|AO800|DI800|DO800|[A-Z]{2,12})(?:_|\s*)?\d+(?:\.\d+)*\b',
         re.IGNORECASE
     )
+
+    # Hardware module codes used as the right-hand token on 800-series card headers
+    _HW_MODULE_TO_FAMILY = {
+        "AI810": "AI800",
+        "AO810": "AO800",
+        "DI820": "DI800",
+        "DO820": "DO800",
+    }
 
     def __init__(self, job_id: str = None):
         self.logger = get_logger(job_id)
@@ -33,11 +42,15 @@ class FamilyDetector:
         """
         Normalizes raw default block or object family names into standard family keys.
         e.g., AIS -> AI, AOS -> AO, DIS -> DI, DOS -> DO,
-              AI800S -> AI800, AO800S -> AO800.
+              AI800S -> AI800, AO800S -> AO800,
+              AI800_ -> AI800, AI810 -> AI800, DI820 -> DI800.
         """
         if not raw_name:
             return ""
-        clean = re.sub(r'\(.*?\)', '', raw_name.strip()).strip().upper()
+        clean = re.sub(r'\(.*?\)', '', raw_name.strip()).strip().upper().rstrip("_")
+        # Hardware module codes on card headers map onto exportable 800 families
+        if clean in self._HW_MODULE_TO_FAMILY:
+            return self._HW_MODULE_TO_FAMILY[clean]
         # Prefer known 800-series base names before stripping trailing S
         for fam_800 in ("AI800", "AO800", "DI800", "DO800"):
             if clean == fam_800 or clean == f"{fam_800}S":
@@ -62,20 +75,27 @@ class FamilyDetector:
                 if raw_name and raw_name.upper() not in ("OF", "DEFAULTS", "BLOCK", "SECTION"):
                     return self.normalize_family_name(raw_name)
 
-        # 2. Check Card definitions (e.g. AI1 AI, AO2 AO, DI1 DI, DAT1 DAT(B))
+        # 2. Check Card definitions (e.g. AI1 AI, AI800_1 AI810, AI8001 AI800)
         match_card = self.CARD_FAMILY_REGEX.match(line_str)
         if match_card:
             card_prefix = match_card.group(1).upper()
             suffix_fam = self.normalize_family_name(match_card.group(2))
-            base_fam = re.match(r'^([A-Z]{2,12})', card_prefix)
-            if base_fam:
-                prefix_fam = base_fam.group(1).upper()
-                if prefix_fam == suffix_fam or suffix_fam in prefix_fam:
-                    return suffix_fam
-                return prefix_fam
-            return suffix_fam
+            # Prefer 800-series prefix family before generic [A-Z]{2,12} match
+            prefix_800 = re.match(r'^(AI800|AO800|DI800|DO800)', card_prefix)
+            if prefix_800:
+                prefix_fam = prefix_800.group(1).upper()
+            else:
+                base_fam = re.match(r'^([A-Z]{2,12})', card_prefix)
+                prefix_fam = base_fam.group(1).upper() if base_fam else ""
 
-        # 3. Check Object declarations (e.g. AI1.1, AO2.1, PIDCON1, DAT1)
+            # Underscore cards: AI800_1 AI810 → AI800 (prefix wins over AI810 hw code)
+            if prefix_fam in ("AI800", "AO800", "DI800", "DO800"):
+                return prefix_fam
+            if prefix_fam and (prefix_fam == suffix_fam or suffix_fam in prefix_fam):
+                return suffix_fam if len(suffix_fam) >= len(prefix_fam) else prefix_fam
+            return prefix_fam or suffix_fam
+
+        # 3. Check Object declarations (e.g. AI1.1, AI800_1.1, AI8001.1, PIDCON1)
         match_obj = self.OBJECT_FAMILY_REGEX.match(line_str)
         if match_obj:
             return self.normalize_family_name(match_obj.group(1))

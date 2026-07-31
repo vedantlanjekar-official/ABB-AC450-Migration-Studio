@@ -90,6 +90,10 @@ class JobManager:
             "missing_parameters_after_merge": 0,
             "ignored_header_footer_lines": 0,
             "processing_time_seconds": 0.0,
+            "worksheet1_records": 0,
+            "worksheet2_records": 0,
+            "matched_records": 0,
+            "unmatched_records": 0,
             "detected_element_types": [],
             "generated_sheets": [],
             "preview_data": {},
@@ -234,12 +238,17 @@ class JobManager:
             duplicate_records=job.get("duplicate_records", 0),
             missing_descriptions=job.get("missing_descriptions", 0),
             processing_time_seconds=job.get("processing_time_seconds", 0.0),
+            worksheet1_records=job.get("worksheet1_records", 0),
+            worksheet2_records=job.get("worksheet2_records", 0),
+            matched_records=job.get("matched_records", 0),
+            unmatched_records=job.get("unmatched_records", 0),
             detected_element_types=element_summaries,
             generated_sheets=job.get("generated_sheets", []),
             preview_data=job.get("preview_data", {}),
             warnings=job.get("warnings", []),
             errors=job.get("errors", []),
-            excel_file_path=job.get("excel_file_path")
+            excel_file_path=job.get("excel_file_path"),
+            updated_at=job.get("updated_at"),
         )
 
 

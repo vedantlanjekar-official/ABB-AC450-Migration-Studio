@@ -39,7 +39,7 @@ class CompletenessAuditor:
         \s*/\s*
         (?P<tag>
             [A-Za-z0-9_][A-Za-z0-9_\-]*
-            (?:\.[A-Za-z0-9_]+)?
+            (?:\.[A-Za-z0-9_]+)*
             (?::[A-Za-z0-9_]+)?
         )
         (?![A-Za-z0-9_.])
@@ -63,6 +63,9 @@ class CompletenessAuditor:
                     ch = m.group("channel") or m.group("channel2") or m.group("port")
                     channel = int(ch) if ch else 0
                     tag = m.group("tag").upper()
+                    # Normalize inventory tags the same way as extracted device tags
+                    from backend.pc_element.parser.grammar_parser import GrammarParser
+                    tag = GrammarParser.clean_device_tag(tag)
                     keys.add((prefix, card, channel, tag))
         return keys
 
@@ -115,9 +118,11 @@ class CompletenessAuditor:
         # Standard categories expected by Valmet migration workflows
         for expected in ("AI", "AO", "DI", "DO", "AI800", "AO800", "DI800", "DO800"):
             if cat_counts.get(expected, 0) == 0:
-                # Only warn for families that also don't appear in inventory
+                # Inventory uses io_family keys like AI800_ / AI
                 inv_has = any(
-                    k[0].startswith(expected.replace("800", "800")) or k[0] == expected or k[0] == expected + "_"
+                    k[0] == expected
+                    or k[0] == f"{expected}_"
+                    or k[0].startswith(expected)
                     for k in inventory
                 )
                 if not inv_has and expected in ("DI", "DO", "AO", "AO800", "DI800", "DO800"):
@@ -129,7 +134,22 @@ class CompletenessAuditor:
         total_inv = len(inventory)
         total_ext = len(extracted_keys)
         matched = len(inventory & extracted_keys)
-        accuracy = round((matched / total_inv) * 100.0, 2) if total_inv else 100.0
+        # Empty inventory is indeterminate — never report a false 100% accuracy
+        if total_inv == 0:
+            accuracy = 0.0
+            low_text = any(getattr(p, "low_text_density", False) for p in pages)
+            if low_text:
+                warnings.append(
+                    "No detectable I/O inventory — PDF text layer is sparse or missing. "
+                    "Enable OCR (ENABLE_PC_OCR=1) or verify the PDF has selectable text."
+                )
+            else:
+                warnings.append(
+                    "No detectable I/O inventory in PDF text layers "
+                    "(accuracy indeterminate; not reported as 100%)."
+                )
+        else:
+            accuracy = round((matched / total_inv) * 100.0, 2)
 
         report = {
             "generated_at": datetime.utcnow().isoformat() + "Z",

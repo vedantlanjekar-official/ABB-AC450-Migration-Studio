@@ -1,16 +1,30 @@
 """
-excel_generator.py - Stage 11: Excel Generator for PC Element Engineering I/O Lists.
+excel_generator.py - Stage 12: Excel Generator for PC Element Engineering I/O Lists.
+
+Writes a single consolidated worksheet. Row order is preserved as provided
+(clubbing + output formatting happen upstream). This layer does not reorder
+or recalculate extracted engineering values.
 
 Columns:
-  Sr. No. | Loop Tag | Description | Device Tag | Category | Slot/Card | Channel
+  Sr. No. | Loop Tag | Description | Device Tag |
+  AI | AO | DI | DO | AI800_ | AO800_ | DI800_ | DO800_ |
+  Slot/Card | Channel
 """
 
 from typing import List, Any
 import os
 import openpyxl
-from openpyxl.styles import Font, PatternFill, Alignment, Border, Side
 from openpyxl.utils import get_column_letter
+from backend.excel.design import build_db_excel_design
 from backend.pc_element.parser.validator import EngineeringIO
+from backend.pc_element.parser.category_mapper import (
+    CATEGORY_INDICATOR_COLUMNS,
+    build_category_indicator_values,
+)
+from backend.excel.header_postprocessor import (
+    PC_HEADER_MAPPING,
+    rename_export_headers,
+)
 
 
 def sanitize_cell_value(val: Any) -> Any:
@@ -28,113 +42,83 @@ def sanitize_cell_value(val: Any) -> Any:
 class ExcelGenerator:
     """Generates Valmet-compatible Excel workbooks for PC Element I/O lists."""
 
-    FAMILY_SORT_ORDER = {
-        "AI800_": 1,
-        "AI": 2,
-        "AO800_": 3,
-        "AO": 4,
-        "DI800_": 5,
-        "DI": 6,
-        "DO800_": 7,
-        "DO": 8,
-    }
+    # Columns that replace the former single Category field
+    _CATEGORY_COLS = CATEGORY_INDICATOR_COLUMNS  # 5..12 after Device Tag
+    _CENTER_COLS = {1, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14}  # Sr + indicators + Slot/Card + Channel
 
     @classmethod
     def generate_excel(cls, io_objects: List[EngineeringIO], output_path: str) -> str:
-        """Generates styled Excel workbook at output_path and returns the filepath."""
-        sorted_objects = sorted(
-            io_objects,
-            key=lambda x: (
-                cls.FAMILY_SORT_ORDER.get(x.io_family.upper(), 99),
-                x.card_number,
-                x.channel_number,
-                x.loop_tag,
-                x.device_tag,
-            )
-        )
+        """
+        Generate a styled single-sheet workbook at output_path.
+
+        Preserves the caller-provided row order (Loop Tag clubbing / formatting
+        must be applied before this call). Returns the filepath.
+        """
+        ordered_objects = list(io_objects)
 
         wb = openpyxl.Workbook()
         ws = wb.active
         ws.title = "I_O_List"
         ws.views.sheetView[0].showGridLines = True
 
-        header_fill = PatternFill(start_color="00805A", end_color="00805A", fill_type="solid")
-        header_font = Font(name="Segoe UI", size=11, bold=True, color="FFFFFF")
-        title_font = Font(name="Segoe UI", size=14, bold=True, color="004D36")
-        subtitle_font = Font(name="Segoe UI", size=10, italic=True, color="4A5568")
-        data_font = Font(name="Segoe UI", size=10, color="1A202C")
-        zebra_fill = PatternFill(start_color="F7FAFC", end_color="F7FAFC", fill_type="solid")
-
-        thin_side = Side(style="thin", color="CBD5E0")
-        thin_border = Border(left=thin_side, right=thin_side, top=thin_side, bottom=thin_side)
-        center_align = Alignment(horizontal="center", vertical="center")
-        left_align = Alignment(horizontal="left", vertical="center")
-
-        ws.merge_cells("A1:G1")
-        ws["A1"] = "VALMET ENGINEERING I/O MIGRATION LIST"
-        ws["A1"].font = title_font
-        ws["A1"].alignment = left_align
-
-        ws.merge_cells("A2:G2")
-        ws["A2"] = "ABB Advant Controller AC450 — PC Element Hardwired I/O References"
-        ws["A2"].font = subtitle_font
-        ws["A2"].alignment = left_align
+        design = build_db_excel_design()
 
         headers = [
             "Sr. No.",
             "Loop Tag",
             "Description",
             "Device Tag",
-            "Category",
+            *CATEGORY_INDICATOR_COLUMNS,
             "Slot/Card",
             "Channel",
         ]
-
-        start_row = 4
+        start_row = 1
         for col_idx, header_text in enumerate(headers, start=1):
             cell = ws.cell(row=start_row, column=col_idx, value=header_text)
-            cell.fill = header_fill
-            cell.font = header_font
-            cell.alignment = center_align
-            cell.border = thin_border
+            cell.fill = design.header_fill
+            cell.font = design.header_font
+            cell.alignment = design.center_align
+            cell.border = design.thin_border
         ws.row_dimensions[start_row].height = 26
 
         current_row = start_row + 1
-        for sr_no, obj in enumerate(sorted_objects, start=1):
+        for sr_no, obj in enumerate(ordered_objects, start=1):
             channel_val = obj.channel_number if obj.channel_number > 0 else ""
+            indicators = build_category_indicator_values(obj.category)
             row_data = [
                 sr_no,
                 obj.loop_tag,
                 obj.description or "",
                 obj.device_tag,
-                obj.category,
+                *[indicators[col] for col in CATEGORY_INDICATOR_COLUMNS],
                 obj.card_number,
                 channel_val,
             ]
 
-            fill_to_apply = zebra_fill if (sr_no % 2 == 0) else None
+            fill_to_apply = (
+                design.zebra_fill if sr_no % 2 == 0 else design.white_fill
+            )
 
             for col_idx, val in enumerate(row_data, start=1):
-                if col_idx == 1 or col_idx in (6, 7):
+                if col_idx == 1 or col_idx >= 5:
                     clean_val = val if val != "" else ""
                 else:
                     clean_val = sanitize_cell_value(val)
                     if clean_val is None:
                         clean_val = ""
                 cell = ws.cell(row=current_row, column=col_idx, value=clean_val)
-                cell.font = data_font
-                cell.border = thin_border
+                cell.font = design.cell_font
+                cell.border = design.thin_border
 
                 if isinstance(clean_val, str):
                     cell.data_type = 's'
 
-                if fill_to_apply:
-                    cell.fill = fill_to_apply
+                cell.fill = fill_to_apply
 
-                if col_idx in (1, 5, 6, 7):
-                    cell.alignment = center_align
+                if col_idx in cls._CENTER_COLS:
+                    cell.alignment = design.center_align
                 else:
-                    cell.alignment = left_align
+                    cell.alignment = design.left_align
 
             ws.row_dimensions[current_row].height = 20
             current_row += 1
@@ -148,9 +132,17 @@ class ExcelGenerator:
                 val_str = str(cell.value or "")
                 if len(val_str) > max_len:
                     max_len = len(val_str)
-            ws.column_dimensions[col_letter].width = max(max_len + 4, 12)
+            # Keep indicator columns compact
+            header_val = ws.cell(row=start_row, column=col[0].column).value or ""
+            if header_val in CATEGORY_INDICATOR_COLUMNS:
+                width = max(max_len + 2, 8)
+            else:
+                width = max(max_len + 4, 12)
+            ws.column_dimensions[col_letter].width = min(width, 60)
 
         if os.path.dirname(output_path):
             os.makedirs(os.path.dirname(output_path), exist_ok=True)
+        # Final post-processing step: transform only displayed export headers.
+        rename_export_headers(wb, PC_HEADER_MAPPING, header_row=start_row)
         wb.save(output_path)
         return output_path

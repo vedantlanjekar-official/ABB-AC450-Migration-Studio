@@ -86,15 +86,16 @@ export function FramerLanding() {
       {/* ============================================================ */}
       <section id="converter" className="scroll-mt-24">
         <div className="text-center max-w-3xl mx-auto mb-10">
-          <span className="text-valmet-green text-xs sm:text-sm font-bold uppercase tracking-widest font-sans block mb-1">
-            CONVERSION ENGINE
+          <span className="text-valmet-green text-[11px] sm:text-xs font-bold uppercase tracking-[0.2em] font-sans block mb-2">
+            ABB AC450 Engineering Services
           </span>
-          <h2 className="text-3xl sm:text-4xl font-extrabold text-slate-800 tracking-tight uppercase font-sans">
-            ENGINEERING FILE CONVERTER
+          <h2 className="text-3xl sm:text-4xl font-bold text-slate-900 tracking-tight font-sans">
+            Engineering Data &amp; Deliverables
           </h2>
-          <div className="w-12 h-1 bg-valmet-green mx-auto my-3 rounded-full" />
-          <p className="text-slate-600 text-xs sm:text-sm font-normal">
-            Upload ABB AC450 engineering documents and automatically generate Valmet-compatible engineering outputs.
+          <div className="w-10 h-0.5 bg-valmet-green mx-auto my-4 rounded-full" />
+          <p className="text-slate-500 text-xs sm:text-sm font-normal leading-relaxed">
+            Process ABB AC450 engineering data, compare tags, and generate
+            project-ready Excel deliverables.
           </p>
         </div>
 

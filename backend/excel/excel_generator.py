@@ -1,9 +1,13 @@
 from pathlib import Path
 from typing import Dict, List, Any
 import openpyxl
-from openpyxl.styles import Font, PatternFill, Alignment, Border, Side
 from openpyxl.utils import get_column_letter
 from backend.core.logging import get_logger
+from backend.excel.design import build_db_excel_design
+from backend.excel.header_postprocessor import (
+    DB_HEADER_MAPPING,
+    rename_export_headers,
+)
 
 class ExcelGenerator:
     """
@@ -32,22 +36,7 @@ class ExcelGenerator:
 
         generated_sheets = []
 
-        # Styles
-        header_fill = PatternFill(start_color="1E293B", end_color="1E293B", fill_type="solid")
-        header_font = Font(name="Calibri", size=11, bold=True, color="FFFFFF")
-        cell_font = Font(name="Calibri", size=10, color="000000")
-        zebra_fill = PatternFill(start_color="F8FAFC", end_color="F8FAFC", fill_type="solid")
-        white_fill = PatternFill(start_color="FFFFFF", end_color="FFFFFF", fill_type="solid")
-        
-        thin_border = Border(
-            left=Side(style='thin', color='E2E8F0'),
-            right=Side(style='thin', color='E2E8F0'),
-            top=Side(style='thin', color='E2E8F0'),
-            bottom=Side(style='thin', color='E2E8F0')
-        )
-        
-        center_align = Alignment(horizontal="center", vertical="center")
-        left_align = Alignment(horizontal="left", vertical="center")
+        design = build_db_excel_design()
 
         for sheet_name, rows in mapped_sheets.items():
             if not rows:
@@ -63,16 +52,18 @@ class ExcelGenerator:
             ws.append(columns)
             for col_num in range(1, len(columns) + 1):
                 cell = ws.cell(row=1, column=col_num)
-                cell.fill = header_fill
-                cell.font = header_font
-                cell.alignment = center_align
+                cell.fill = design.header_fill
+                cell.font = design.header_font
+                cell.alignment = design.center_align
 
             # Write data rows
             for row_idx, row_data in enumerate(rows, start=2):
                 row_values = [row_data.get(col, "") for col in columns]
                 ws.append(row_values)
                 
-                fill_color = zebra_fill if row_idx % 2 == 0 else white_fill
+                fill_color = (
+                    design.zebra_fill if row_idx % 2 == 0 else design.white_fill
+                )
                 for col_num in range(1, len(columns) + 1):
                     raw_val = ws.cell(row=row_idx, column=col_num).value
                     if isinstance(raw_val, str):
@@ -85,15 +76,15 @@ class ExcelGenerator:
                         cell = ws.cell(row=row_idx, column=col_num)
 
                     cell.fill = fill_color
-                    cell.font = cell_font
-                    cell.border = thin_border
+                    cell.font = design.cell_font
+                    cell.border = design.thin_border
                     
                     # Align center for short codes / numbers / tags, left for descriptions
                     val_str = str(cell.value or "")
                     if len(val_str) < 15 and not " " in val_str:
-                        cell.alignment = center_align
+                        cell.alignment = design.center_align
                     else:
-                        cell.alignment = left_align
+                        cell.alignment = design.left_align
 
             # Auto-fit column widths
             for col_idx, col_name in enumerate(columns, start=1):
@@ -109,6 +100,8 @@ class ExcelGenerator:
         if generated_sheets and default_sheet in wb.worksheets:
             wb.remove(default_sheet)
 
+        # Final post-processing step: transform only displayed export headers.
+        rename_export_headers(wb, DB_HEADER_MAPPING, header_row=1)
         wb.save(output_path)
         self.logger.info(f"Generated Excel workbook at {output_path} with sheets: {generated_sheets}")
         return generated_sheets

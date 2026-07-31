@@ -32,11 +32,17 @@ def test_excel_workbook_generation(tmp_path):
     
     ws_ai = wb["AI"]
     assert ws_ai.cell(row=1, column=1).value == "Tag"
+    assert ws_ai.cell(row=1, column=3).value == "$(DEVICETAG)"
+    assert ws_ai.cell(row=1, column=4).value == "$(DEVICETAG:UNIT)"
+    assert ws_ai.cell(row=1, column=5).value == "$(DEVICETAG:MAX)"
     assert ws_ai.cell(row=2, column=1).value == "AI1.1"
     assert ws_ai.cell(row=2, column=3).value == "PRESS_01"
 
 def test_excel_single_clubbed_worksheet(tmp_path):
     """DB export must produce one consolidated Clubbed_IO worksheet."""
+    from backend.mapper.output_formatter import OutputFormatter
+    from backend.mapper.category_mapper import CATEGORY_INDICATOR_COLUMNS
+
     sample_pdf = Path(__file__).resolve().parent.parent.parent / "examples" / "sample_ac450_db.pdf"
     extractor = PDFTextExtractor("test_excel_defaults")
     pages = extractor.extract_text_pages(sample_pdf)
@@ -47,23 +53,27 @@ def test_excel_single_clubbed_worksheet(tmp_path):
     clubbed = RecordClubber("test_excel_defaults").club_elements(elements)
     mapper = ElementMapper("test_excel_defaults")
     clubbed_rows = mapper.map_clubbed(clubbed)
+    formatted_rows = OutputFormatter("test_excel_defaults").format_clubbed_rows(clubbed_rows)
 
-    categories = {r["Category"] for r in clubbed_rows}
-    assert categories.issubset(
-        {"AI", "AO", "DI", "DO", "AI800", "AO800", "DI800", "DO800"}
-    )
-    assert "PIDCON" not in categories
+    assert "Category" not in formatted_rows[0]
+    assert all(col in formatted_rows[0] for col in CATEGORY_INDICATOR_COLUMNS)
+    assert any(r.get("AI") == 1 or r.get("AO") == 1 for r in formatted_rows)
 
     out_excel = tmp_path / "valmet_defaults_export.xlsx"
     generator = ExcelGenerator("test_excel_defaults")
-    generator.generate_workbook({"Clubbed_IO": clubbed_rows}, out_excel)
+    generator.generate_workbook({"Clubbed_IO": formatted_rows}, out_excel)
 
     wb = openpyxl.load_workbook(out_excel)
     assert wb.sheetnames == ["Clubbed_IO"]
     ws = wb["Clubbed_IO"]
 
     headers = [ws.cell(row=1, column=col).value for col in range(1, ws.max_column + 1)]
-    assert "Category" in headers
+    assert "Category" not in headers
+    for col in CATEGORY_INDICATOR_COLUMNS:
+        assert col in headers
+    # Indicators remain immediately after the renamed DESCR header.
+    descr_idx = headers.index("$(NAME_40)")
+    assert headers[descr_idx + 1: descr_idx + 9] == CATEGORY_INDICATOR_COLUMNS
     assert "TYPE" in headers
     assert "SCANT" in headers
     assert "DEC" in headers
@@ -72,6 +82,7 @@ def test_excel_single_clubbed_worksheet(tmp_path):
     type_col = headers.index("TYPE") + 1
     scant_col = headers.index("SCANT") + 1
     dec_col = headers.index("DEC") + 1
+    ai_col = headers.index("AI") + 1
 
     ai1_1_row = next(
         r for r in range(2, ws.max_row + 1)
@@ -81,11 +92,53 @@ def test_excel_single_clubbed_worksheet(tmp_path):
     assert ws.cell(row=ai1_1_row, column=type_col).value == "ANALOG_INPUT"
     assert ws.cell(row=ai1_1_row, column=scant_col).value == "1s"
     assert ws.cell(row=ai1_1_row, column=dec_col).value == 2
+    assert ws.cell(row=ai1_1_row, column=ai_col).value == 1
 
-def test_excel_no_blank_cells_for_inherited_defaults():
+
+def test_db_export_renames_only_requested_headers(tmp_path):
+    rows = [
+        {
+            "NAME": "940TI011A.MV",
+            "Loop Tag": "940TI011A",
+            "DESCR": "Temperature Indicator",
+            "UNIT": "degC",
+            "Range Min": 0,
+            "Range Max": 100,
+            "UNCHANGED": "keep",
+        }
+    ]
+    out_file = tmp_path / "renamed_headers.xlsx"
+
+    ExcelGenerator("header_test").generate_workbook({"Clubbed_IO": rows}, out_file)
+
+    workbook = openpyxl.load_workbook(out_file, data_only=False)
+    try:
+        worksheet = workbook["Clubbed_IO"]
+        assert [cell.value for cell in worksheet[1]] == [
+            "$(DEVICETAG)",
+            "$(TAG)",
+            "$(NAME_40)",
+            "$(DEVICETAG:UNIT)",
+            "$(DEVICETAG:MIN)",
+            "$(DEVICETAG:MAX)",
+            "UNCHANGED",
+        ]
+        assert [cell.value for cell in worksheet[2]] == [
+            "940TI011A.MV",
+            "940TI011A",
+            "Temperature Indicator",
+            "degC",
+            0,
+            100,
+            "keep",
+        ]
+    finally:
+        workbook.close()
+
+def test_excel_preserves_object_own_parameters_only():
+    """Blank cells must stay blank — do not copy sibling object values."""
     from backend.models.db_element import DBElement
 
-    # AI1.1 has explicit TYPE, AI1.2 omits TYPE
     elements = [
         DBElement(
             tag="AI1.1",
@@ -108,6 +161,8 @@ def test_excel_no_blank_cells_for_inherited_defaults():
     row_1 = next(r for r in ai_rows if r["Tag"] == "AI1.1")
     row_2 = next(r for r in ai_rows if r["Tag"] == "AI1.2")
 
-    # Row 2 MUST NOT have empty string for TYPE or SCANT, it must take the sheet default value!
-    assert row_2["TYPE"] == "ANALOG_INPUT"
-    assert row_2["SCANT"] == "1s"
+    assert row_1["TYPE"] == "ANALOG_INPUT"
+    assert row_1["SCANT"] == "1s"
+    # AI1.2 must NOT inherit TYPE/SCANT from sibling AI1.1
+    assert row_2.get("TYPE", "") in ("", None)
+    assert row_2.get("SCANT", "") in ("", None)

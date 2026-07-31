@@ -25,6 +25,8 @@ venv.bak/
 
 # Next.js & Vercel
 .next/
+.next-dev/
+frontend/.next-dev/
 out/
 build/
 dist/
@@ -35,10 +37,12 @@ backend/temp/
 backend/logs/
 temp/
 logs/
+tmp_out/
 *.log
 *.xlsx
 !test_formula_fix.xlsx
 !test_sanitize.xlsx
+*.tsbuildinfo
 
 # Environment Variables & Secrets
 .env
@@ -54,5 +58,3 @@ Thumbs.db
 *.swp
 .idea/
 .vscode/
-
-.vercel

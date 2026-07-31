@@ -11,13 +11,17 @@ Pipeline:
   9. Exact-duplicate removal
   10. Validation (invalid refs logged, not silently dropped without record)
   11. Completeness audit + validation report
-  12. Excel generation
+  12. Loop Tag record clubbing (AI→AO, DO→DI, 800-series, valves)
+  13. Output formatting (engineering section sequence)
+  14. Excel generation (single consolidated worksheet)
 """
 
 from typing import List, Dict, Any, Optional
 import time
 import os
+import re
 import logging
+from pathlib import Path
 from pydantic import BaseModel, Field
 
 from backend.pc_element.parser.pdf_reader import PDFReader, PageContent
@@ -28,6 +32,9 @@ from backend.pc_element.parser.metadata_extractor import MetadataExtractor, Docu
 from backend.pc_element.parser.description_mapper import DescriptionMapper
 from backend.pc_element.parser.duplicate_detector import DuplicateDetector
 from backend.pc_element.parser.validator import Validator, EngineeringIO
+from backend.pc_element.parser.record_clubber import RecordClubber
+from backend.pc_element.parser.output_formatter import OutputFormatter
+from backend.pc_element.parser.category_mapper import apply_category_columns
 from backend.pc_element.parser.excel_generator import ExcelGenerator
 from backend.pc_element.parser.completeness_auditor import CompletenessAuditor
 
@@ -120,12 +127,13 @@ class PCParserService:
                 )
 
                 for cand in candidates:
-                    ref = GrammarParser.parse_reference(cand, page_number=page.page_number)
-                    if ref:
-                        parsed_references.append(ref)
+                    refs = GrammarParser.parse_all_references(cand, page_number=page.page_number)
+                    if refs:
+                        parsed_references.extend(refs)
                     else:
                         # Keep an audit trail of candidates that looked like I/O but failed grammar
-                        if "/" in cand and any(k in cand.upper() for k in ("AI", "AO", "DI", "DO")):
+                        upper = cand.upper()
+                        if "/" in cand and re.search(r'\b(?:AI800_|AO800_|DI800_|DO800_|AI800|AO800|DI800|DO800|AI|AO|DI|DO)\b', upper):
                             skipped_candidates.append(cand[:120])
 
             logger.info(
@@ -218,18 +226,29 @@ class PCParserService:
             report_path = CompletenessAuditor.write_report(report, self.output_dir, self.job_id)
             result.validation_report_path = report_path
 
-            excel_filename = f"PC_Element_IO_List_{self.job_id}.xlsx"
-            excel_path = os.path.join(self.output_dir, excel_filename)
-            ExcelGenerator.generate_excel(valid_objects, excel_path)
+            # Stage 12-13: Loop Tag clubbing + engineering presentation order
+            # (mirrors DB Element RecordClubber + OutputFormatter)
+            clubbed_objects = RecordClubber(self.job_id).club_elements(valid_objects)
+            formatted_objects = OutputFormatter(self.job_id).format_clubbed_elements(
+                clubbed_objects
+            )
+            logger.info(
+                f"[{self.job_id}] VALIDATION raw_parsed={len(parsed_references)} "
+                f"unique={len(unique_refs)} valid={len(valid_objects)} "
+                f"clubbed={len(clubbed_objects)} exported={len(formatted_objects)} "
+                f"dups={dup_count} invalid={result.invalid_references}"
+            )
+
+            from backend.utils.file_utils import pdf_to_excel_filename, unique_output_path
+
+            export_name = pdf_to_excel_filename(Path(self.file_path).name)
+            excel_path = str(unique_output_path(self.output_dir, export_name))
+            ExcelGenerator.generate_excel(formatted_objects, excel_path)
             result.excel_file_path = excel_path
 
             preview_rows = []
-            sorted_preview = sorted(
-                valid_objects,
-                key=lambda x: (x.category, x.card_number, x.channel_number, x.loop_tag, x.device_tag),
-            )
-            for sr, item in enumerate(sorted_preview[:150], start=1):
-                preview_rows.append({
+            for sr, item in enumerate(formatted_objects[:150], start=1):
+                preview_rows.append(apply_category_columns({
                     "Sr. No.": sr,
                     "Loop Tag": item.loop_tag,
                     "Description": item.description,
@@ -237,7 +256,7 @@ class PCParserService:
                     "Category": item.category,
                     "Slot/Card": item.card_number,
                     "Channel": item.channel_number if item.channel_number > 0 else "",
-                })
+                }))
             result.preview_data = preview_rows
 
             logger.info(

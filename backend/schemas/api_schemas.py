@@ -9,7 +9,7 @@ class FileUploadResponse(BaseModel):
 
 class ProcessRequest(BaseModel):
     job_id: str
-    conversion_type: Optional[str] = "DB"  # "DB" or "PC"
+    conversion_type: Optional[str] = "DB"  # DB, PC, COMPARE, IO_ARRANGE, or ENG_TEMPLATE
 
 class ElementTypeSummary(BaseModel):
     element_type: str
@@ -41,9 +41,16 @@ class ProcessStatusResponse(BaseModel):
     duplicate_records: int = 0
     missing_descriptions: int = 0
     processing_time_seconds: float = 0.0
+    # Excel Comparison & Validation metrics
+    worksheet1_records: int = 0
+    worksheet2_records: int = 0
+    matched_records: int = 0
+    unmatched_records: int = 0
     detected_element_types: List[ElementTypeSummary] = []
     generated_sheets: List[str] = []
     preview_data: Dict[str, List[Dict[str, Any]]] = {}
     warnings: List[str] = []
     errors: List[str] = []
     excel_file_path: Optional[str] = None
+    # Touched by worker heartbeats during long PDF/AST stages so clients can detect liveness.
+    updated_at: Optional[str] = None

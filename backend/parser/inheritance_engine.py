@@ -65,13 +65,17 @@ class InheritanceEngine:
                 card_name = obj_node.card_name
                 card_node = fam_ast.cards.get(card_name)
 
-                # Fallback card resolution: e.g. index "1.4" -> family "AI" + "1" = "AI1"
+                # Fallback card resolution for channel indexes:
+                #   underscore: index "1.4" + family "AI800" → "AI800_1"
+                #   concatenated: index "1.4" + family "AI" → "AI1"
                 if not card_node and "." in obj_node.index:
-                    card_prefix = f"{obj_node.family}{obj_node.index.split('.')[0]}"
-                    card_node = fam_ast.cards.get(card_prefix)
+                    card_num = obj_node.index.split(".")[0]
+                    underscore_name = f"{obj_node.family}_{card_num}"
+                    concatenated_name = f"{obj_node.family}{card_num}"
+                    card_node = fam_ast.cards.get(underscore_name) or fam_ast.cards.get(concatenated_name)
 
-                if not card_node and len(fam_ast.cards) == 1:
-                    card_node = list(fam_ast.cards.values())[0]
+                # Do NOT fall back to an unrelated single card — that bleeds ADDR/CONV
+                # parameters onto channels belonging to a different card number.
 
                 if card_node:
                     for k, v in card_node.parameters.items():

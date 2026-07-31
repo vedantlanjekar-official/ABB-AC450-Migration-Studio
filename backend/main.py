@@ -9,7 +9,10 @@ logger = get_logger()
 app = FastAPI(
     title=settings.PROJECT_NAME,
     version=settings.VERSION,
-    description="Backend service for converting ABB AC450 DB Element PDFs into Valmet Excel workbooks."
+    description=(
+        "Backend service for ABB AC450 Migration Studio: DB/PC PDF conversion, "
+        "Excel tag comparison, I/O address arrangement, and engineering templates."
+    ),
 )
 
 # Enable CORS for Next.js frontend (Vercel or local dev)

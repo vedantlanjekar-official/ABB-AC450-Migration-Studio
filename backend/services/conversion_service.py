@@ -48,6 +48,10 @@ class ConversionService:
             message = f"{message} — {detail}"
         self.logger.info(message)
         try:
+            # Don't overwrite the final completed/failed user-facing message.
+            job = job_store.get_job(self.job_id)
+            if job and job.get("status") in {"completed", "failed"}:
+                return
             job_store.heartbeat(self.job_id, message=f"{stage}: {detail}" if detail else stage)
         except Exception:
             pass
@@ -59,7 +63,11 @@ class ConversionService:
         def _beat():
             while not stop.wait(15):
                 try:
-                    job_store.heartbeat(self.job_id, message=f"Still working: {label}...")
+                    stamp = datetime.utcnow().strftime("%H:%M:%S")
+                    job_store.heartbeat(
+                        self.job_id,
+                        message=f"Still working: {label}... ({stamp})",
+                    )
                 except Exception:
                     pass
 
@@ -72,17 +80,391 @@ class ConversionService:
             thread.join(timeout=1)
 
     def run_conversion_pipeline(self, conversion_type: str = "DB") -> None:
-        """Runs DB or PC conversion pipeline across all uploaded files and updates job status."""
+        """Run the selected PDF or standalone Excel processing workflow."""
         self._pipeline_started_at = datetime.utcnow()
         self._log_stage("START", f"conversion_type={conversion_type.upper()}")
         self.logger.info(
             f"Pipeline environment: upload_dir={settings.UPLOAD_DIR}, "
             f"output_dir={settings.OUTPUT_DIR}, log_dir={settings.LOG_DIR}"
         )
-        if conversion_type.upper() == "PC":
+        mode = conversion_type.upper()
+        if mode == "PC":
             self._run_pc_conversion_pipeline()
+        elif mode in {"COMPARE", "EXCEL", "EXCEL_COMPARE"}:
+            self._run_excel_compare_pipeline()
+        elif mode in {"IO_ARRANGE", "IO_ADDRESS", "ARRANGE"}:
+            self._run_io_address_arrangement_pipeline()
+        elif mode in {"ENG_TEMPLATE", "ENGINEERING_TEMPLATE", "ABB_TEMPLATE", "TEMPLATE"}:
+            self._run_engineering_template_pipeline()
         else:
             self._run_db_conversion_pipeline()
+
+    def _run_engineering_template_pipeline(self) -> None:
+        """Map one generated DB/PC workbook into an ABB engineering import template."""
+        from backend.engineering_template import EngineeringTemplateGenerator
+
+        try:
+            job = job_store.get_job(self.job_id)
+            if not job:
+                self.logger.error(f"Job ID {self.job_id} not found in store")
+                return
+
+            uploaded_filenames = job.get("uploaded_files", [])
+            excel_files = [
+                filename
+                for filename in uploaded_filenames
+                if str(filename).lower().endswith((".xlsx", ".xlsm", ".xls"))
+            ]
+            if len(excel_files) != 1:
+                raise ValueError(
+                    "ABB Engineering Template requires exactly one generated "
+                    "DB or PB/PC Excel file."
+                )
+
+            source_path = settings.UPLOAD_DIR / self.job_id / excel_files[0]
+            if not source_path.exists():
+                raise FileNotFoundError(
+                    f"Uploaded Excel file not found on disk for job {self.job_id}."
+                )
+
+            job_store.update_status(
+                self.job_id,
+                status="reading_pdf",
+                progress_percentage=25,
+                current_phase="Reading generated engineering workbook",
+                conversion_type="ENG_TEMPLATE",
+                message=f"Reading clubbed I/O records from {source_path.name}...",
+            )
+            self._log_stage("ENG TEMPLATE READ", f"source={source_path.name}")
+
+            output_dir = settings.OUTPUT_DIR / self.job_id
+            output_dir.mkdir(parents=True, exist_ok=True)
+            output_path = output_dir / "ABB_Engineering_Template.xlsx"
+
+            job_store.update_status(
+                self.job_id,
+                status="grouping_elements",
+                progress_percentage=55,
+                current_phase="Mapping clubbed records into ABB template",
+                message="Reusing adjacent AI/AO and DI/DO clubs without re-pairing...",
+            )
+            result = self._run_with_heartbeat(
+                "ABB engineering template",
+                EngineeringTemplateGenerator().generate,
+                source_path,
+                output_path,
+            )
+
+            for warning in result.warnings:
+                job_store.add_warning(self.job_id, warning)
+            if result.skipped_records:
+                job_store.add_warning(
+                    self.job_id,
+                    f"Skipped {result.skipped_records} row(s) without a supported category.",
+                )
+
+            elapsed = (datetime.utcnow() - self._pipeline_started_at).total_seconds()
+            detected_types = [
+                {
+                    "element_type": "Paired Clubs",
+                    "count": result.paired_clubs,
+                    "sample_tags": [
+                        str(row.get("$(DEVICETAG1)", ""))
+                        for row in result.template_rows[:5]
+                        if row.get("$(DEVICETAG2)")
+                    ],
+                },
+                {
+                    "element_type": "Singleton Rows",
+                    "count": result.singleton_rows,
+                    "sample_tags": [
+                        str(row.get("$(DEVICETAG1)", ""))
+                        for row in result.template_rows[:5]
+                        if not row.get("$(DEVICETAG2)")
+                    ],
+                },
+            ]
+            self._log_stage(
+                "ENG TEMPLATE DONE",
+                f"source={result.source_records}, template_rows={len(result.template_rows)}, "
+                f"paired={result.paired_clubs}, singletons={result.singleton_rows}",
+            )
+            job_store.update_status(
+                self.job_id,
+                status="completed",
+                progress_percentage=100,
+                current_phase="ABB engineering template complete",
+                conversion_type="ENG_TEMPLATE",
+                message=(
+                    f"Mapped {result.source_records} source record(s) into "
+                    f"{len(result.template_rows)} ABB template row(s)."
+                ),
+                total_objects=len(result.template_rows),
+                matched_records=result.paired_clubs,
+                unmatched_records=result.singleton_rows,
+                detected_element_types=detected_types,
+                generated_sheets=result.generated_sheets,
+                preview_data=result.preview_data,
+                excel_file_path=str(output_path),
+                processing_time_seconds=round(elapsed, 2),
+            )
+        except Exception as exc:
+            self.logger.error(
+                f"ABB engineering template pipeline failed: {exc}", exc_info=True
+            )
+            job_store.add_error(self.job_id, str(exc))
+            job_store.update_status(
+                self.job_id,
+                status="failed",
+                progress_percentage=100,
+                current_phase="ABB engineering template failed",
+                conversion_type="ENG_TEMPLATE",
+                message=f"ABB engineering template failed: {exc}",
+            )
+
+    def _run_io_address_arrangement_pipeline(self) -> None:
+        """Rearrange one generated DB/PC workbook into paired ABB addresses."""
+        from backend.io_address_arrangement import IOAddressArranger
+
+        try:
+            job = job_store.get_job(self.job_id)
+            if not job:
+                self.logger.error(f"Job ID {self.job_id} not found in store")
+                return
+
+            uploaded_filenames = job.get("uploaded_files", [])
+            excel_files = [
+                filename
+                for filename in uploaded_filenames
+                if str(filename).lower().endswith((".xlsx", ".xlsm", ".xls"))
+            ]
+            if len(excel_files) != 1:
+                raise ValueError(
+                    "I/O Address Arrangement requires exactly one generated DB or PB/PC Excel file."
+                )
+
+            source_path = settings.UPLOAD_DIR / self.job_id / excel_files[0]
+            if not source_path.exists():
+                raise FileNotFoundError(
+                    f"Uploaded Excel file not found on disk for job {self.job_id}."
+                )
+
+            job_store.update_status(
+                self.job_id,
+                status="reading_pdf",
+                progress_percentage=25,
+                current_phase="Reading generated engineering workbook",
+                conversion_type="IO_ARRANGE",
+                message=f"Reading I/O records from {source_path.name}...",
+            )
+            self._log_stage("IO ARRANGE READ", f"source={source_path.name}")
+
+            output_dir = settings.OUTPUT_DIR / self.job_id
+            output_dir.mkdir(parents=True, exist_ok=True)
+            output_path = output_dir / "IO_Address_Arrangement.xlsx"
+
+            job_store.update_status(
+                self.job_id,
+                status="grouping_elements",
+                progress_percentage=55,
+                current_phase="Grouping records and generating ABB addresses",
+                message="Preserving category order and assigning paired 16-channel cards...",
+            )
+            result = self._run_with_heartbeat(
+                "I/O address arrangement",
+                IOAddressArranger().arrange,
+                source_path,
+                output_path,
+            )
+
+            if result.skipped_records:
+                job_store.add_warning(
+                    self.job_id,
+                    f"Skipped {result.skipped_records} row(s) without a supported category.",
+                )
+
+            elapsed = (datetime.utcnow() - self._pipeline_started_at).total_seconds()
+            detected_types = [
+                {
+                    "element_type": category,
+                    "count": count,
+                    "sample_tags": [
+                        str(record.device_tag)
+                        for record in result.records_by_category[category][:5]
+                    ],
+                }
+                for category, count in result.category_counts.items()
+            ]
+            self._log_stage(
+                "IO ARRANGE DONE",
+                f"records={result.source_records}, sheets={result.generated_sheets}",
+            )
+            job_store.update_status(
+                self.job_id,
+                status="completed",
+                progress_percentage=100,
+                current_phase="I/O address arrangement complete",
+                conversion_type="IO_ARRANGE",
+                message=(
+                    f"Arranged {result.source_records} I/O record(s) across "
+                    f"{len(result.generated_sheets)} category sheet(s)."
+                ),
+                total_objects=result.source_records,
+                detected_element_types=detected_types,
+                generated_sheets=result.generated_sheets,
+                preview_data=result.preview_data,
+                excel_file_path=str(output_path),
+                processing_time_seconds=round(elapsed, 2),
+            )
+        except Exception as exc:
+            self.logger.error(
+                f"I/O address arrangement pipeline failed: {exc}", exc_info=True
+            )
+            job_store.add_error(self.job_id, str(exc))
+            job_store.update_status(
+                self.job_id,
+                status="failed",
+                progress_percentage=100,
+                current_phase="I/O address arrangement failed",
+                conversion_type="IO_ARRANGE",
+                message=f"I/O address arrangement failed: {exc}",
+            )
+
+    def _run_excel_compare_pipeline(self) -> None:
+        """Compare ``$(DEVICETAG)`` values symmetrically across two workbooks."""
+        from backend.excel_compare.comparator import ExcelComparator
+        from backend.excel_compare.report_generator import ComparisonReportGenerator
+
+        try:
+            job = job_store.get_job(self.job_id)
+            if not job:
+                self.logger.error(f"Job ID {self.job_id} not found in store")
+                return
+
+            uploaded_filenames = job.get("uploaded_files", [])
+            job_upload_dir = settings.UPLOAD_DIR / self.job_id
+            self._log_stage(
+                "COMPARE INIT",
+                f"files={uploaded_filenames}, upload_dir={job_upload_dir}",
+            )
+
+            excel_files = [
+                f for f in uploaded_filenames
+                if str(f).lower().endswith((".xlsx", ".xlsm", ".xls"))
+            ]
+            if len(excel_files) != 2:
+                raise ValueError(
+                    "Excel Comparison requires exactly two Excel files: "
+                    "each must contain a $(DEVICETAG) column."
+                )
+
+            file1 = job_upload_dir / excel_files[0]
+            file2 = job_upload_dir / excel_files[1]
+            if not file1.exists() or not file2.exists():
+                raise FileNotFoundError(
+                    f"Uploaded Excel files not found on disk for job {self.job_id}."
+                )
+            for fpath in (file1, file2):
+                if fpath.suffix.lower() == ".xls":
+                    raise ValueError(
+                        f'Legacy .xls format is not supported ({fpath.name}). '
+                        "Please save as .xlsx and retry."
+                    )
+
+            job_store.update_status(
+                self.job_id,
+                status="reading_pdf",
+                progress_percentage=20,
+                current_phase="Reading Excel worksheets",
+                conversion_type="COMPARE",
+                message=(
+                    f"Locating $(DEVICETAG) in {file1.name} and {file2.name}..."
+                ),
+            )
+
+            self._log_stage("COMPARE EXTRACT", f"ws1={file1.name}, ws2={file2.name}")
+            result = self._run_with_heartbeat(
+                "Excel comparison",
+                ExcelComparator().compare,
+                file1,
+                file2,
+            )
+            self._log_stage(
+                "COMPARE EXTRACT",
+                f"sheet1={result.worksheet1_sheet} raw={result.worksheet1_raw_rows} "
+                f"unique={result.worksheet1_records} dupes={result.worksheet1_duplicates}; "
+                f"sheet2={result.worksheet2_sheet} raw={result.worksheet2_raw_rows} "
+                f"unique={result.worksheet2_records} dupes={result.worksheet2_duplicates}",
+            )
+            if result.worksheet1_duplicates or result.worksheet2_duplicates:
+                job_store.add_warning(
+                    self.job_id,
+                    f"Duplicate tags ignored — WS1: {result.worksheet1_duplicates}, "
+                    f"WS2: {result.worksheet2_duplicates}.",
+                )
+            self._log_stage(
+                "COMPARE MATCH",
+                f"matched={result.matched_records}, unmatched_total={result.unmatched_records}, "
+                f"only_file1={len(result.unmatched_in_worksheet1)}, "
+                f"only_file2={len(result.unmatched_in_worksheet2)}",
+            )
+
+            job_store.update_status(
+                self.job_id,
+                status="generating_excel",
+                progress_percentage=70,
+                current_phase="Generating comparison report",
+                message="Building Comparison_Report.xlsx...",
+                worksheet1_records=result.worksheet1_records,
+                worksheet2_records=result.worksheet2_records,
+                matched_records=result.matched_records,
+                unmatched_records=result.unmatched_records,
+                total_objects=result.worksheet1_records,
+            )
+
+            output_dir = settings.OUTPUT_DIR / self.job_id
+            output_dir.mkdir(parents=True, exist_ok=True)
+            report_path = output_dir / "Comparison_Report.xlsx"
+            ComparisonReportGenerator().generate(result, report_path)
+            preview = ComparisonReportGenerator.build_preview(result)
+
+            elapsed = (datetime.utcnow() - self._pipeline_started_at).total_seconds()
+            self._log_stage(
+                "COMPARE DONE",
+                f"matched={result.matched_records}, unmatched={result.unmatched_records}",
+            )
+
+            job_store.update_status(
+                self.job_id,
+                status="completed",
+                progress_percentage=100,
+                current_phase="Comparison complete",
+                conversion_type="COMPARE",
+                message=(
+                    f"Comparison complete — {result.matched_records} matched, "
+                    f"{result.unmatched_records} unmatched."
+                ),
+                worksheet1_records=result.worksheet1_records,
+                worksheet2_records=result.worksheet2_records,
+                matched_records=result.matched_records,
+                unmatched_records=result.unmatched_records,
+                total_objects=result.worksheet1_records,
+                generated_sheets=["Summary", "Unmatched Records"],
+                preview_data=preview,
+                excel_file_path=str(report_path),
+                processing_time_seconds=round(elapsed, 2),
+            )
+        except Exception as e:
+            self.logger.error(f"Excel comparison pipeline failed: {e}", exc_info=True)
+            job_store.add_error(self.job_id, str(e))
+            job_store.update_status(
+                self.job_id,
+                status="failed",
+                progress_percentage=100,
+                current_phase="Comparison failed",
+                conversion_type="COMPARE",
+                message=f"Excel comparison failed: {e}",
+            )
 
     def _run_pc_conversion_pipeline(self) -> None:
         """Executes PC Element extraction pipeline using backend.pc_element module."""
@@ -145,10 +527,12 @@ class ConversionService:
                 time.sleep(0.05)
 
                 self._log_stage("PC STAGE", f"Executing PC parser pipeline for {fname}")
+                pc_output_dir = settings.OUTPUT_DIR / self.job_id
+                pc_output_dir.mkdir(parents=True, exist_ok=True)
                 service = ModularPCParserService(
                     file_path=str(pdf_path),
                     job_id=self.job_id,
-                    output_dir=str(settings.OUTPUT_DIR)
+                    output_dir=str(pc_output_dir),
                 )
                 res = self._run_with_heartbeat(
                     f"PC parse {fname}",
@@ -304,17 +688,45 @@ class ConversionService:
                 combined_line_records,
                 file_name=combined_file_name,
             )
+            raw_count = len(all_parsed_elements)
             self._log_stage(
                 "STAGE 4-7",
-                f"Parsed {len(all_parsed_elements)} object(s), "
+                f"Parsed {raw_count} object(s), "
                 f"{stats.raw_default_blocks_found} default block(s), "
                 f"{stats.inherited_parameters} inherited parameter(s)",
             )
+
+            # Deduplicate by (element_type, tag) — keep first occurrence
+            deduped: List = []
+            seen_keys = set()
+            duplicate_count = 0
+            for elem in all_parsed_elements:
+                key = ((elem.element_type or "").upper(), (elem.tag or "").upper())
+                if key in seen_keys:
+                    duplicate_count += 1
+                    continue
+                seen_keys.add(key)
+                deduped.append(elem)
+            all_parsed_elements = deduped
+            if duplicate_count:
+                self.logger.info(
+                    f"DB dedup removed {duplicate_count} duplicate tag(s); "
+                    f"{len(all_parsed_elements)} unique object(s) remain."
+                )
+                job_store.add_warning(
+                    self.job_id,
+                    f"Removed {duplicate_count} duplicate DB element tag(s) before export.",
+                )
 
             for w in warnings:
                 job_store.add_warning(self.job_id, w)
 
             total_objects = len(all_parsed_elements)
+            self._log_stage(
+                "VALIDATION",
+                f"raw_parsed={raw_count}, unique_exported={total_objects}, "
+                f"duplicates_removed={duplicate_count}",
+            )
             if total_objects == 0:
                 job_store.add_warning(self.job_id, "No ABB AC450 DB Element objects detected in provided PDF(s).")
                 self._log_stage("STAGE 4-7 WARNING", "Zero DB elements detected after parsing")
@@ -335,7 +747,7 @@ class ConversionService:
             self._log_stage("STAGE 8-9", f"Record clubbing applied to {len(clubbed_elements)} object(s)")
 
             clubbed_rows = self.mapper.map_clubbed(clubbed_elements)
-            # Presentation layer: engineering section order + sequential Index (pairs preserved)
+            # Presentation layer: engineering section order (original Index preserved; pairs adjacent)
             formatted_rows = self.output_formatter.format_clubbed_rows(clubbed_rows)
             mapped_sheets = {"Clubbed_IO": formatted_rows} if formatted_rows else {}
             self._log_stage(
@@ -368,8 +780,15 @@ class ConversionService:
             time.sleep(0.05)
             self._log_stage("STAGE 10", "Excel workbook generation starting")
 
-            settings.OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
-            output_excel_path = settings.OUTPUT_DIR / f"{self.job_id}_valmet_export.xlsx"
+            from backend.utils.file_utils import excel_filename_from_uploads, unique_output_path
+
+            output_dir = settings.OUTPUT_DIR / self.job_id
+            output_dir.mkdir(parents=True, exist_ok=True)
+            export_name = excel_filename_from_uploads(
+                uploaded_filenames,
+                fallback="DB_Element.xlsx",
+            )
+            output_excel_path = unique_output_path(output_dir, export_name)
             generated_sheets = self.excel_generator.generate_workbook(mapped_sheets, output_excel_path)
             excel_exists = output_excel_path.exists()
             excel_size = output_excel_path.stat().st_size if excel_exists else 0
@@ -381,11 +800,22 @@ class ConversionService:
                 raise FileNotFoundError(f"Excel workbook was not created at {output_excel_path}")
 
             clubbed_rows = mapped_sheets.get("Clubbed_IO", [])
-            ai_count = sum(1 for r in clubbed_rows if r.get("Category") == "AI")
-            ao_count = sum(1 for r in clubbed_rows if r.get("Category") == "AO")
-            di_count = sum(1 for r in clubbed_rows if r.get("Category") == "DI")
-            do_count = sum(1 for r in clubbed_rows if r.get("Category") == "DO")
+            ai_count = sum(1 for r in clubbed_rows if r.get("AI") == 1)
+            ao_count = sum(1 for r in clubbed_rows if r.get("AO") == 1)
+            di_count = sum(1 for r in clubbed_rows if r.get("DI") == 1)
+            do_count = sum(1 for r in clubbed_rows if r.get("DO") == 1)
+            ai800_count = sum(1 for r in clubbed_rows if r.get("AI800_") == 1)
+            ao800_count = sum(1 for r in clubbed_rows if r.get("AO800_") == 1)
+            di800_count = sum(1 for r in clubbed_rows if r.get("DI800_") == 1)
+            do800_count = sum(1 for r in clubbed_rows if r.get("DO800_") == 1)
+            self._log_stage(
+                "VALIDATION",
+                f"excel_rows={len(clubbed_rows)} "
+                f"AI={ai_count} AO={ao_count} DI={di_count} DO={do_count} "
+                f"AI800={ai800_count} AO800={ao800_count} DI800={di800_count} DO800={do800_count}",
+            )
 
+            elapsed = (datetime.utcnow() - self._pipeline_started_at).total_seconds()
             job_store.update_status(
                 self.job_id,
                 status="completed",
@@ -402,14 +832,16 @@ class ConversionService:
                 object_overrides=stats.object_overrides,
                 missing_parameters_after_merge=stats.missing_parameters_after_merge,
                 ignored_header_footer_lines=stats.headers_removed,
-                ai_count=ai_count,
-                ao_count=ao_count,
-                di_count=di_count,
-                do_count=do_count,
+                ai_count=ai_count + ai800_count,
+                ao_count=ao_count + ao800_count,
+                di_count=di_count + di800_count,
+                do_count=do_count + do800_count,
+                duplicate_records=duplicate_count,
                 detected_element_types=[s.model_dump() for s in detected_summaries],
                 generated_sheets=generated_sheets,
                 preview_data=preview_data,
                 excel_file_path=str(output_excel_path),
+                processing_time_seconds=round(elapsed, 2),
                 message=f"Conversion complete! Processed {total_objects} objects ({stats.inherited_parameters} inherited params) in consolidated worksheet."
             )
             self._log_stage("COMPLETE", f"DB conversion finished — {total_objects} object(s), 1 worksheet")

@@ -2,8 +2,9 @@
 output_formatter.py — Post-clubbing presentation layer for DB Element Excel export.
 
 Does NOT change Loop Tag matching, clubbing, or extracted values.
-Only reorders already-clubbed rows into the engineering sequence and
-renumbers the Index column to match the final row order.
+Only reorders already-clubbed rows into the engineering sequence while
+preserving the original Index column extracted from the PDF, then applies
+Category → eight indicator columns after DESCR for final export.
 """
 
 from __future__ import annotations
@@ -13,6 +14,7 @@ from collections import defaultdict
 
 from backend.core.logging import get_logger
 from backend.mapper.record_clubber import derive_loop_tag, derive_name_suffix
+from backend.mapper.category_mapper import apply_category_columns_after_description
 
 
 # Presentation sections — emitted in this order on the single worksheet
@@ -45,7 +47,7 @@ VALVE_SUFFIX_ORDER: Dict[str, int] = {
 class OutputFormatter:
     """
     Final formatting stage: sort clubbed rows into engineering sequence
-    immediately before Excel generation.
+    immediately before Excel generation, then expand Category into indicator columns.
     """
 
     def __init__(self, job_id: str = None):
@@ -63,7 +65,8 @@ class OutputFormatter:
           4. All DO800 → DI800 groups
 
         Paired records (same Loop Tag within a section) remain adjacent.
-        Index is renumbered 1..N to match the final presentation order.
+        Then replace Category with AI/AO/DI/DO/AI800_/… indicator columns
+        immediately after DESCR/Description.
         """
         if not rows:
             return []
@@ -105,15 +108,66 @@ class OutputFormatter:
             members_sorted = sorted(members, key=self._within_club_sort_key)
             formatted.extend(members_sorted)
 
-        # Presentation Index = final row sequence (does not affect clubbing)
-        for i, row in enumerate(formatted, start=1):
-            row["Index"] = i
+        # Final export formatting: Category → eight indicator columns after DESCR
+        export_rows = [
+            apply_category_columns_after_description(row) for row in formatted
+        ]
+        # Canonicalize column order across all rows (Excel uses first-row keys)
+        export_rows = self._canonicalize_export_columns(export_rows)
 
         self.logger.info(
-            f"OutputFormatter arranged {len(formatted)} row(s) into "
-            f"{len(ordered_keys)} club group(s) across engineering sections."
+            f"OutputFormatter arranged {len(export_rows)} row(s) into "
+            f"{len(ordered_keys)} club group(s) across engineering sections "
+            f"with category indicator columns after DESCR."
         )
-        return formatted
+        return export_rows
+
+    @staticmethod
+    def _canonicalize_export_columns(
+        rows: List[Dict[str, Any]],
+    ) -> List[Dict[str, Any]]:
+        """Ensure every row shares one column order with DESCR → indicators contiguous."""
+        from backend.mapper.category_mapper import CATEGORY_INDICATOR_COLUMNS
+
+        if not rows:
+            return rows
+
+        # Prefer order from the first row; union any extra keys at the end
+        ordered_keys: List[str] = list(rows[0].keys())
+        seen = set(ordered_keys)
+        for row in rows[1:]:
+            for key in row.keys():
+                if key not in seen:
+                    ordered_keys.append(key)
+                    seen.add(key)
+
+        # Enforce DESCR immediately followed by the eight indicators
+        if "DESCR" in ordered_keys:
+            without = [
+                k for k in ordered_keys
+                if k not in CATEGORY_INDICATOR_COLUMNS
+            ]
+            if "DESCR" in without:
+                di = without.index("DESCR")
+                ordered_keys = (
+                    without[: di + 1]
+                    + list(CATEGORY_INDICATOR_COLUMNS)
+                    + without[di + 1:]
+                )
+            else:
+                ordered_keys = without + list(CATEGORY_INDICATOR_COLUMNS)
+        else:
+            # Should not happen — still append indicators after identity cols
+            without = [
+                k for k in ordered_keys
+                if k not in CATEGORY_INDICATOR_COLUMNS
+            ]
+            ordered_keys = without + ["DESCR"] + list(CATEGORY_INDICATOR_COLUMNS)
+
+        return [
+            {col: row.get(col, "") for col in ordered_keys}
+            for row in rows
+        ]
 
     @staticmethod
     def _within_club_sort_key(row: Dict[str, Any]) -> Tuple[int, int, str, str]:

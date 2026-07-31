@@ -1,18 +1,17 @@
 import re
 
 # Regex for detecting ABB AC450 DB Element Headers
-# Supported tags: AI1.4, AO2.6, DI3.1, DO4.2, AI8001.1, AO8002.1, DI8003.1, DO8004.1
-# Group 1: Element type string (uppercase letters)
-# Group 2: Index number (e.g. 1.4, 2.6, 3, 100.1)
-# Prefer 800-series prefixes (contain digits) before letter-only AI/AO/DI/DO
+# Supported tags: AI1.4, AO2.6, DI3.1, DO4.2,
+#                 AI8001.1 / AI800_1.1, AO8002.1 / AO800_2.1, etc.
+# Prefer underscore and concatenated 800-series before letter-only AI/AO/DI/DO
 ELEMENT_HEADER_PATTERN = re.compile(
-    r'^\s*(AI800|AO800|DI800|DO800|[A-Z]{2,12})\s*(\d+(?:\.\d+)*)\s*$',
+    r'^\s*(AI800|AO800|DI800|DO800|[A-Z]{2,12})(?:_|\s*)?(\d+(?:\.\d+)*)\s*$',
     re.MULTILINE | re.IGNORECASE
 )
 
 # Alternative inline header pattern (e.g., when tag appears on a line with parameters or trailing text)
 ELEMENT_INLINE_HEADER_PATTERN = re.compile(
-    r'^\s*(AI800|AO800|DI800|DO800|[A-Z]{2,12})(\d+(?:\.\d+)*)\b',
+    r'^\s*(AI800|AO800|DI800|DO800|[A-Z]{2,12})(?:_)?(\d+(?:\.\d+)*)\b',
     re.MULTILINE | re.IGNORECASE
 )
 

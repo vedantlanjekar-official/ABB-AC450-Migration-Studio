@@ -62,7 +62,7 @@ class GrammarParser:
     _DEVICE_TAG = r'''
         (?P<device_tag>
             [A-Za-z0-9_][A-Za-z0-9_\-]*
-            (?:\.[A-Za-z0-9_]+)?
+            (?:\.[A-Za-z0-9_]+)*
             (?::[A-Za-z0-9_]+)?
         )
         (?![A-Za-z0-9_.])
@@ -139,62 +139,60 @@ class GrammarParser:
 
     @classmethod
     def parse_reference(cls, candidate: str, page_number: int = 1) -> Optional[ParsedIOReference]:
-        """Parses a raw reference string into a structured ParsedIOReference object."""
+        """Parses the first valid I/O reference from a candidate string."""
+        refs = cls.parse_all_references(candidate, page_number=page_number)
+        return refs[0] if refs else None
 
+    @classmethod
+    def parse_all_references(
+        cls, candidate: str, page_number: int = 1
+    ) -> List[ParsedIOReference]:
+        """
+        Extract every valid I/O reference from a candidate string.
+
+        Dense spatial bands and fused CAD lines often contain multiple refs;
+        returning only the first match silently drops the rest.
+        """
         raw = candidate.strip()
         cleaned = cls.normalize_candidate(raw)
         if not cleaned:
-            return None
+            return []
 
-        # Pattern 0: CARD.CHANNEL:TERMINAL/TAG  (must run before standard)
-        match = cls.PATTERN_CHANNEL_PORT.search(cleaned)
-        if match:
-            return cls._build_reference(
-                match.group("prefix"),
-                match.group("card"),
-                match.group("channel"),
-                match.group("device_tag"),
-                raw,
-                page_number
-            )
+        found: List[ParsedIOReference] = []
+        occupied: List[Tuple[int, int]] = []
 
-        # Pattern 1: CARD.CHANNEL/TAG
-        match = cls.PATTERN_STANDARD.search(cleaned)
-        if match:
-            return cls._build_reference(
-                match.group("prefix"),
-                match.group("card"),
-                match.group("channel"),
-                match.group("device_tag"),
-                raw,
-                page_number
-            )
+        pattern_specs = (
+            (cls.PATTERN_CHANNEL_PORT, "channel"),
+            (cls.PATTERN_STANDARD, "channel"),
+            (cls.PATTERN_PORT, "port"),
+            (cls.PATTERN_NO_CHANNEL, "zero"),
+        )
 
-        # Pattern 2: CARD:PORT/TAG
-        match = cls.PATTERN_PORT.search(cleaned)
-        if match:
-            return cls._build_reference(
-                match.group("prefix"),
-                match.group("card"),
-                match.group("port"),
-                match.group("device_tag"),
-                raw,
-                page_number
-            )
+        for pattern, channel_mode in pattern_specs:
+            for match in pattern.finditer(cleaned):
+                span = match.span()
+                if any(not (span[1] <= a or span[0] >= b) for a, b in occupied):
+                    continue
+                if channel_mode == "channel":
+                    channel_str = match.group("channel")
+                elif channel_mode == "port":
+                    channel_str = match.group("port")
+                else:
+                    channel_str = "0"
 
-        # Pattern 3: CARD/TAG
-        match = cls.PATTERN_NO_CHANNEL.search(cleaned)
-        if match:
-            return cls._build_reference(
-                match.group("prefix"),
-                match.group("card"),
-                "0",
-                match.group("device_tag"),
-                raw,
-                page_number
-            )
+                ref = cls._build_reference(
+                    match.group("prefix"),
+                    match.group("card"),
+                    channel_str,
+                    match.group("device_tag"),
+                    raw[span[0]:span[1]] if span[1] <= len(raw) else match.group(0),
+                    page_number,
+                )
+                if ref:
+                    found.append(ref)
+                    occupied.append(span)
 
-        return None
+        return found
 
     @classmethod
     def _build_reference(
@@ -254,45 +252,51 @@ class GrammarParser:
 
     @classmethod
     def clean_device_tag(cls, device_tag: str) -> str:
-        """Uppercase and isolate a valid engineering device tag from CAD glue.
+        """Return the Device Tag exactly as printed — no length or suffix limits.
 
-        Canonical form: LOOP.EXT or LOOP.EXT:ATTR using known ABB extensions.
+        Normalization only:
+          1. Uppercase
+          2. Trim whitespace / trailing punctuation
+          3. Discard colon attributes (:MAN, :ERR, :SELECTED, …)
+          4. Keep every letter/digit/_/-/. up to the first true delimiter
+
+        Does NOT use predefined suffix lists and does NOT impose a maximum length.
         """
-        tag = device_tag.strip().upper().rstrip(".,;")
+        tag = (device_tag or "").strip().upper()
+        if not tag:
+            return ""
 
-        # Longest/most-specific extensions first
-        m = re.match(
-            r'^([A-Z0-9_]+\.(?:CA\d{1,2}|KEY\d?|CURR|OUT|MV|SEL|PWR|RUN|STOP|IT|RDY|MSTR|[A-Z]{2,4}))'
-            r'(?::(SELECTED|MAN|CALC_VAL|ERR|HL|LL|OV|[A-Z_]{2,12}))?',
-            tag,
-        )
-        if m:
-            base = m.group(1)
-            attr = m.group(2)
-            return f"{base}:{attr}" if attr else base
+        # Operating states / modes after a colon are not part of the Device Tag
+        if ":" in tag:
+            tag = tag.split(":", 1)[0]
 
-        return tag
+        tag = tag.strip().rstrip(".,; ")
+
+        # Capture the complete engineering identifier — unlimited length
+        m = re.match(r"^([A-Z0-9][A-Z0-9_\-]*(?:\.[A-Z0-9_\-]*)*)", tag)
+        if not m:
+            return tag
+        cleaned = m.group(1).rstrip(".-_")
+        return cleaned
 
     @classmethod
     def normalize_device_tag(cls, device_tag: str) -> str:
-        """Base device tag without colon attribute — used only for loop-tag derivation."""
-        tag = cls.clean_device_tag(device_tag)
-        if ':' in tag:
-            tag = tag.split(':', 1)[0]
-        return tag.rstrip('.:')
+        """Normalized engineering tag (no colon attribute) for loop-tag derivation."""
+        return cls.clean_device_tag(device_tag).rstrip(".:")
 
     @classmethod
     def derive_loop_tag(cls, device_tag: str) -> str:
         """Derives Loop Tag by removing only the final extension after the last period.
 
-        Colon attributes are ignored for loop derivation:
+        Colon attributes are discarded before derivation:
           940LC391.MV                 -> 940LC391
           949DKA050.KEY:SELECTED      -> 949DKA050
           M49FI1201.MV:ERR            -> M49FI1201
+          940M02M1.STRT:MAN           -> 940M02M1
         """
         tag = cls.normalize_device_tag(device_tag)
 
-        if '.' in tag:
-            return tag.rsplit('.', 1)[0]
+        if "." in tag:
+            return tag.rsplit(".", 1)[0]
 
         return tag

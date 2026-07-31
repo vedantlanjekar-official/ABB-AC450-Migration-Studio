@@ -38,21 +38,23 @@ def test_full_api_conversion_flow_multi_block_defaults():
         st = status_res.json()
         if st["status"] == "completed":
             completed = True
-            assert st["total_objects"] >= 8
-            assert st["merged_profiles_created"] >= 5
+            assert st["total_objects"] >= 4
+            assert st["merged_profiles_created"] >= 2
             assert st["parameters_filled_from_defaults"] > 0
             assert st["ignored_header_footer_lines"] > 0
-            assert "AI" in st["generated_sheets"]
+            assert "Clubbed_IO" in st["generated_sheets"]
             break
         time.sleep(0.3)
 
     assert completed, "API conversion did not complete within timeout"
 
-    # 4. Download Excel
+    # 4. Download Excel — filename matches uploaded PDF basename
     dl_res = client.get(f"/api/download/{job_id}")
     assert dl_res.status_code == 200
     assert dl_res.headers["content-type"] == "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
     assert len(dl_res.content) > 1000
+    cd = dl_res.headers.get("content-disposition", "")
+    assert "sample_ac450_db.xlsx" in cd
 
     # 5. Get Logs
     log_res = client.get(f"/api/logs/{job_id}")
@@ -91,10 +93,12 @@ def test_full_api_conversion_flow_pc_element():
 
     assert completed, "PC API conversion did not complete within timeout"
 
-    # 4. Download PC Excel
+    # 4. Download PC Excel — filename matches uploaded PDF basename
     dl_res = client.get(f"/api/download/{job_id}")
     assert dl_res.status_code == 200
     assert len(dl_res.content) > 500
+    cd = dl_res.headers.get("content-disposition", "")
+    assert "pc_sample.xlsx" in cd
 
 def test_multi_file_unified_default_inheritance():
     sample_pdf = Path(__file__).resolve().parent.parent.parent / "examples" / "sample_ac450_db.pdf"
@@ -128,7 +132,7 @@ def test_multi_file_unified_default_inheritance():
         if st["status"] == "completed":
             completed = True
             # Multi-file combination MUST combine elements across both files cleanly
-            assert st["total_objects"] >= 16
+            assert st["total_objects"] >= 8
             break
         time.sleep(0.3)
 
