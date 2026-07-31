@@ -4,6 +4,7 @@ services:
     runtime: python
     region: oregon
     plan: free
+    repo: https://github.com/vedantlanjekar-official/ABB-AC450-Migration-Studio
     branch: main
     buildCommand: pip install -r requirements.txt
     startCommand: uvicorn backend.main:app --host 0.0.0.0 --port $PORT --workers 1
