@@ -1,17 +1,17 @@
 services:
   - type: web
     name: abb-ac450-migration-studio-backend
-    env: python
+    runtime: python
     region: oregon
     plan: free
+    branch: main
     buildCommand: pip install -r requirements.txt
     startCommand: uvicorn backend.main:app --host 0.0.0.0 --port $PORT --workers 1
     healthCheckPath: /health
+    autoDeploy: true
     envVars:
       - key: PYTHON_VERSION
         value: 3.11.0
-      - key: PORT
-        value: 10000
       - key: PC_LIGHT_PDF_READ
         value: "1"
       - key: ENABLE_PC_OCR
