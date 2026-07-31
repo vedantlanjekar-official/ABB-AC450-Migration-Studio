@@ -20,7 +20,9 @@ PROCESSING_STATUSES = {
 }
 
 # Jobs with no heartbeat for this long are considered dead (worker crash / OOM).
-STALE_JOB_SECONDS = 120
+# Large DB PDFs can take several minutes on free-tier CPU; heartbeats every ~15s
+# keep healthy jobs alive. This window only matters after a hard process restart.
+STALE_JOB_SECONDS = 300
 
 
 class JobManager:

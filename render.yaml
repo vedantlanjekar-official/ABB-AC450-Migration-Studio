@@ -15,5 +15,7 @@ services:
         value: 3.11.0
       - key: PC_LIGHT_PDF_READ
         value: "1"
+      - key: DB_LIGHT_PDF_READ
+        value: "1"
       - key: ENABLE_PC_OCR
         value: "0"

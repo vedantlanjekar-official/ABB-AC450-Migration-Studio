@@ -21,6 +21,7 @@ class Settings(BaseSettings):
 
     # Production knobs (also set via Render env vars)
     PC_LIGHT_PDF_READ: str = os.getenv("PC_LIGHT_PDF_READ", "1")
+    DB_LIGHT_PDF_READ: str = os.getenv("DB_LIGHT_PDF_READ", "1")
     ENABLE_PC_OCR: str = os.getenv("ENABLE_PC_OCR", "0")
 
     model_config = SettingsConfigDict(case_sensitive=True, env_file=".env", extra="ignore")

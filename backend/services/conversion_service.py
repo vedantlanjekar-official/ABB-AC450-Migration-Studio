@@ -640,10 +640,18 @@ class ConversionService:
                     continue
 
                 self._log_stage("STAGE 1", f"Extracting lines from {fname} ({pdf_path.stat().st_size} bytes)")
+
+                def _page_progress(done: int, total: int, _fname: str = fname) -> None:
+                    job_store.heartbeat(
+                        self.job_id,
+                        message=f"Extracting {_fname}: page {done}/{total}...",
+                    )
+
                 file_records = self._run_with_heartbeat(
                     f"PDF extract {fname}",
                     self.pdf_reader.extract_line_records,
                     pdf_path,
+                    progress_callback=_page_progress,
                 )
                 self._log_stage("STAGE 1", f"Extracted {len(file_records)} line(s) from {fname}")
                 gc.collect()
