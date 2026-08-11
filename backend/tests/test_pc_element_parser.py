@@ -8,8 +8,16 @@ import openpyxl
 from backend.pc_element.parser.grammar_parser import GrammarParser
 from backend.pc_element.parser.duplicate_detector import DuplicateDetector
 from backend.pc_element.parser.validator import Validator, EngineeringIO
-from backend.pc_element.parser.excel_generator import ExcelGenerator
+from backend.pc_element.parser.excel_generator import (
+    ExcelGenerator,
+    FUNCTION_BLOCK_SUMMARY_SHEET,
+)
 from backend.pc_element.parser.io_reference_detector import IOReferenceDetector
+from backend.pc_element.parser.function_block_extractor import (
+    count_function_blocks,
+    function_block_summary_rows,
+    SUPPORTED_FUNCTION_BLOCKS,
+)
 
 
 def test_user_examples_extraction():
@@ -247,6 +255,7 @@ def test_excel_generation_columns(tmp_path):
     out_file = str(tmp_path / "test_io_list.xlsx")
     ExcelGenerator.generate_excel([obj1, obj2], out_file)
     wb = openpyxl.load_workbook(out_file)
+    assert wb.sheetnames == ["I_O_List", FUNCTION_BLOCK_SUMMARY_SHEET]
     ws = wb["I_O_List"]
 
     headers = [ws.cell(row=1, column=c).value for c in range(1, 15)]
@@ -274,6 +283,16 @@ def test_excel_generation_columns(tmp_path):
     row3 = [ws.cell(row=3, column=c).value for c in range(1, 15)]
     assert row3[3] == "945FC400.OUT"
     assert row3[4:12] == [None, 1, None, None, None, None, None, None]
+
+    summary = wb[FUNCTION_BLOCK_SUMMARY_SHEET]
+    assert [summary.cell(row=1, column=c).value for c in range(1, 3)] == [
+        "Functional Block",
+        "Total Count",
+    ]
+    assert [summary.cell(row=r, column=1).value for r in range(2, 6)] == list(
+        SUPPORTED_FUNCTION_BLOCKS
+    )
+    assert all(summary.cell(row=r, column=2).value == 0 for r in range(2, 6))
 
 
 def test_category_mapper_indicators():
@@ -447,3 +466,111 @@ def test_reference_o2_pc32_full_coverage():
     # Device Tags must be clean engineering tags (no colon attributes)
     colon_tags = {k for k in out_keys if ":" in k[3]}
     assert len(colon_tags) == 0, f"Device Tags must not contain colon attributes: {list(colon_tags)[:10]}"
+
+
+def test_function_block_declaration_counted():
+    """Only PIDCON(...) style declarations increment the count."""
+    pages = [
+        "PIDCON(0,0,1,1,1,0)\nTRACKA\nPARAM1",
+        "Some noise PIDCON (1,0,0)\nand MOTCON(0,1)",
+    ]
+    counts = count_function_blocks(pages)
+    assert counts["PIDCON"] == 2
+    assert counts["MOTCON"] == 1
+    assert counts["VALVECON"] == 0
+    assert counts["MANSTN"] == 0
+
+
+def test_function_block_references_ignored():
+    """Parameter / cross-reference labels must never count as declarations."""
+    pages = [
+        """
+        =PIDCON1:94/940LC391:PARAM1
+        =PIDCON1:32/940LC391:PARAM2
+        PIDCON1:55/940LC391:PARAM4
+        PIDCON1:86/940LC391:POUT
+        PIDCON1:46/940LC391:PARAM3
+        P-=MOTCON1:10/940M01:OUT
+        VALVECON1:22/940XV101:SV1
+        MANSTN1:5/940MS01:MAN
+        DEFAULT PIDCON
+        PIDCON1
+        """
+    ]
+    counts = count_function_blocks(pages)
+    assert counts == {
+        "PIDCON": 0,
+        "MOTCON": 0,
+        "VALVECON": 0,
+        "MANSTN": 0,
+    }
+
+
+def test_function_block_mixed_counts():
+    """Mixed declarations produce the expected summary totals."""
+    page = "\n".join(
+        [
+            "PIDCON(0,0,1,1,1,0)",
+            "PIDCON(1,0,0,0,0,0)",
+            "PIDCON(0,1,1,1,0,0)",
+            "MOTCON(0,0)",
+            "MOTCON(1,1)",
+            "VALVECON(2,2)",
+            "MANSTN(0)",
+            "MANSTN(1)",
+            "MANSTN(2)",
+            "MANSTN(3)",
+            "MANSTN(4)",
+            # noise that must be ignored
+            "=PIDCON1:94/940LC391:PARAM1",
+            "MOTCON1:10/TAG:OUT",
+        ]
+    )
+    counts = count_function_blocks([page])
+    assert counts == {
+        "PIDCON": 3,
+        "MOTCON": 2,
+        "VALVECON": 1,
+        "MANSTN": 5,
+    }
+    rows = function_block_summary_rows(counts)
+    assert rows == [
+        {"Functional Block": "PIDCON", "Total Count": 3},
+        {"Functional Block": "MOTCON", "Total Count": 2},
+        {"Functional Block": "VALVECON", "Total Count": 1},
+        {"Functional Block": "MANSTN", "Total Count": 5},
+    ]
+
+
+def test_function_block_summary_excel_sheet(tmp_path):
+    """Excel export includes Function Block Summary with provided counts."""
+    obj = EngineeringIO(
+        io_family="AI",
+        io_type="AI",
+        category="AI",
+        card_number=1,
+        channel_number=1,
+        loop_tag="940LC391",
+        device_tag="940LC391.MV",
+        description="Level",
+    )
+    counts = {"PIDCON": 3, "MOTCON": 2, "VALVECON": 1, "MANSTN": 5}
+    out_file = str(tmp_path / "fb_summary.xlsx")
+    ExcelGenerator.generate_excel([obj], out_file, function_block_counts=counts)
+    wb = openpyxl.load_workbook(out_file)
+    assert "I_O_List" in wb.sheetnames
+    assert FUNCTION_BLOCK_SUMMARY_SHEET in wb.sheetnames
+
+    summary = wb[FUNCTION_BLOCK_SUMMARY_SHEET]
+    assert summary["A1"].value == "Functional Block"
+    assert summary["B1"].value == "Total Count"
+    assert summary["A1"].fill.fgColor.rgb.endswith("1E293B")
+    expected = [
+        ("PIDCON", 3),
+        ("MOTCON", 2),
+        ("VALVECON", 1),
+        ("MANSTN", 5),
+    ]
+    for idx, (name, total) in enumerate(expected, start=2):
+        assert summary.cell(row=idx, column=1).value == name
+        assert summary.cell(row=idx, column=2).value == total

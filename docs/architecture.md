@@ -64,7 +64,7 @@ The **ABB AC450 Engineering Converter** is designed as a decoupled enterprise we
 | Type | Engine | Excel |
 |------|--------|-------|
 | **DB** | `backend/parser/*` + mapper | Multi-sheet Valmet workbook |
-| **PC** | `backend/pc_element/parser/*` | Single-sheet `I_O_List` |
+| **PC** | `backend/pc_element/parser/*` | `I_O_List` + `Function Block Summary` |
 
 Full PC Element design, parsing rules, and verification results: [`docs/pc_element_module.md`](pc_element_module.md).
 

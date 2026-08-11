@@ -74,7 +74,8 @@ DB and PC share upload, job store, status polling, and download. Parser stacks a
 | 7–8 | `metadata_extractor.py` | Controller / process area from title block |
 | 9 | `duplicate_detector.py` | Collapse attribute variants (`KEY:SELECTED` / `KEY:MAN` → one `KEY`) |
 | 10 | `validator.py` | Accept all supported families; allow channel `0` |
-| 11 | `excel_generator.py` | Valmet single-sheet workbook |
+| 11 | `excel_generator.py` | Valmet workbook: `I_O_List` + `Function Block Summary` |
+| — | `function_block_extractor.py` | Count `PIDCON(` / `MOTCON(` / `VALVECON(` / `MANSTN(` declarations (independent of I/O) |
 
 ---
 
@@ -103,7 +104,8 @@ No-channel: [=|-|P-=]* PREFIX CARD           / DEVICE_TAG
 ## Excel Output
 
 **File:** `PC_Element_IO_List_{job_id}.xlsx`  
-**Sheet:** `I_O_List`
+
+### Sheet 1: `I_O_List`
 
 | Column | Source |
 |--------|--------|
@@ -120,6 +122,24 @@ Example:
 | 1 | 940LC391 | PURE WTR. TK. LVL. | 940LC391.MV | AI |
 | 2 | M49DKA050 | | M49DKA050.KEY | AOC |
 | 3 | M49ARA106 | | M49ARA106.CA41 | AOC |
+
+### Sheet 2: `Function Block Summary`
+
+Independent of I/O extraction. Counts only ABB function-block **declarations**
+inside engineering boxes (`PIDCON(...)`, `MOTCON(...)`, `VALVECON(...)`,
+`MANSTN(...)`). Parameter references and cross-labels such as
+`=PIDCON1:94/940LC391:PARAM1` are ignored.
+
+| Functional Block | Total Count |
+|------------------|------------:|
+| PIDCON | X |
+| MOTCON | X |
+| VALVECON | X |
+| MANSTN | X |
+
+Detection rule: the block name must be followed immediately by `(` (optional
+whitespace allowed for CAD text splits). Extensible via
+`SUPPORTED_FUNCTION_BLOCKS` in `function_block_extractor.py`.
 
 ---
 
@@ -192,6 +212,7 @@ backend/pc_element/
     metadata_extractor.py
     duplicate_detector.py
     validator.py
+    function_block_extractor.py
     excel_generator.py
     parser_service.py          ← orchestrator
 

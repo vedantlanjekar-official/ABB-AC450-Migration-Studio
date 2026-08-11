@@ -1,17 +1,21 @@
 """
 excel_generator.py - Stage 12: Excel Generator for PC Element Engineering I/O Lists.
 
-Writes a single consolidated worksheet. Row order is preserved as provided
-(clubbing + output formatting happen upstream). This layer does not reorder
-or recalculate extracted engineering values.
+Writes a consolidated I/O worksheet plus an independent Function Block Summary
+sheet. Row order for I/O is preserved as provided (clubbing + output formatting
+happen upstream). This layer does not reorder or recalculate extracted
+engineering values.
 
-Columns:
+I_O_List columns:
   Sr. No. | Loop Tag | Description | Device Tag |
   AI | AO | DI | DO | AI800_ | AO800_ | DI800_ | DO800_ |
   Slot/Card | Channel
+
+Function Block Summary columns:
+  Functional Block | Total Count
 """
 
-from typing import List, Any
+from typing import List, Any, Optional, Mapping
 import os
 import openpyxl
 from openpyxl.utils import get_column_letter
@@ -21,10 +25,16 @@ from backend.pc_element.parser.category_mapper import (
     CATEGORY_INDICATOR_COLUMNS,
     build_category_indicator_values,
 )
+from backend.pc_element.parser.function_block_extractor import (
+    SUPPORTED_FUNCTION_BLOCKS,
+    function_block_summary_rows,
+)
 from backend.excel.header_postprocessor import (
     PC_HEADER_MAPPING,
     rename_export_headers,
 )
+
+FUNCTION_BLOCK_SUMMARY_SHEET = "Function Block Summary"
 
 
 def sanitize_cell_value(val: Any) -> Any:
@@ -47,12 +57,18 @@ class ExcelGenerator:
     _CENTER_COLS = {1, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14}  # Sr + indicators + Slot/Card + Channel
 
     @classmethod
-    def generate_excel(cls, io_objects: List[EngineeringIO], output_path: str) -> str:
+    def generate_excel(
+        cls,
+        io_objects: List[EngineeringIO],
+        output_path: str,
+        function_block_counts: Optional[Mapping[str, int]] = None,
+    ) -> str:
         """
-        Generate a styled single-sheet workbook at output_path.
+        Generate a styled workbook at output_path with I_O_List and
+        Function Block Summary sheets.
 
-        Preserves the caller-provided row order (Loop Tag clubbing / formatting
-        must be applied before this call). Returns the filepath.
+        Preserves the caller-provided I/O row order (Loop Tag clubbing /
+        formatting must be applied before this call). Returns the filepath.
         """
         ordered_objects = list(io_objects)
 
@@ -142,7 +158,53 @@ class ExcelGenerator:
 
         if os.path.dirname(output_path):
             os.makedirs(os.path.dirname(output_path), exist_ok=True)
-        # Final post-processing step: transform only displayed export headers.
+        # Transform only I_O_List export headers before appending the summary sheet.
         rename_export_headers(wb, PC_HEADER_MAPPING, header_row=start_row)
+        cls._write_function_block_summary(wb, function_block_counts, design)
         wb.save(output_path)
         return output_path
+
+    @classmethod
+    def _write_function_block_summary(
+        cls,
+        wb: openpyxl.Workbook,
+        function_block_counts: Optional[Mapping[str, int]],
+        design,
+    ) -> None:
+        """Append the Function Block Summary worksheet (independent of I/O)."""
+        ws = wb.create_sheet(FUNCTION_BLOCK_SUMMARY_SHEET)
+        ws.views.sheetView[0].showGridLines = True
+
+        headers = ["Functional Block", "Total Count"]
+        for col_idx, header_text in enumerate(headers, start=1):
+            cell = ws.cell(row=1, column=col_idx, value=header_text)
+            cell.fill = design.header_fill
+            cell.font = design.header_font
+            cell.alignment = design.center_align
+            cell.border = design.thin_border
+        ws.row_dimensions[1].height = 26
+
+        rows = function_block_summary_rows(
+            function_block_counts,
+            block_names=SUPPORTED_FUNCTION_BLOCKS,
+        )
+        for sr_no, row in enumerate(rows, start=1):
+            fill_to_apply = (
+                design.zebra_fill if sr_no % 2 == 0 else design.white_fill
+            )
+            values = [row["Functional Block"], row["Total Count"]]
+            for col_idx, val in enumerate(values, start=1):
+                cell = ws.cell(row=sr_no + 1, column=col_idx, value=val)
+                cell.font = design.cell_font
+                cell.border = design.thin_border
+                cell.fill = fill_to_apply
+                if col_idx == 1:
+                    cell.alignment = design.left_align
+                    if isinstance(val, str):
+                        cell.data_type = "s"
+                else:
+                    cell.alignment = design.center_align
+            ws.row_dimensions[sr_no + 1].height = 20
+
+        ws.column_dimensions["A"].width = 22
+        ws.column_dimensions["B"].width = 14

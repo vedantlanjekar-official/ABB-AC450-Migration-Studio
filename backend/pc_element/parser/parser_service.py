@@ -13,7 +13,7 @@ Pipeline:
   11. Completeness audit + validation report
   12. Loop Tag record clubbing (AI→AO, DO→DI, 800-series, valves)
   13. Output formatting (engineering section sequence)
-  14. Excel generation (single consolidated worksheet)
+  14. Excel generation (I_O_List + Function Block Summary)
 """
 
 from typing import List, Dict, Any, Optional
@@ -37,6 +37,7 @@ from backend.pc_element.parser.output_formatter import OutputFormatter
 from backend.pc_element.parser.category_mapper import apply_category_columns
 from backend.pc_element.parser.excel_generator import ExcelGenerator
 from backend.pc_element.parser.completeness_auditor import CompletenessAuditor
+from backend.pc_element.parser.function_block_extractor import count_function_blocks
 
 logger = logging.getLogger("pc_element_parser")
 
@@ -98,6 +99,13 @@ class PCParserService:
             result.total_pages_processed = len(pages)
             page_texts = [p.text for p in pages]
             pages_words = [p.words for p in pages]
+
+            # Independent of I/O extraction: count ABB function-block declarations
+            function_block_counts = count_function_blocks(page_texts)
+            logger.info(
+                f"[{self.job_id}] Function block declarations: "
+                + ", ".join(f"{k}={v}" for k, v in function_block_counts.items())
+            )
 
             low_density_pages = sum(1 for p in pages if p.low_text_density)
             if low_density_pages:
@@ -243,7 +251,11 @@ class PCParserService:
 
             export_name = pdf_to_excel_filename(Path(self.file_path).name)
             excel_path = str(unique_output_path(self.output_dir, export_name))
-            ExcelGenerator.generate_excel(formatted_objects, excel_path)
+            ExcelGenerator.generate_excel(
+                formatted_objects,
+                excel_path,
+                function_block_counts=function_block_counts,
+            )
             result.excel_file_path = excel_path
 
             preview_rows = []

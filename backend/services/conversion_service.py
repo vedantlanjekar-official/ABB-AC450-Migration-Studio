@@ -583,7 +583,7 @@ class ConversionService:
                 duplicate_records=duplicates_removed,
                 missing_descriptions=missing_descriptions,
                 processing_time_seconds=round(total_proc_time, 2),
-                generated_sheets=["I_O_List"],
+                generated_sheets=["I_O_List", "Function Block Summary"],
                 preview_data=preview_data,
                 excel_file_path=excel_path_str,
                 message=f"PC Element Conversion complete! Extracted {total_objects} hardwired I/O reference(s) into Valmet Excel I_O_List."

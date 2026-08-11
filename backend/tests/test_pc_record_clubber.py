@@ -193,7 +193,7 @@ def test_excel_preserves_clubbed_order(tmp_path):
     out_file = str(tmp_path / "pc_clubbed.xlsx")
     ExcelGenerator.generate_excel(formatted, out_file)
     wb = openpyxl.load_workbook(out_file)
-    assert wb.sheetnames == ["I_O_List"]
+    assert wb.sheetnames == ["I_O_List", "Function Block Summary"]
     ws = wb["I_O_List"]
 
     categories_ai = [ws.cell(row=r, column=5).value for r in range(2, 6)]
