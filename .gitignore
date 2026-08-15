@@ -26,13 +26,16 @@ venv.bak/
 # Local portable toolchains (dev machine only)
 .tools/
 
-# Next.js & Vercel
+# Next.js & Vercel (root/frontend only — do not match Guide Materials/Output)
 .next/
 .next-dev/
 frontend/.next-dev/
-out/
-build/
-dist/
+/out/
+frontend/out/
+/build/
+frontend/build/
+/dist/
+frontend/dist/
 .vercel
 
 # Application Temp & Logs
@@ -45,6 +48,9 @@ tmp_out/
 *.xlsx
 !test_formula_fix.xlsx
 !test_sanitize.xlsx
+!Guide Materials/Output/
+!Guide Materials/Output/**
+!Guide Materials/Output/*.xlsx
 *.tsbuildinfo
 
 # Environment Variables & Secrets
