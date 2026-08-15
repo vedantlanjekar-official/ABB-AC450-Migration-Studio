@@ -17,7 +17,7 @@ class Settings(BaseSettings):
     LOG_DIR: Path = SYS_TEMP / "abb_ac450" / "logs"
 
     MAX_UPLOAD_SIZE_MB: int = 100
-    ALLOWED_EXTENSIONS: set[str] = {".pdf", ".xlsx", ".xlsm", ".xls"}
+    ALLOWED_EXTENSIONS: set[str] = {".pdf", ".bax", ".aax", ".xlsx", ".xlsm", ".xls"}
 
     # Production knobs (also set via Render env vars)
     PC_LIGHT_PDF_READ: str = os.getenv("PC_LIGHT_PDF_READ", "1")

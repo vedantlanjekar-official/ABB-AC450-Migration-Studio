@@ -35,7 +35,7 @@ from backend.pc_element.parser.validator import Validator, EngineeringIO
 from backend.pc_element.parser.record_clubber import RecordClubber
 from backend.pc_element.parser.output_formatter import OutputFormatter
 from backend.pc_element.parser.category_mapper import apply_category_columns
-from backend.pc_element.parser.excel_generator import ExcelGenerator
+from backend.pc_element.parser.excel_generator import ExcelGenerator, address_cell
 from backend.pc_element.parser.completeness_auditor import CompletenessAuditor
 from backend.pc_element.parser.function_block_extractor import count_function_blocks
 
@@ -76,6 +76,8 @@ class PCParseResult(BaseModel):
     warnings: List[str] = Field(default_factory=list)
     errors: List[str] = Field(default_factory=list)
     preview_data: List[Dict[str, Any]] = Field(default_factory=list)
+    exported_objects: List[EngineeringIO] = Field(default_factory=list)
+    function_block_counts: Dict[str, int] = Field(default_factory=dict)
 
 
 class PCParserService:
@@ -86,14 +88,44 @@ class PCParserService:
         self.job_id = job_id
         self.output_dir = output_dir
 
-    def execute_pipeline(self) -> PCParseResult:
+    @staticmethod
+    def preview_rows_from_objects(
+        objects: List[EngineeringIO],
+        limit: int = 5000,
+    ) -> List[Dict[str, Any]]:
+        """Build I_O_List preview dicts (sequential Sr. No.) from exported records.
+
+        Slot/Card and Channel sit immediately after Device Tag so the results
+        grid shows extracted hardware numbers without horizontal scrolling past
+        the eight category indicator columns.
+        """
+        rows: List[Dict[str, Any]] = []
+        for sr, item in enumerate(objects[:limit], start=1):
+            rows.append(apply_category_columns({
+                "Sr. No.": sr,
+                "Loop Tag": item.loop_tag,
+                "Description": item.description,
+                "Device Tag": item.device_tag,
+                "Slot/Card": address_cell(item.card_number),
+                "Channel": address_cell(item.channel_number),
+                "Category": item.category,
+            }))
+        return rows
+
+    def execute_pipeline(self, *, write_excel: bool = True) -> PCParseResult:
         start_time = time.time()
         result = PCParseResult(job_id=self.job_id)
 
         try:
-            logger.info(f"[{self.job_id}] Stage 1: Multi-layer PDF read...")
-            reader = PDFReader(self.file_path)
-            pages: List[PageContent] = reader.read_all_pages()
+            suffix = Path(self.file_path).suffix.lower()
+            if suffix == ".aax":
+                logger.info(f"[{self.job_id}] Stage 1: AAX PC export read...")
+                from backend.pc_element.parser.aax_reader import AaxReader
+                pages: List[PageContent] = AaxReader(self.file_path).read_all_pages()
+            else:
+                logger.info(f"[{self.job_id}] Stage 1: Multi-layer PDF read...")
+                reader = PDFReader(self.file_path)
+                pages = reader.read_all_pages()
 
             result.total_pages_read = len(pages)
             result.total_pages_processed = len(pages)
@@ -102,6 +134,7 @@ class PCParserService:
 
             # Independent of I/O extraction: count ABB function-block declarations
             function_block_counts = count_function_blocks(page_texts)
+            result.function_block_counts = dict(function_block_counts)
             logger.info(
                 f"[{self.job_id}] Function block declarations: "
                 + ", ".join(f"{k}={v}" for k, v in function_block_counts.items())
@@ -247,29 +280,20 @@ class PCParserService:
                 f"dups={dup_count} invalid={result.invalid_references}"
             )
 
-            from backend.utils.file_utils import pdf_to_excel_filename, unique_output_path
+            result.exported_objects = formatted_objects
+            result.preview_data = self.preview_rows_from_objects(formatted_objects)
 
-            export_name = pdf_to_excel_filename(Path(self.file_path).name)
-            excel_path = str(unique_output_path(self.output_dir, export_name))
-            ExcelGenerator.generate_excel(
-                formatted_objects,
-                excel_path,
-                function_block_counts=function_block_counts,
-            )
-            result.excel_file_path = excel_path
+            if write_excel:
+                from backend.utils.file_utils import pdf_to_excel_filename, unique_output_path
 
-            preview_rows = []
-            for sr, item in enumerate(formatted_objects[:150], start=1):
-                preview_rows.append(apply_category_columns({
-                    "Sr. No.": sr,
-                    "Loop Tag": item.loop_tag,
-                    "Description": item.description,
-                    "Device Tag": item.device_tag,
-                    "Category": item.category,
-                    "Slot/Card": item.card_number,
-                    "Channel": item.channel_number if item.channel_number > 0 else "",
-                }))
-            result.preview_data = preview_rows
+                export_name = pdf_to_excel_filename(Path(self.file_path).name)
+                excel_path = str(unique_output_path(self.output_dir, export_name))
+                ExcelGenerator.generate_excel(
+                    formatted_objects,
+                    excel_path,
+                    function_block_counts=function_block_counts,
+                )
+                result.excel_file_path = excel_path
 
             logger.info(
                 f"[{self.job_id}] Done -> extracted={result.successfully_parsed}, "

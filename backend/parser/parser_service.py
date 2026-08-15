@@ -52,6 +52,15 @@ class ParserService:
         records = self.pdf_reader.extract_line_records(pdf_path)
         return self.parse_line_records(records, file_name=pdf_path.name)
 
+    def parse_bax_file(
+        self,
+        bax_path: Path
+    ) -> Tuple[List[DBElement], CompilerAuditStatistics, List[str]]:
+        """Parses a BAX export using the same AST pipeline as PDF DB listings."""
+        from backend.parser.bax_reader import BaxReader
+        records = BaxReader(self.job_id).extract_line_records(bax_path)
+        return self.parse_line_records(records, file_name=bax_path.name)
+
     def parse_document_pages(
         self,
         pages: List[Dict[str, Any]],

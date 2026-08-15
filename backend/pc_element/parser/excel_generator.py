@@ -7,9 +7,8 @@ happen upstream). This layer does not reorder or recalculate extracted
 engineering values.
 
 I_O_List columns:
-  Sr. No. | Loop Tag | Description | Device Tag |
+  Sr. No. | Loop Tag | Description | Device Tag | Slot/Card | Channel |
   AI | AO | DI | DO | AI800_ | AO800_ | DI800_ | DO800_ |
-  Slot/Card | Channel
 
 Function Block Summary columns:
   Functional Block | Total Count
@@ -49,12 +48,21 @@ def sanitize_cell_value(val: Any) -> Any:
     return val
 
 
+def address_cell(value: Any) -> Any:
+    """Write Slot/Card or Channel only when a real hardware number was resolved."""
+    try:
+        number = int(value)
+    except (TypeError, ValueError):
+        return ""
+    return number if number > 0 else ""
+
+
 class ExcelGenerator:
     """Generates Valmet-compatible Excel workbooks for PC Element I/O lists."""
 
     # Columns that replace the former single Category field
-    _CATEGORY_COLS = CATEGORY_INDICATOR_COLUMNS  # 5..12 after Device Tag
-    _CENTER_COLS = {1, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14}  # Sr + indicators + Slot/Card + Channel
+    _CATEGORY_COLS = CATEGORY_INDICATOR_COLUMNS  # 7..14 after Slot/Channel
+    _CENTER_COLS = {1, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14}  # Sr + Slot/Card + Channel + indicators
 
     @classmethod
     def generate_excel(
@@ -84,9 +92,9 @@ class ExcelGenerator:
             "Loop Tag",
             "Description",
             "Device Tag",
-            *CATEGORY_INDICATOR_COLUMNS,
             "Slot/Card",
             "Channel",
+            *CATEGORY_INDICATOR_COLUMNS,
         ]
         start_row = 1
         for col_idx, header_text in enumerate(headers, start=1):
@@ -96,19 +104,19 @@ class ExcelGenerator:
             cell.alignment = design.center_align
             cell.border = design.thin_border
         ws.row_dimensions[start_row].height = 26
+        ws.freeze_panes = "G2"
 
         current_row = start_row + 1
         for sr_no, obj in enumerate(ordered_objects, start=1):
-            channel_val = obj.channel_number if obj.channel_number > 0 else ""
             indicators = build_category_indicator_values(obj.category)
             row_data = [
                 sr_no,
                 obj.loop_tag,
                 obj.description or "",
                 obj.device_tag,
+                address_cell(obj.card_number),
+                address_cell(obj.channel_number),
                 *[indicators[col] for col in CATEGORY_INDICATOR_COLUMNS],
-                obj.card_number,
-                channel_val,
             ]
 
             fill_to_apply = (
@@ -138,6 +146,9 @@ class ExcelGenerator:
 
             ws.row_dimensions[current_row].height = 20
             current_row += 1
+
+        last_data_row = max(current_row - 1, start_row)
+        ws.auto_filter.ref = f"A{start_row}:{get_column_letter(len(headers))}{last_data_row}"
 
         for col in ws.columns:
             max_len = 0

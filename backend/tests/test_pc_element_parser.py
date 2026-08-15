@@ -261,8 +261,8 @@ def test_excel_generation_columns(tmp_path):
     headers = [ws.cell(row=1, column=c).value for c in range(1, 15)]
     assert headers == [
         "Sr. No.", "$(TAG)", "$(NAME_40)", "$(DEVICETAG)",
-        "AI", "AO", "DI", "DO", "AI800_", "AO800_", "DI800_", "DO800_",
         "Slot/Card", "Channel",
+        "AI", "AO", "DI", "DO", "AI800_", "AO800_", "DI800_", "DO800_",
     ]
     assert ws["A1"].fill.fgColor.rgb.endswith("1E293B")
     assert ws["A1"].font.name == "Calibri"
@@ -275,14 +275,16 @@ def test_excel_generation_columns(tmp_path):
     row2 = [ws.cell(row=2, column=c).value for c in range(1, 15)]
     assert row2[1] == "82LIC660"
     assert row2[3] == "82LIC660.MV"
-    assert row2[4:12] == [None, None, None, None, 1, None, None, None]
-    assert row2[12] == 5
-    assert row2[13] == 10
+    assert row2[4] == 5
+    assert row2[5] == 10
+    assert row2[6:14] == [None, None, None, None, 1, None, None, None]
 
     # Row 2: AO → AO = 1
     row3 = [ws.cell(row=3, column=c).value for c in range(1, 15)]
     assert row3[3] == "945FC400.OUT"
-    assert row3[4:12] == [None, 1, None, None, None, None, None, None]
+    assert row3[4] == 2
+    assert row3[5] == 3
+    assert row3[6:14] == [None, 1, None, None, None, None, None, None]
 
     summary = wb[FUNCTION_BLOCK_SUMMARY_SHEET]
     assert [summary.cell(row=1, column=c).value for c in range(1, 3)] == [
@@ -381,6 +383,10 @@ def test_pc_element_parser_service_pipeline(tmp_path):
             "AI", "AO", "DI", "DO", "AI800_", "AO800_", "DI800_", "DO800_",
             "Slot/Card", "Channel",
         }
+        keys = list(res.preview_data[0].keys())
+        device_idx = keys.index("Device Tag")
+        assert keys[device_idx + 1] == "Slot/Card"
+        assert keys[device_idx + 2] == "Channel"
 
 
 @pytest.mark.integration

@@ -1,0 +1,78 @@
+(* sample BAX generated for unit tests *)
+BEGIN DB
+HEADER
+BEGIN GENERAL DEFAULTS
+DEFAULT AI
+   :SERVICE              1
+   :TYPE                 DSAI_130
+   :SCANT                NOT USED
+
+DEFAULT AIS
+   :UNIT                 %
+   :DEC                  2
+   :DESCR
+
+DEFAULT AO
+   :SERVICE              1
+   :TYPE                 DSAO_110
+
+DEFAULT AOS
+   :DEC                  1
+   :UNIT                 %
+
+DEFAULT DI
+   :SERVICE              1
+   :TYPE                 DSDI_110
+
+DEFAULT DIS
+   :DESCR
+
+DEFAULT DO
+   :SERVICE              1
+   :TYPE                 DSDO_110
+
+DEFAULT DOS
+   :DESCR
+
+END GENERAL DEFAULTS
+
+AI1                   AI
+   :ADDR                 32
+   :TYPE                 DSAI_110
+   :CONV_PAR             4..20mA
+
+AI1.1              (* AIS *)
+   :NAME                 82M001.IT
+   :DESCR                DC Motor Cooling Fan
+   :UNIT                 A
+   :RANGEMAX             6.000000E+01
+
+AI1.2              (* AIS *)
+   :NAME                 82M007.IT
+   :DESCR                No.2 Nash Vacuum
+
+AO1                   AO
+   :ADDR                 40
+
+AO1.1              (* AOS *)
+   :NAME                 82CV001.OUT
+   :DESCR                Control Output
+
+DI1                   DI
+   :ADDR                 16
+
+DI1.1              (* DIS *)
+   :NAME                 82XS001.DI
+   :DESCR                Limit Switch
+
+DO1                   DO
+   :ADDR                 24
+
+DO1.1              (* DOS *)
+   :NAME                 82YV001.DO
+   :DESCR                Solenoid
+
+PIDCON1               PIDCON
+   :NAME                 SKIP_ME
+
+END DB

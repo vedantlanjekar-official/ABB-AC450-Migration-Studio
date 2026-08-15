@@ -54,13 +54,13 @@ const WORKFLOW_COPY: Record<
   DB: {
     title: 'DB Element Converter',
     description:
-      'Upload ABB Advant Controller 450 DB printout PDFs for structured Excel conversion.',
+      'Upload ABB Advant Controller 450 DB printout PDF or BAX files for structured Excel conversion.',
     action: 'Start DB Conversion',
   },
   PC: {
     title: 'PC Element Converter',
     description:
-      'Upload ABB AC450 PC Element PDFs to extract structured hardwired I/O references.',
+      'Upload ABB AC450 PC Element PDF or AAX files to extract structured hardwired I/O references.',
     action: 'Start PC Conversion',
   },
   COMPARE: {
@@ -85,6 +85,22 @@ const WORKFLOW_COPY: Record<
 
 function isPdfFile(file: File): boolean {
   return file.name.toLowerCase().endsWith('.pdf');
+}
+
+function isBaxFile(file: File): boolean {
+  return file.name.toLowerCase().endsWith('.bax');
+}
+
+function isAaxFile(file: File): boolean {
+  return file.name.toLowerCase().endsWith('.aax');
+}
+
+function isDbSourceFile(file: File): boolean {
+  return isPdfFile(file) || isBaxFile(file);
+}
+
+function isPcSourceFile(file: File): boolean {
+  return isPdfFile(file) || isAaxFile(file);
 }
 
 function isExcelFile(file: File, allowLegacy = false): boolean {
@@ -127,7 +143,9 @@ function WorkflowUploadBox({
   const { startConversion, isUploading, error } = useFileUpload();
 
   const copy = WORKFLOW_COPY[activeType];
-  const isPdfWorkflow = activeType === 'DB' || activeType === 'PC';
+  const isDbWorkflow = activeType === 'DB';
+  const isPcWorkflow = activeType === 'PC';
+  const isPdfWorkflow = isDbWorkflow || isPcWorkflow;
   const isCompare = activeType === 'COMPARE';
   const isArrangement = activeType === 'IO_ARRANGE';
   const isTemplate = activeType === 'ENG_TEMPLATE';
@@ -142,10 +160,14 @@ function WorkflowUploadBox({
     void startConversion(activeType);
   };
 
-  const handlePdfFiles = (files: File[]) => {
-    const pdfFiles = files.filter(isPdfFile);
-    if (pdfFiles.length) {
-      setSelectedFiles([...selectedFiles, ...pdfFiles]);
+  const handleDocumentFiles = (files: File[]) => {
+    const accepted = isDbWorkflow
+      ? files.filter(isDbSourceFile)
+      : isPcWorkflow
+      ? files.filter(isPcSourceFile)
+      : files.filter(isPdfFile);
+    if (accepted.length) {
+      setSelectedFiles([...selectedFiles, ...accepted]);
     }
   };
 
@@ -153,7 +175,7 @@ function WorkflowUploadBox({
     event.preventDefault();
     setIsDragOver(false);
     if (isPdfWorkflow) {
-      handlePdfFiles(Array.from(event.dataTransfer.files || []));
+      handleDocumentFiles(Array.from(event.dataTransfer.files || []));
     }
   };
 
@@ -332,10 +354,16 @@ function WorkflowUploadBox({
               <input
                 ref={pdfInputRef}
                 type="file"
-                accept=".pdf,application/pdf"
+                accept={
+                  isDbWorkflow
+                    ? '.pdf,.bax,application/pdf'
+                    : isPcWorkflow
+                    ? '.pdf,.aax,application/pdf'
+                    : '.pdf,application/pdf'
+                }
                 multiple
                 onChange={(event) => {
-                  handlePdfFiles(Array.from(event.target.files || []));
+                  handleDocumentFiles(Array.from(event.target.files || []));
                   event.target.value = '';
                 }}
                 className="hidden"
@@ -344,11 +372,25 @@ function WorkflowUploadBox({
                 <UploadCloud className="w-6 h-6" />
               </span>
               <p className="text-sm font-bold text-slate-800">
-                Drag and drop PDF files
+                {isDbWorkflow
+                  ? 'Drag and drop PDF or BAX files'
+                  : isPcWorkflow
+                  ? 'Drag and drop PDF or AAX files'
+                  : 'Drag and drop PDF files'}
               </p>
               <p className="text-xs text-slate-400 mt-1">
                 or <span className="font-semibold text-valmet-green">browse files</span> · up to 100MB each
               </p>
+              {isDbWorkflow && (
+                <p className="text-[11px] font-semibold text-slate-500 mt-2 tracking-wide">
+                  Supported Formats: PDF, BAX
+                </p>
+              )}
+              {isPcWorkflow && (
+                <p className="text-[11px] font-semibold text-slate-500 mt-2 tracking-wide">
+                  Supported Formats: PDF, AAX
+                </p>
+              )}
             </div>
 
             {selectedFiles.length > 0 && (

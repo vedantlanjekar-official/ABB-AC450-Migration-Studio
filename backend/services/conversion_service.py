@@ -7,6 +7,7 @@ import gc
 from backend.core.config import settings
 from backend.core.logging import get_logger
 from backend.parser.pdf_reader import PDFReader, LineRecord
+from backend.parser.bax_reader import BaxReader
 from backend.parser.parser_service import ParserService
 from backend.mapper.element_mapper import ElementMapper
 from backend.mapper.record_clubber import RecordClubber
@@ -29,6 +30,7 @@ class ConversionService:
         self.logger = get_logger(job_id)
         self._pipeline_started_at: datetime | None = None
         self.pdf_reader = PDFReader(job_id)
+        self.bax_reader = BaxReader(job_id)
         self.parser_service = ParserService(job_id)
         self.mapper = ElementMapper(job_id)
         self.record_clubber = RecordClubber(job_id)
@@ -481,20 +483,24 @@ class ConversionService:
                 f"files={uploaded_filenames}, upload_dir={job_upload_dir}, dir_exists={job_upload_dir.exists()}",
             )
 
-            # Phase 1: Reading PDF
+            # Phase 1: Reading PC source (PDF or AAX)
             job_store.update_status(
                 self.job_id,
                 status="reading_pdf",
                 progress_percentage=15,
-                current_phase="Reading PC Element PDF (Phase 1)",
+                current_phase="Reading PC Element source (Phase 1)",
                 conversion_type="PC",
-                message=f"Reading {len(uploaded_filenames)} uploaded PC Element PDF document(s)..."
+                message=f"Reading {len(uploaded_filenames)} uploaded PC Element document(s) (PDF/AAX)..."
             )
             time.sleep(0.05)
 
             from backend.pc_element.parser.parser_service import PCParserService as ModularPCParserService
+            from backend.pc_element.parser.excel_generator import ExcelGenerator as PCExcelGenerator
+            from backend.pc_element.parser.function_block_extractor import SUPPORTED_FUNCTION_BLOCKS
+            from backend.utils.file_utils import combined_export_filename, unique_output_path
 
-            all_previews = []
+            all_objects = []
+            combined_fb = {name: 0 for name in SUPPORTED_FUNCTION_BLOCKS}
             total_objects = 0
             ai_count = 0
             ai800_count = 0
@@ -508,35 +514,45 @@ class ConversionService:
             missing_descriptions = 0
             excel_path_str = None
             total_proc_time = 0.0
+            parsed_sources = 0
 
             for fname in uploaded_filenames:
-                pdf_path = job_upload_dir / fname
-                if not pdf_path.exists():
+                source_path = job_upload_dir / fname
+                if not source_path.exists():
                     job_store.add_warning(self.job_id, f"File not found: {fname}")
                     continue
 
-                # Phase 2: Processing PC Diagram PDF
+                suffix = source_path.suffix.lower()
+                if suffix not in {".pdf", ".aax"}:
+                    job_store.add_warning(
+                        self.job_id,
+                        f"Unsupported PC source type for {fname} (expected .pdf or .aax).",
+                    )
+                    continue
+
+                # Phase 2: Processing PC Diagram / AAX export
                 job_store.update_status(
                     self.job_id,
                     status="extracting_text",
                     progress_percentage=50,
                     current_phase="Extracting Hardwired I/O References & Tag Grammar",
                     conversion_type="PC",
-                    message=f"Scanning PC Diagram '{fname}' for hardwired I/O references..."
+                    message=f"Scanning PC source '{fname}' for hardwired I/O references..."
                 )
                 time.sleep(0.05)
 
-                self._log_stage("PC STAGE", f"Executing PC parser pipeline for {fname}")
+                self._log_stage("PC STAGE", f"Executing PC parser pipeline for {fname} ({suffix})")
                 pc_output_dir = settings.OUTPUT_DIR / self.job_id
                 pc_output_dir.mkdir(parents=True, exist_ok=True)
                 service = ModularPCParserService(
-                    file_path=str(pdf_path),
+                    file_path=str(source_path),
                     job_id=self.job_id,
                     output_dir=str(pc_output_dir),
                 )
                 res = self._run_with_heartbeat(
                     f"PC parse {fname}",
                     service.execute_pipeline,
+                    write_excel=False,
                 )
                 self._log_stage(
                     "PC STAGE",
@@ -544,6 +560,7 @@ class ConversionService:
                 )
                 gc.collect()
 
+                parsed_sources += 1
                 total_objects += res.total_io_found
                 # Roll extended families into summary counters for the UI
                 ai_count += res.ai_count + res.ai800_count + res.aic_count
@@ -553,9 +570,9 @@ class ConversionService:
                 duplicates_removed += res.duplicates_removed
                 missing_descriptions += res.descriptions_missing
                 total_proc_time += res.processing_time_seconds
-                if res.excel_file_path:
-                    excel_path_str = res.excel_file_path
-                all_previews.extend(res.preview_data)
+                all_objects.extend(res.exported_objects)
+                for name, count in (res.function_block_counts or {}).items():
+                    combined_fb[name] = combined_fb.get(name, 0) + int(count)
 
                 for w in res.warnings:
                     job_store.add_warning(self.job_id, w)
@@ -564,8 +581,24 @@ class ConversionService:
                 if res.errors:
                     raise Exception(f"PC Element extraction failed: {res.errors[0]}")
 
+            pc_output_dir = settings.OUTPUT_DIR / self.job_id
+            pc_output_dir.mkdir(parents=True, exist_ok=True)
+            export_name = combined_export_filename(
+                uploaded_filenames,
+                suffixes=(".pdf", ".aax"),
+                combined_name="PC_Element_IO_List.xlsx",
+                fallback="PC_Element.xlsx",
+            )
+            combined_excel = unique_output_path(pc_output_dir, export_name)
+            PCExcelGenerator.generate_excel(
+                all_objects,
+                str(combined_excel),
+                function_block_counts=combined_fb,
+            )
+            excel_path_str = str(combined_excel)
+            total_objects = len(all_objects)
             preview_data = {
-                "I_O_List": all_previews[:50]
+                "I_O_List": ModularPCParserService.preview_rows_from_objects(all_objects)
             }
 
             # Phase 4: Completed
@@ -621,51 +654,127 @@ class ConversionService:
                 self.job_id,
                 status="reading_pdf",
                 progress_percentage=10,
-                current_phase="Reading PDF files (Stage 1)",
+                current_phase="Reading source files (Stage 1)",
                 conversion_type="DB",
-                message=f"Reading {len(uploaded_filenames)} uploaded PDF document(s)..."
+                message=f"Reading {len(uploaded_filenames)} uploaded DB document(s) (PDF/BAX)...",
             )
             time.sleep(0.05)
-            self._log_stage("STAGE 1", "PDF document extraction starting")
+            self._log_stage("STAGE 1", "DB source extraction starting (PDF or BAX)")
 
-            combined_line_records: List[LineRecord] = []
-            page_offset = 0
+            from backend.parser.validator import CompilerAuditStatistics
+            from backend.models.db_element import DBElement
+
+            all_parsed_elements: List[DBElement] = []
+            stats = CompilerAuditStatistics()
+            parsed_sources = 0
+            duplicate_count = 0
 
             for fname in uploaded_filenames:
-                pdf_path = job_upload_dir / fname
-                if not pdf_path.exists():
-                    msg = f"File not found: {fname} (expected at {pdf_path})"
+                source_path = job_upload_dir / fname
+                if not source_path.exists():
+                    msg = f"File not found: {fname} (expected at {source_path})"
                     self._log_stage("STAGE 1 ERROR", msg)
                     job_store.add_warning(self.job_id, msg)
                     continue
 
-                self._log_stage("STAGE 1", f"Extracting lines from {fname} ({pdf_path.stat().st_size} bytes)")
+                suffix = source_path.suffix.lower()
+                self._log_stage(
+                    "STAGE 1",
+                    f"Extracting lines from {fname} ({source_path.stat().st_size} bytes, type={suffix or 'unknown'})",
+                )
 
                 def _page_progress(done: int, total: int, _fname: str = fname) -> None:
                     job_store.heartbeat(
                         self.job_id,
-                        message=f"Extracting {_fname}: page {done}/{total}...",
+                        message=f"Extracting {_fname}: {done}/{total}...",
                     )
 
-                file_records = self._run_with_heartbeat(
-                    f"PDF extract {fname}",
-                    self.pdf_reader.extract_line_records,
-                    pdf_path,
-                    progress_callback=_page_progress,
-                )
+                if suffix == ".bax":
+                    file_records = self._run_with_heartbeat(
+                        f"BAX extract {fname}",
+                        self.bax_reader.extract_line_records,
+                        source_path,
+                        progress_callback=_page_progress,
+                    )
+                elif suffix == ".pdf":
+                    file_records = self._run_with_heartbeat(
+                        f"PDF extract {fname}",
+                        self.pdf_reader.extract_line_records,
+                        source_path,
+                        progress_callback=_page_progress,
+                    )
+                else:
+                    msg = (
+                        f"Unsupported DB source type for {fname} "
+                        f"(expected .pdf or .bax, got '{suffix or 'none'}')."
+                    )
+                    self._log_stage("STAGE 1 ERROR", msg)
+                    job_store.add_warning(self.job_id, msg)
+                    continue
+
                 self._log_stage("STAGE 1", f"Extracted {len(file_records)} line(s) from {fname}")
                 gc.collect()
-                if file_records:
-                    max_page_in_file = max(r.page_number for r in file_records)
-                    for rec in file_records:
-                        combined_line_records.append(
-                            LineRecord(
-                                page_number=rec.page_number + page_offset,
-                                line_number=rec.line_number,
-                                text=rec.text
-                            )
-                        )
-                    page_offset += max_page_in_file
+                if not file_records:
+                    job_store.add_warning(self.job_id, f"No extractable lines in {fname}.")
+                    continue
+
+                job_store.update_status(
+                    self.job_id,
+                    status="detecting_elements",
+                    progress_percentage=45,
+                    current_phase="AST Hierarchy & Default Library Building (Stage 4 - 7)",
+                    conversion_type="DB",
+                    message=f"Parsing DB Element objects in '{fname}'...",
+                )
+                file_elements, file_stats, file_warnings = self._run_with_heartbeat(
+                    f"DB AST parse {fname}",
+                    self.parser_service.parse_line_records,
+                    file_records,
+                    file_name=fname,
+                )
+
+                seen_keys = set()
+                kept: List[DBElement] = []
+                file_dups = 0
+                for elem in file_elements:
+                    key = ((elem.element_type or "").upper(), (elem.tag or "").upper())
+                    if key in seen_keys:
+                        file_dups += 1
+                        continue
+                    seen_keys.add(key)
+                    if not elem.file_name:
+                        elem.file_name = fname
+                    kept.append(elem)
+
+                all_parsed_elements.extend(kept)
+                parsed_sources += 1
+                duplicate_count += file_dups
+                stats.pages_read += file_stats.pages_read
+                stats.headers_removed += file_stats.headers_removed
+                stats.ignored_header_footer_lines += file_stats.ignored_header_footer_lines
+                stats.raw_default_blocks_found += file_stats.raw_default_blocks_found
+                stats.hardware_default_blocks += file_stats.hardware_default_blocks
+                stats.software_default_blocks += file_stats.software_default_blocks
+                stats.merged_profiles_created += file_stats.merged_profiles_created
+                stats.objects_parsed += file_stats.objects_parsed
+                stats.inherited_parameters += file_stats.inherited_parameters
+                stats.object_overrides += file_stats.object_overrides
+                stats.missing_parameters_after_merge += file_stats.missing_parameters_after_merge
+                stats.warnings.extend(file_stats.warnings)
+                stats.processing_time_seconds += file_stats.processing_time_seconds
+
+                self._log_stage(
+                    "STAGE 4-7",
+                    f"{fname}: parsed={len(file_elements)} kept={len(kept)} "
+                    f"dups={file_dups} inherited={file_stats.inherited_parameters}",
+                )
+                for w in file_warnings:
+                    job_store.add_warning(self.job_id, w)
+                if file_dups:
+                    job_store.add_warning(
+                        self.job_id,
+                        f"Removed {file_dups} duplicate DB element tag(s) from {fname}.",
+                    )
 
             job_store.update_status(
                 self.job_id,
@@ -673,70 +782,25 @@ class ConversionService:
                 progress_percentage=25,
                 current_phase="Cleaning Document Noise (Stage 2 & 3)",
                 conversion_type="DB",
-                message=f"Cleaning repeated page headers and footers across {len(combined_line_records)} line records..."
+                message=f"Parsed {parsed_sources} DB document(s) into {len(all_parsed_elements)} object(s)...",
             )
             time.sleep(0.05)
-            self._log_stage("STAGE 2-3", f"Document cleaning complete — {len(combined_line_records)} combined line record(s)")
 
-            job_store.update_status(
-                self.job_id,
-                status="detecting_elements",
-                progress_percentage=45,
-                current_phase="AST Hierarchy & Default Library Building (Stage 4 - 7)",
-                conversion_type="DB",
-                message="Building unified Default Library and Card/Object AST Tree..."
-            )
-            time.sleep(0.05)
-            self._log_stage("STAGE 4-7", "AST hierarchy and default library building starting")
-
-            combined_file_name = ", ".join(uploaded_filenames) if uploaded_filenames else "document.pdf"
-            all_parsed_elements, stats, warnings = self._run_with_heartbeat(
-                "DB AST parse",
-                self.parser_service.parse_line_records,
-                combined_line_records,
-                file_name=combined_file_name,
-            )
-            raw_count = len(all_parsed_elements)
-            self._log_stage(
-                "STAGE 4-7",
-                f"Parsed {raw_count} object(s), "
-                f"{stats.raw_default_blocks_found} default block(s), "
-                f"{stats.inherited_parameters} inherited parameter(s)",
-            )
-
-            # Deduplicate by (element_type, tag) — keep first occurrence
-            deduped: List = []
-            seen_keys = set()
-            duplicate_count = 0
-            for elem in all_parsed_elements:
-                key = ((elem.element_type or "").upper(), (elem.tag or "").upper())
-                if key in seen_keys:
-                    duplicate_count += 1
-                    continue
-                seen_keys.add(key)
-                deduped.append(elem)
-            all_parsed_elements = deduped
+            raw_count = stats.objects_parsed
             if duplicate_count:
                 self.logger.info(
-                    f"DB dedup removed {duplicate_count} duplicate tag(s); "
-                    f"{len(all_parsed_elements)} unique object(s) remain."
+                    f"DB within-file dedup removed {duplicate_count} duplicate tag(s); "
+                    f"{len(all_parsed_elements)} object(s) remain from {parsed_sources} file(s)."
                 )
-                job_store.add_warning(
-                    self.job_id,
-                    f"Removed {duplicate_count} duplicate DB element tag(s) before export.",
-                )
-
-            for w in warnings:
-                job_store.add_warning(self.job_id, w)
 
             total_objects = len(all_parsed_elements)
             self._log_stage(
                 "VALIDATION",
-                f"raw_parsed={raw_count}, unique_exported={total_objects}, "
-                f"duplicates_removed={duplicate_count}",
+                f"files={parsed_sources}, raw_parsed={raw_count}, "
+                f"exported={total_objects}, duplicates_removed={duplicate_count}",
             )
             if total_objects == 0:
-                job_store.add_warning(self.job_id, "No ABB AC450 DB Element objects detected in provided PDF(s).")
+                job_store.add_warning(self.job_id, "No ABB AC450 DB Element objects detected in provided PDF(s)/BAX file(s).")
                 self._log_stage("STAGE 4-7 WARNING", "Zero DB elements detected after parsing")
 
             job_store.update_status(
@@ -775,7 +839,7 @@ class ConversionService:
                         sample_tags=sample_tags
                     )
                 )
-                preview_data[etype] = rows[:10]
+                preview_data[etype] = rows[:150]
 
             job_store.update_status(
                 self.job_id,
@@ -788,12 +852,14 @@ class ConversionService:
             time.sleep(0.05)
             self._log_stage("STAGE 10", "Excel workbook generation starting")
 
-            from backend.utils.file_utils import excel_filename_from_uploads, unique_output_path
+            from backend.utils.file_utils import combined_export_filename, unique_output_path
 
             output_dir = settings.OUTPUT_DIR / self.job_id
             output_dir.mkdir(parents=True, exist_ok=True)
-            export_name = excel_filename_from_uploads(
+            export_name = combined_export_filename(
                 uploaded_filenames,
+                suffixes=(".pdf", ".bax"),
+                combined_name="DB_Element.xlsx",
                 fallback="DB_Element.xlsx",
             )
             output_excel_path = unique_output_path(output_dir, export_name)
@@ -823,7 +889,9 @@ class ConversionService:
                 f"AI800={ai800_count} AO800={ao800_count} DI800={di800_count} DO800={do800_count}",
             )
 
-            elapsed = (datetime.utcnow() - self._pipeline_started_at).total_seconds()
+            elapsed = 0.0
+            if self._pipeline_started_at:
+                elapsed = (datetime.utcnow() - self._pipeline_started_at).total_seconds()
             job_store.update_status(
                 self.job_id,
                 status="completed",

@@ -29,12 +29,13 @@ def sanitize_filename(filename: str) -> str:
 
 def pdf_to_excel_filename(pdf_filename: str) -> str:
     """
-    Derive Excel export name from a PDF filename.
+    Derive Excel export name from a PDF, BAX, or AAX filename.
 
-    Removes only a trailing .pdf/.PDF extension; everything else is preserved.
+    Removes only a trailing .pdf/.bax/.aax extension; everything else is preserved.
     """
     name = Path(pdf_filename or "").name.strip() or "export.pdf"
-    if name.lower().endswith(".pdf"):
+    lower = name.lower()
+    if lower.endswith((".pdf", ".bax", ".aax")):
         return name[:-4] + ".xlsx"
     return f"{Path(name).stem}.xlsx"
 
@@ -47,17 +48,36 @@ def excel_filename_from_uploads(
     """
     Pick the Excel download/export filename from uploaded sources.
 
-    Uses the first PDF when present (single-file jobs and multi-PDF DB merges).
-    Falls back to a generic name when no PDF is in the upload list.
+    Prefers the first PDF, then BAX, then AAX.
+    Falls back to a generic name when none of those are in the upload list.
     """
     files = list(uploaded_files or [])
-    for fname in files:
-        if str(fname).lower().endswith(".pdf"):
-            return pdf_to_excel_filename(str(fname))
+    for ext in (".pdf", ".bax", ".aax"):
+        for fname in files:
+            if str(fname).lower().endswith(ext):
+                return pdf_to_excel_filename(str(fname))
     if files:
         stem = Path(str(files[0])).stem
         return f"{stem}.xlsx" if stem else fallback
     return fallback
+
+
+def combined_export_filename(
+    uploaded_files: Optional[Sequence[str]],
+    *,
+    suffixes: Sequence[str],
+    combined_name: str,
+    fallback: str,
+) -> str:
+    """Use a stable combined workbook name when more than one source is present."""
+    sources = [
+        fname
+        for fname in (uploaded_files or [])
+        if str(fname).lower().endswith(tuple(s.lower() for s in suffixes))
+    ]
+    if len(sources) > 1:
+        return combined_name
+    return excel_filename_from_uploads(uploaded_files, fallback=fallback)
 
 
 def unique_output_path(directory: Union[str, Path], filename: str) -> Path:

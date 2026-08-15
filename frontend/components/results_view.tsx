@@ -546,7 +546,14 @@ export function ResultsView() {
                     #
                   </th>
                   {Object.keys(filteredRows[0]).map((col) => (
-                    <th key={col} className="px-3.5 py-2 border-r border-slate-300 whitespace-nowrap font-semibold">
+                    <th
+                      key={col}
+                      className={`px-3.5 py-2 border-r border-slate-300 whitespace-nowrap font-semibold ${
+                        col === 'Slot/Card' || col === 'Channel'
+                          ? 'bg-amber-100 text-slate-900'
+                          : ''
+                      }`}
+                    >
                       {col}
                     </th>
                   ))}
@@ -565,14 +572,16 @@ export function ResultsView() {
                       <td
                         key={cIdx}
                         className={`px-3.5 py-2 border-r border-slate-200 whitespace-nowrap ${
-                          col === 'Tag' || col === 'Loop Tag'
+                          col === 'Tag' || col === 'Loop Tag' || col === '$(TAG)'
                             ? 'font-bold text-valmet-darkgreen bg-valmet-lightgreen/40'
                             : col === 'Device Tag' || col === '$(DEVICETAG)'
                             ? 'font-bold text-slate-900'
+                            : col === 'Slot/Card' || col === 'Channel'
+                            ? 'font-bold text-slate-900 bg-amber-50'
                             : 'text-slate-700'
                         }`}
                       >
-                        {String(val ?? '') || '-'}
+                        {val === 0 || val === '0' ? '0' : String(val ?? '') || '-'}
                       </td>
                     ))}
                   </tr>

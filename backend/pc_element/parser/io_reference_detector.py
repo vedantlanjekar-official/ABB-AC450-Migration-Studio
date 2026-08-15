@@ -120,7 +120,12 @@ class IOReferenceDetector:
                 if name == "spatial":
                     continue
                 blob_str = (blob or "").strip()
-                if not blob_str or not cls.KEYWORD_REGEX.search(blob_str):
+                if not blob_str:
+                    continue
+                if not (
+                    cls.KEYWORD_REGEX.search(blob_str)
+                    or cls.IO_NEAR_SLASH.search(blob_str)
+                ):
                     continue
                 sources.append(blob_str[: cls.MAX_SOURCE_CHARS])
 

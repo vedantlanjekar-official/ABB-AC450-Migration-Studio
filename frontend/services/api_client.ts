@@ -2,7 +2,7 @@ import axios from 'axios';
 import { FileUploadResponse, ProcessStatusResponse, ConversionType } from '../types/converter';
 
 const PRODUCTION_API_URL = 'https://abb-ac450-migration-studio-backend.onrender.com/api';
-const LOCAL_API_URL = 'http://127.0.0.1:8000/api';
+const LOCAL_API_URL = 'http://127.0.0.1:8002/api';
 
 function isLocalHost(): boolean {
   if (typeof window === 'undefined') {

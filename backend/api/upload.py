@@ -10,13 +10,13 @@ from backend.utils.file_utils import sanitize_filename
 router = APIRouter(prefix="/upload", tags=["Upload"])
 logger = get_logger()
 
-ALLOWED_SUFFIXES = (".pdf", ".xlsx", ".xlsm", ".xls")
+ALLOWED_SUFFIXES = (".pdf", ".bax", ".aax", ".xlsx", ".xlsm", ".xls")
 
 
 @router.post("", response_model=FileUploadResponse)
 async def upload_files(files: List[UploadFile] = File(...)):
     """
-    Receives PDF conversion or standalone Excel workflow uploads.
+    Receives PDF/BAX/AAX conversion or standalone Excel workflow uploads.
     Saves files to job directory and returns job_id.
     """
     if not files:
@@ -36,7 +36,7 @@ async def upload_files(files: List[UploadFile] = File(...)):
                 status_code=400,
                 detail=(
                     f"Invalid file extension for {file.filename}. "
-                    "Supported: PDF, XLSX, XLSM, XLS."
+                    "Supported: PDF, BAX, AAX, XLSX, XLSM, XLS."
                 ),
             )
 

@@ -1,6 +1,6 @@
 """
 validator.py - Stage 10: Validation of EngineeringIO objects for PC Element Engine.
-Mandatory fields: io_family, category, card_number, device_tag, loop_tag.
+Mandatory fields: io_family, category, card_number (>=0; 0 = unknown/soft AAX), device_tag, loop_tag.
 Only the eight supported I/O families are accepted.
 """
 
@@ -50,7 +50,7 @@ class Validator:
         if category not in cls.VALID_CATEGORIES:
             errors.append(f"Invalid or missing category: '{obj.category}'")
 
-        if obj.card_number <= 0:
+        if obj.card_number < 0:
             errors.append(f"Invalid card_number: {obj.card_number}")
 
         if obj.channel_number < 0:

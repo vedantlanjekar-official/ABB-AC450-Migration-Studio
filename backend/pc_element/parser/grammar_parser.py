@@ -276,7 +276,11 @@ class GrammarParser:
         m = re.match(r"^([A-Z0-9][A-Z0-9_\-]*(?:\.[A-Z0-9_\-]*)*)", tag)
         if not m:
             return tag
-        cleaned = m.group(1).rstrip(".-_")
+        # Trim trailing structural punctuation only. Trailing underscores are
+        # PRESERVED because ABB AAX exports use IT_, ST_, INT_, SSP_, CSP_
+        # (etc.) as legitimate suffixes that are semantically distinct from
+        # their underscore-less variants (IT, ST, INT, SSP, CSP).
+        cleaned = m.group(1).rstrip(".-")
         return cleaned
 
     @classmethod

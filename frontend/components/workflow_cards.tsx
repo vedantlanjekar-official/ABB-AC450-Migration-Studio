@@ -5,7 +5,7 @@ import { Upload, FileSearch, Cpu, FileSpreadsheet, Download, ChevronRight } from
 import { useConverterStore } from '../store/converter_store';
 
 const steps = [
-  { id: 'upload', title: 'Upload PDF', desc: 'AC450 DB Printouts', icon: Upload },
+  { id: 'upload', title: 'Upload Source', desc: 'PDF or BAX DB Export', icon: Upload },
   { id: 'parse', title: 'Parse DB Elements', desc: 'Identify Tags & Blocks', icon: FileSearch },
   { id: 'extract', title: 'Extract Parameters', desc: ':KEY VALUE Pairs', icon: Cpu },
   { id: 'generate', title: 'Generate Excel', desc: 'One Sheet Per Type', icon: FileSpreadsheet },

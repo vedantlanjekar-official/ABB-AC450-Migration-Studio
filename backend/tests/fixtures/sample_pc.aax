@@ -1,0 +1,50 @@
+BEGIN PC16
+HEADER
+     IEC_DocNo      22-PC16
+     IEC_Title2     PM2 \ Test Area
+     IEC_Project1   Carter Holt Harvey Tissue
+
+PCD-PAGE    1
+"82PIC972: Steam Box Supply"
+
+PC16.31.22.1.110 PIDCON (1,1,1,1,1,0)
+          :DBINST             =82PIC972
+          :MV                 =AI7.10
+          :ALCBLK             =AI7.10:ERR
+          :OUTP
+
+PC16.31.22.1.111 MOVE (R,2)
+          :21                 =82PIC972:POUT
+          :22                 =AO3.9
+
+PCD-PAGE    2
+"82PIC740: Soft MV Example"
+
+PC16.32.12.1.110 PIDCON (1,1,1,1,1,0)
+          :DBINST             =82PIC740
+          :MV                 =82PIC740.MV
+          :PARAM1             =82PIC740:PARAM1
+
+PC16.32.12.1.111 MOVE (R,1)
+          :22                 =82PIC740.OUT
+
+PC16.31.21.1 MOVE (B,2)
+          :21                 =DI2.23:BLOCKED
+          :22                 =DI1.31:BLOCKED
+
+PC16.31.21.16 OR (2)
+          :20                 =DO3.19
+
+PC16.33.12.1.110 VALVECON (0,1)
+          :DBINST             =82HSV632
+PC16.33.12.1.111 MOVE (B,1)
+          :21                 =82HSV632.SV
+
+PC16.32.12.1.210 MOTCON (0,0,1,1,1,0)
+          :DBINST             =82M001
+
+PC16.40.1.1 OR (2)
+          :21                 =82LIC428:BLK_D
+          :22                 =82FIC480:POUT
+
+END PC16
