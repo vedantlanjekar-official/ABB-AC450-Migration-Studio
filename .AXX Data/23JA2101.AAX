@@ -1,0 +1,308 @@
+BEGIN PC21
+
+HEADER
+
+PCD-PAGE    1
+"Workshop Heating"
+
+PC21 PCPGM (40,16)
+          :ON                 D=1
+          :R                  D=0
+          :RUN 
+
+PC21.1 CONTRM (1000,41,0)
+          :ON                 D=1
+          :SINGLE             D=0
+          :R                  D=0
+          :RUN 
+          :MODP 
+
+PC21.1.1 FUNCM 
+
+PCD-PAGE    2
+"Workshop Heating Input Processing"
+
+PC21.31 CONTRM (1000,42,0)
+          :ON                 D=1
+          :SINGLE             D=0
+          :R                  D=0
+          :RUN 
+          :MODP 
+
+PC21.31.1 FUNCM 
+
+PCD-PAGE    3
+"82TIC100 : Input Processing"
+
+PC21.31.11 FUNCM 
+
+PC21.31.11.1 AND (3)
+          :1                  =82M114.ON
+          :2                  PC21.31.22.1.110:RUN
+          :3                  =82FSA101.FSL
+          :20                                     N=(82TIC100_Eolim)
+
+PCD-PAGE    4
+"82TIC100 : Workshop Heating Temp"
+
+PC21.31.12 FUNCM 
+
+PC21.31.12.1 BLOCK 
+          :ON                 1
+          :RUN 
+
+PC21.31.12.1.100 MOVE (R,1)
+          :1                  D=0.000000
+          :21 
+
+PC21.31.12.1.110 PIDCON (1,1,1,1,1,0)
+          :TRACKA             2
+          :TRACKB             2
+          :TRACKC             2
+          :REVACT             1
+          :DERIV              0
+          :HOTINIT            0
+          :PARAM1             =82TIC100:PARAM1
+          :PARAM2             =82TIC100:PARAM2
+          :PARAM3A            =82TIC100:PARAM3
+          :MV                 =82TIC100.MV
+          :SPEED1             D=2.000000E+00
+          :SPEED4             D=2.000000E+01
+          :MANENBL            1
+          :AUTOENBL           1
+          :DBINST             =82TIC100
+          :PARAM4             =82TIC100:PARAM4
+          :PARAM5             =82TIC100:PARAM5
+          :PARAM6             =82TIC100:PARAM6
+          :AUTOSP 
+          :WSP                                    N=(82TIC100_WSP)
+          :DEV 
+          :OUTP 
+          :BAL 
+          :MAN 
+          :AUTO                                   N=(82TIC100_AUT)
+          :OUT=LL 
+          :OUT=HL 
+          :PARAM3B            =82TIC100:PARAM3
+          :E1ENBL             1
+          :E2ENBL             0
+          :E3ENBL             0
+          :EXTREF1            D=0.000000
+          :EXTREF2            D=0.000000
+          :EXTREF3            D=0.000000
+          :SPEED2             D=1.000000E+01
+          :SPEED3             D=1.000000E+01
+          :E1                                     N=(82TIC100_E1)
+          :E2                                     N=(82TIC100_E2)
+          :E3 
+          :BALOUT 
+          :E1FL               0
+          :E2FL               0
+          :E3FL               0
+          :SEQE1              0
+          :SEQE2              0
+          :SEQE3              0
+          :LOCALFL            0
+          :LOCAL              0
+          :BALIN              0
+          :MANFL              0
+          :AUTOFL             0
+          :SEQMAN             0
+          :SEQAUTO            0
+          :BALREF             D=0.000000
+          :PARAM7             =82TIC100:PARAM7
+          :ALCBLK             =82TIC100.MV:ERR
+          :SP=LL 
+          :SP=HL 
+          :MV_LT_L2 
+          :MV_LT_L1 
+          :MV_GT_H1 
+          :MV_GT_H2 
+          :DEV_LT_L 
+          :DEV_GT_H 
+          :CLAMP              0
+          :CLAMPREF           D=0.000000
+          :EOLIM   -          PC21.31.11.1:20
+          :EOLL               PC21.31.12.1.100:21
+          :EOHL               PC21.31.12.1.100:21
+          :PARAM8             =82TIC100:PARAM8
+          :OLIMERR                                N=(82TIC100_INT)
+
+PC21.31.12.1.111 MOVE (R,2)
+          :1                  PC21.31.12.1.110:OUTP
+          :2                  PC21.31.12.1.110:OUTP
+          :21                 =82TIC100:POUT
+          :22                 =82TIC100.OUT
+
+PCD-PAGE    5
+"82M114 : Input Processing"
+
+PC21.31.21 FUNCM 
+
+PC21.31.21.1 MOVE (B,1)
+          :1                  =82M114.ON:SELECTED
+          :21                 =82M114.ON:MAN
+
+PC21.31.21.2 AND (4)
+          :1                  =82M114.ON
+          :2                  =82YANKEE.RDY
+          :3       -          PC21.31.21.9:20
+          :4                  1
+          :20                                     N=(82M114_Activate)
+
+PC21.31.21.3 CONV (IL,T)
+          :I                  =82M114.STIM
+          :O 
+          :ERR 
+
+PC21.31.21.4 CONV (IL,T)
+          :I                  =82M114.ETIM
+          :O 
+          :ERR 
+
+PC21.31.21.5 TIMER (1)
+          :ERR 
+          :YEAR1              D=0
+          :WEEK1              D=0
+          :DAY1               D=0
+          :TON1               PC21.31.21.3:O
+          :TOFF1              PC21.31.21.4:O
+          :O1                                     N=(82M114_Start)
+
+PC21.31.21.8 TON 
+          :I                  PC21.31.22.1.110:RUN
+          :TD                 D=30
+          :O 
+          :TE 
+
+PC21.31.21.9 AND (2)
+          :1                  PC21.31.21.8:O
+          :2       -          =82FSA101.FSL
+          :20                 =82FSA101.ALM:CALC_VAL
+
+PC21.31.21.16 SW-C (B,1)
+          :ACT                PC21.31.21.9:20
+          :11                 D=0
+          :12                 =82M114.ON
+          :13                 =82M114.ON
+
+PC21.31.21.10 AND (3)
+          :1                  =82M114.ON
+          :2                  =82M114.RDY
+          :3                  1
+          :20 
+
+PC21.31.21.11 TRIGG 
+          :1       -          PC21.31.21.10:20
+          :5 
+
+PC21.31.21.12 TOFF 
+          :I                  PC21.31.21.11:5
+          :TD                 D=10:0
+          :O 
+          :TE 
+
+PC21.31.21.13 TRIGG 
+          :1                  PC21.31.21.10:20
+          :5 
+
+PC21.31.21.14 SW-C (B,1)
+          :ACT                PC21.31.21.13:5
+          :11                 0
+          :12                 1
+          :13 
+
+PC21.31.21.15 SW-C (B,2)
+          :ACT                PC21.31.21.12:O
+          :11                 PC21.31.21.14:13
+          :12                 PC21.31.22.1.110:SEQ
+          :13 
+          :21                 PC21.31.21.14:13
+          :22                 PC21.31.22.1.110:SEQ
+          :23 
+
+PCD-PAGE    6
+"82M114 : Workshop Heating Pump"
+
+PC21.31.22 FUNCM 
+
+PC21.31.22.1 BLOCK 
+          :ON                 1
+          :RUN 
+
+PC21.31.22.1.100 MOVE (B,2)
+          :1                  PC21.31.21.2:20
+          :2                  D=1
+          :21 
+          :22 
+
+PC21.31.22.1.102 OR (3)
+          :1                  PC21.31.22.1.110:INDA
+          :2                  =MMC_X.82M114:59
+          :3                  0
+          :20 
+
+PC21.31.22.1.105 COMP-R (1,1)
+          :I                  =82M114.IT
+          :HHYS               D=6.000001E-01
+          :H1                 D=1.200000E+00
+          :I<H1 
+          :I>=H1 
+          :LHYS               D=2.000000E-01
+          :L1                 D=5.000000E+00
+          :I>L1 
+          :I<=L1 
+
+PC21.31.22.1.109 OR-A (1,2,0,0,0,0)
+          :1                  1
+          :11      -          PC21.31.22.1.110:SEQ
+          :12      -          =MMC_X.82M114:93
+          :60                                     N=(82M114_IA)
+
+PC21.31.22.1.110 MOTCON (0,0,0,1,0,0)
+          :PARAM              =82M114:PC_PARM
+          :ME                 1
+          :M1                 1
+          :M2                 =82M114.RDY
+          :M3                 1
+          :M4                 1
+          :IC1                1
+          :IC2                1
+          :IB1                1
+          :IB2                1
+          :IB3                1
+          :IB4                1
+          :IBF                0
+          :IA                 PC21.31.22.1.109:60
+          :T1                 D=5
+          :T2                 D=7
+          :T3                 D=1
+          :STF                1
+          :START              PC21.31.22.1.102:20
+          :STOP               PC21.31.22.1.100:22
+          :ACK1               PC21.31.22.1.105:I>=H1
+          :MC                 =82M114.IT
+          :RESULT             =82M114:PC_RES
+          :RMORD              =82M114:MORD
+          :NOINT 
+          :TRIP                                   N=(82M114_TRIP)
+          :BLK                                    N=(82M114_BLK)
+          :RFS 
+          :SO1                =82M114.MSTR
+          :SACK 
+          :RUN                                    N=(82M114_RUN)
+          :SEQ 
+          :MAN     -          PC21.31.21.15:13
+          :AUTO               PC21.31.21.15:23
+          :A1                 PC21.31.22.1.100:21
+          :A2                 0
+          :A0                 0
+          :INDM 
+          :INDA                                   N=(82M114_AUTO)
+
+PC21.31.22.1.111 AND (2)
+          :1                  PC21.31.22.1.110:RFS
+          :2                  PC21.31.22.1.110:SEQ
+          :20                                     N=(82M114_RDY)
+
+END PC21

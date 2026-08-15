@@ -1,0 +1,279 @@
+BEGIN PC4
+
+HEADER
+     IEC_BasedOn    CHH Specs
+     IEC_Prepared   R. Couper
+     IEC_Approved   R. Burden
+     IEC_Title2     PM2 \ IMS Functions
+     IEC_Project1   Carter Holt Harvey Tissue
+     IEC_Project2   Kawerau Mill
+     IEC_Project3   PM2\Control System Upgrade
+     IEC_RespDept   NZABB/IAD
+     IEC_DocNo      22-PC04
+     IEC_Language   E
+
+PCD-PAGE    1
+"IMS Data Handling Logic"
+
+PC4 PCPGM (40,10)
+          :ON                 1
+          :R                  0
+          :RUN 
+
+PC4.1 CONTRM (2000,1,0)
+          :ON                 1
+          :SINGLE             0
+          :R                  0
+          :RUN 
+          :MODP 
+
+PC4.1.1 ANALYSE (0,0)
+          :MPLD               =82NODE22.LOAD:CALC_VAL
+          :OVERLD 
+
+PC4.1.2 MOVE (R,1)
+          :1                  =823FQGAS.R1R
+          :21                 =82FIQGAS2:CALC_VAL
+
+PCD-PAGE    2
+"PM2 Energy Consumption"
+
+PC4.21 CONTRM (2000,8,0)
+          :ON                 1
+          :SINGLE             0
+          :R                  0
+          :RUN 
+          :MODP 
+
+PC4.21.1 FUNCM 
+
+PC4.21.1.1 DIV-MR (1,2)
+          :1                  =821J290.R6R
+          :21                 =821PRODT.R8R
+          :22                 D=1.000000E+03
+          :40 
+
+PC4.21.1.2 MUL (R,3)
+          :1                  =82FIC753.MV
+          :2                  D=1.000000E+03
+          :3                  D=2.792000E+03
+          :20 
+
+PC4.21.1.3 MUL (R,2)
+          :1                  =82FIQ973.MV
+          :2                  D=2.742000E+03
+          :20 
+
+PC4.21.1.4 MUL (R,3)
+          :1                  =82FIA761
+          :2                  D=1.000000E+03
+          :3                  D=2.370000E+02
+          :20 
+
+PC4.21.1.5 ADD (R,2)
+          :1                  =823F830.R2R
+          :2                  =823F870.R3R
+          :20 
+
+PC4.21.1.6 ADD (R,2)
+          :1                  PC4.21.1.2:20
+          :2                  PC4.21.1.3:20
+          :20 
+
+PC4.21.1.7 SUB (R)
+          :1                  PC4.21.1.6:20
+          :2                  PC4.21.1.4:20
+          :20 
+
+PC4.21.1.8 DIV (R)
+          :1                  PC4.21.1.7:20
+          :2                  D=3.600000E+06
+          :20 
+          :REM 
+
+PC4.21.1.9 DIV (R)
+          :1                  PC4.21.1.8:20
+          :2                  =821PRODT.R8R
+          :20                 =82STEAM.MWHT:CALC_VAL
+          :REM 
+
+PC4.21.1.10 DIV-MR (2,1)
+          :1                  PC4.21.1.5:20
+          :2                  D=4.100000E-02
+          :21                 D=3.600000E+00
+          :40 
+
+PC4.21.1.11 DIV (R)
+          :1                  PC4.21.1.10:40
+          :2                  =821PRODT.R8R
+          :20                 =82GAS.MWHT:CALC_VAL
+          :REM 
+
+PC4.21.1.12 ADD (R,2)
+          :1                  PC4.21.1.9:20
+          :2                  PC4.21.1.11:20
+          :20 
+
+PC4.21.1.13 SW-C (R,2)
+          :ACT                =82ZIA990.ZS
+          :11                 D=0.000000
+          :12                 PC4.21.1.1:40
+          :13                 =82ELECT.MWHT:CALC_VAL
+          :21                 D=0.000000
+          :22                 PC4.21.1.12:20
+          :23                 =82THERM.MWHT:CALC_VAL
+
+PC4.21.1.14 ADD (R,2)
+          :1                  =82ELECT.MWHT
+          :2                  =82THERM.MWHT
+          :20                 =82TOTAL.MWHT:CALC_VAL
+
+PCD-PAGE    3
+"PM2 Energy Consumption"
+
+PC4.21.1.15 MUL (R,2)
+          :1                  =82ELECT.MWHT
+          :2                  =82ELCOST
+          :20                 =82ELECT.COST
+
+PC4.21.1.16 MUL (R,2)
+          :1                  =82GAS.MWHT
+          :2                  =82GASCOST
+          :20                 =82GAS.COST
+
+PC4.21.1.17 MUL (R,2)
+          :1                  =82STEAM.MWHT
+          :2                  =82STCOST
+          :20                 =82STEAM.COST
+
+PC4.21.1.18 ADD (R,2)
+          :1                  =82GAS.COST
+          :2                  =82STEAM.COST
+          :20                 =82THERM.COST
+
+PC4.21.1.19 ADD (R,2)
+          :1                  =82ELECT.COST
+          :2                  =82THERM.COST
+          :20                 =82TOTAL.COST
+
+PCD-PAGE    4
+"Down-Time Detection"
+
+PC4.31 CONTRM (2000,2,0)
+          :ON                 1
+          :SINGLE             0
+          :R                  0
+          :RUN 
+          :MODP 
+
+PC4.31.1 FUNCM 
+
+PC4.31.1.5 AND (3)
+          :1                  =82FIC480.STF
+          :2                  =82ZIA990.ZS
+          :3                  D=1
+          :20 
+
+PC4.31.1.10 SW-C (R,1)
+          :ACT                PC4.31.1.5:20
+          :11                 D=0.000000
+          :12                 D=1.000000E+00
+          :13                 =82RUNNINGDT:CALC_VAL
+
+PC4.31.1.15 SW-C (R,1)
+          :ACT                =82FIC480.STF
+          :11                 D=1.000000E+00
+          :12                 D=0.000000
+          :13                 =82NON_RUNDT:CALC_VAL
+
+PC4.31.1.17 SW-C (R,1)
+          :ACT                D=0
+          :11                 D=1.000000E+00
+          :12                 D=0.000000
+          :13                 =82ZI986
+
+PCD-PAGE    5
+"Integrators"
+
+PC4.32 CONTRM (2000,3,0)
+          :ON                 1
+          :SINGLE             0
+          :R                  0
+          :RUN 
+          :MODP 
+
+PC4.32.1 FUNCM 
+
+PC4.32.1.2 TIMER (1)
+          :ERR 
+          :YEAR1              D=0
+          :WEEK1              D=0
+          :DAY1               D=0
+          :TON1               D=8:0:5
+          :TOFF1              D=8:0:7
+          :O1                                     N=Reset_Integrators
+
+PC4.32.1.5 INT 
+          :I                  =82FIC753.MV
+          :K                  D=1.000000E+00
+          :TI                 D=1:0:0.0
+          :RINT               PC4.32.1.2:O1
+          :BAL                D=0
+          :BALREF             D=0.000000
+          :OHL                D=9.999990E+05
+          :OLL                D=0.000000
+          :O                  =82FIQ753:CALC_VAL
+          :O=HL 
+          :O=LL 
+          :ERR 
+
+PC4.32.1.10 INT 
+          :I                  =82FIQ973.MV
+          :K                  D=1.000000E+00
+          :TI                 D=1:0:0.0
+          :RINT               PC4.32.1.2:O1
+          :BAL                D=0
+          :BALREF             D=0.000000
+          :OHL                D=9.999990E+05
+          :OLL                D=0.000000
+          :O                  =82FIQ973:CALC_VAL
+          :O=HL 
+          :O=LL 
+          :ERR 
+
+PC4.32.1.11 DIV (R)
+          :1                  PC4.32.1.10:O
+          :2                  D=1.000000E+03
+          :20 
+          :REM 
+
+PC4.32.1.12 ADD (R,2)
+          :1                  PC4.32.1.11:20
+          :2                  PC4.32.1.5:O
+          :20                 =82STEAMFIQ:CALC_VAL
+
+PC4.32.1.13 MUL (R,2)
+          :1                  =82FIC753.MV
+          :2                  D=1.000000E+03
+          :20 
+
+PC4.32.1.14 ADD (R,2)
+          :1                  PC4.32.1.13:20
+          :2                  =82FIQ973.MV
+          :20                 =82STEAM.TOTAL:CALC_VAL
+
+PC4.32.1.15 INT 
+          :I                  =82M136.ST
+          :K                  D=1.000000E+00
+          :TI                 D=1:0.0
+          :RINT               PC4.32.1.2:O1
+          :BAL                D=0
+          :BALREF             D=0.000000
+          :OHL                D=9.999999E+06
+          :OLL                D=0.000000
+          :O                  =82M136.SQ
+          :O=HL 
+          :O=LL 
+          :ERR 
+
+END PC4

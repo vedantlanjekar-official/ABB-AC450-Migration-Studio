@@ -1,13 +1,22 @@
+.AXX Data
+.AXX Data/**
+Guide Materials
+Guide Materials/**
+.tools
+.tools/**
+.git
+backend
+docs
+scripts
+*.aax
+*.bax
+*.pdf
+*.xlsx
 node_modules
 frontend/node_modules
-.next
 frontend/.next
-backend/__pycache__
-backend/.pytest_cache
+frontend/.next-dev
 .pytest_cache
-*.xlsx
-*.pdf
-temp
-logs
-backend/temp
-backend/logs
+__pycache__
+.env.local
+.env

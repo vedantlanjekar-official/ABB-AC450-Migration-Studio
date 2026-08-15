@@ -1,0 +1,2478 @@
+BEGIN PC13
+
+HEADER
+     IEC_BasedOn    PM2
+     IEC_Prepared   MKinsler
+     IEC_Approved   MKinsler
+     IEC_Title2     PM2\Node22
+     IEC_Title3     Stock Approach & Periform
+     IEC_Project1   Carter Holt Harvey Tissue
+     IEC_Project2   Kawerau Mill
+     IEC_Project3   PM2\Control System Upgrade
+     IEC_RespDept   NZABB\IAD
+     IEC_RevInd     1
+     IEC_DocNo      PM2-N22-PC13
+     IEC_Language   E
+
+PCD-PAGE    1
+"Periformer: Input Processing"
+
+PC13 PCPGM (40,3)
+          :ON                 1
+          :R                  0
+          :RUN 
+
+PC13.1 CONTRM (250,2,0)
+          :ON                 1
+          :SINGLE             0
+          :R                  0
+          :RUN 
+          :MODP 
+
+PC13.1.1 FUNCM 
+
+PC13.1.1.1 MOVE (B,19)
+          :1                  =82MOTOR.RUN
+          :2                  =82MOTOR.RUN:VALUE2
+          :3                  =82MOTOR.RUN:VALUE3
+          :4                  =122T124A.B1:VALUE8
+          :5                  =82MOTOR.RUN:VALUE4
+          :6                  =82MOTOR.RUN:VALUE5
+          :7                  =122F124A.B1:VALUE2
+          :8                  =122F124A.B1:VALUE3
+          :9                  =122F124A.B1:VALUE4
+          :10                 =122T124A.B1:VALUE12
+          :11                 =82MOTOR.RUN:VALUE10
+          :12                 =82MOTOR.RUN:VALUE11
+          :13                 =82MOTOR.RUN:VALUE21
+          :14                 =122T124A.B2
+          :15                 =82MOTOR.RUN:VALUE7
+          :16                 =122F123E.B1
+          :17                 D=1
+          :18                 0
+          :19                 0
+          :21                                     N=(82M023_RUN)
+          :22                                     N=(82M023_SEQ)
+          :23                                     N=(82M023_RDY)
+          :24                                     N=(82M027_RUN)
+          :25                                     N=(82M027_SEQ)
+          :26                                     N=(82M027_RDY)
+          :27                                     N=(82M081_RUN)
+          :28                                     N=(82M081_SEQ)
+          :29                                     N=(82M081_RDY)
+          :30                                     N=(82M132_Run)
+          :31                                     N=(82M132_SEQ)
+          :32                                     N=(82M132_RDY)
+          :33                                     N=(82M069_RDY)
+          :34                                     N=Fire_ESD
+          :35                                     N=(82M073_Run)
+          :36                                     N=(82M062_RDY)
+          :37                                     N=(82M130_ZS)
+          :38 
+          :39 
+
+PCD-PAGE    2
+"Periformer: Group 9 Start"
+
+PC13.1.2 FUNCM 
+
+PC13.1.2.1 AND (19)
+          :1                  PC13.1.1.1:22
+          :2                  PC13.1.1.1:25
+          :3                  PC13.1.1.1:28
+          :4                  1
+          :5                  1
+          :6                  1
+          :7                  PC13.32.22.1.110:INDA
+          :8                  PC13.1.1.1:31
+          :9                  1
+          :10                 1
+          :11                 1
+          :12                 1
+          :13                 1
+          :14                 1
+          :15                 PC13.1.1.1:33
+          :16                 PC13.1.1.1:36
+          :17                 1
+          :18                 1
+          :19                 1
+          :20 
+
+PC13.1.2.2 OR-A (0,2,2,0,0,0)
+          :11                 PC13.1.2.1:20
+          :12                 =82GRPST.09:SELECTED
+          :21                 =82GRPST.09:SELECTED
+          :22                 PC13.1.2.4:13
+          :60                 =82GRPST.09:BLOCKED
+
+PC13.1.2.3 TRIGG 
+          :1                  1
+          :5 
+
+PC13.1.2.4 SW-C (B,1)
+          :ACT                PC13.1.2.3:5
+          :11                 0
+          :12                 =82GRPST.09
+          :13 
+
+PC13.1.2.5 SW-C (B,1)
+          :ACT                0
+          :11                 0
+          :12                 PC13.1.2.4:13
+          :13                 =82GRPST.09:CALC_VAL
+
+PC13.1.2.6 OR-A (0,2,2,0,0,0)
+          :11                 PC13.1.2.1:20
+          :12                 PC13.1.2.4:13
+          :21      -          PC13.1.2.1:20
+          :22      -          PC13.1.2.4:13
+          :60                 =82GRPST.09:NORM_POS
+
+PC13.1.2.7 XOR 
+          :1                  PC13.1.2.6:60
+          :2                  PC13.1.2.8:21
+          :5                  =82GRPST.09:AL_P_BLK
+
+PC13.1.2.8 MOVE (B,1)
+          :1                  PC13.1.2.6:60
+          :21 
+
+PCD-PAGE    3
+"Periformer: Group 9 Start"
+
+PC13.1.3 FUNCM 
+
+PC13.1.3.1 AND (2)
+          :1                  =82GRPST.09
+          :2                  PC13.1.1.1:23
+          :20                                     N=(83M023_GStart)
+
+PC13.1.3.2 TON 
+          :I                  =82GRPST.09
+          :TD                 D=5
+          :O 
+          :TE 
+
+PC13.1.3.3 AND (2)
+          :1                  PC13.1.3.2:O
+          :2                  PC13.1.1.1:26
+          :20                                     N=(83M027_GStart)
+
+PC13.1.3.4 TON 
+          :I                  PC13.1.3.2:O
+          :TD                 D=5
+          :O 
+          :TE 
+
+PC13.1.3.5 AND (2)
+          :1                  PC13.1.3.4:O
+          :2                  PC13.1.1.1:29
+          :20                                     N=(83M081_GStart)
+
+PC13.1.3.6 TON 
+          :I                  PC13.1.3.4:O
+          :TD                 D=5
+          :O 
+          :TE 
+
+PC13.1.3.7 AND (2)
+          :1                  PC13.1.3.6:O
+          :2                  PC13.32.22.1.111:20
+          :20                                     N=(83M101_GStart)
+
+PC13.1.3.8 TON 
+          :I                  PC13.1.3.6:O
+          :TD                 D=5
+          :O 
+          :TE 
+
+PC13.1.3.9 AND (2)
+          :1                  PC13.1.3.8:O
+          :2                  PC13.32.12.1.111:20
+          :20                                     N=(83M066_GStart)
+
+PC13.1.3.10 MOVE (B,3)
+          :1                  PC13.1.3.1:20
+          :2                  PC13.1.3.3:20
+          :3                  PC13.1.3.5:20
+          :21                 =82GRPSTART
+          :22                 =82GRPSTART:VALUE2
+          :23                 =122T124A.B1:VALUE17
+
+PC13.1.3.12 TON 
+          :I                  =82GRPST.09
+          :TD                 D=1
+          :O 
+          :TE 
+
+PC13.1.3.14 AND (4)
+          :1                  PC13.1.3.12:O
+          :2                  PC13.1.1.1:33
+          :3                  1
+          :4                  1
+          :20                 =82GRPSTART:VALUE10,
+                                                  N=(82M069_GStart)
+
+PC13.1.3.16 TON 
+          :I                  =82GRPST.09
+          :TD                 D=1
+          :O 
+          :TE 
+
+PC13.1.3.18 AND (4)
+          :1                  PC13.1.3.16:O
+          :2                  PC13.1.1.1:36
+          :3                  1
+          :4                  1
+          :20                 =122T123E.B2:VALUE5,
+                                                  N=(82M062_GStart)
+
+PCD-PAGE    4
+"Fan Pump & Slice Gap: Input Processing"
+
+PC13.31 CONTRM (500,1,0)
+          :ON                 1
+          :SINGLE             0
+          :R                  0
+          :RUN 
+          :MODP 
+
+PC13.31.1 FUNCM 
+
+PC13.31.1.1 MOVE (B,2)
+          :1                  =82M130.RDY
+          :2                  =82M131.RDY
+          :21                                     N=(82M130_Ready)
+          :22                                     N=(82M131_Ready)
+
+PC13.31.1.2 MOVE (R,2)
+          :1                  =82M130.IT_
+          :2                  =82M131.IT_
+          :21                                     N=(82M130_IT)
+          :22                                     N=(82M131_IT)
+
+PC13.31.1.3 AND (6)
+          :1                  PC13.31.32.1.110:SEQ
+          :2                  PC13.31.42.1.110:SEQ
+          :3                  =82M130.RDY
+          :4                  =82M131.RDY
+          :5                  1
+          :6                  1
+          :20 
+
+PC13.31.1.4 OR-A (0,2,2,0,0,0)
+          :11                 PC13.31.1.3:20
+          :12                 =82GRPST.11:SELECTED
+          :21                 =82GRPST.11:SELECTED
+          :22                 PC13.31.1.6:13
+          :60                 =82GRPST.11:BLOCKED
+
+PC13.31.1.5 TRIGG 
+          :1                  1
+          :5 
+
+PC13.31.1.6 SW-C (B,1)
+          :ACT                PC13.31.1.5:5
+          :11                 0
+          :12                 =82GRPST.11
+          :13 
+
+PC13.31.1.11 AND (3)
+          :1                  =82M130.RDY
+          :2                  =82M131.RDY
+          :3                  PC13.31.1.12:I>=H1
+          :20 
+
+PC13.31.1.7 SW-C (B,1)
+          :ACT     -          PC13.31.1.11:20
+          :11                 0
+          :12                 PC13.31.1.6:13
+          :13                 =82GRPST.11:CALC_VAL,
+                                                  N=(82M13*_Activate)
+
+PC13.31.1.8 OR-A (0,2,2,0,0,0)
+          :11                 PC13.31.1.3:20
+          :12                 PC13.31.1.6:13
+          :21      -          PC13.31.1.3:20
+          :22      -          PC13.31.1.6:13
+          :60                 =82GRPST.11:NORM_POS
+
+PC13.31.1.9 XOR 
+          :1                  PC13.31.1.8:60
+          :2                  PC13.31.1.10:21
+          :5                  =82GRPST.11:AL_P_BLK
+
+PC13.31.1.10 MOVE (B,1)
+          :1                  PC13.31.1.8:60
+          :21 
+
+PC13.31.1.12 COMP-R (1,1)
+          :I                  =82M132.ST
+          :HHYS               D=1.000000E+00
+          :H1                 D=2.000000E+02
+          :I<H1 
+          :I>=H1                                  N=(82M132_RUNNING)
+          :LHYS               D=1.000000E+00
+          :L1                 D=0.000000
+          :I>L1 
+          :I<=L1 
+
+PCD-PAGE    5
+"82PIC622: Input Processing"
+
+PC13.31.11 FUNCM 
+
+PC13.31.11.1 OR-A (0,3,3,3,0,0)
+          :11                 PC13.1.1.1:37
+          :12                 PC13.31.32.1.110:RUN
+          :13                 PC13.31.42.1.110:RUN
+          :21      -          PC13.1.1.1:37
+          :22                 PC13.31.32.1.110:RUN
+          :23      -          PC13.31.42.1.111:20
+          :31      -          PC13.1.1.1:37
+          :32      -          PC13.31.32.1.111:20
+          :33                 PC13.31.42.1.110:RUN
+          :60 
+
+PC13.31.11.2 MONO 
+          :RTG                0
+          :I                  PC13.31.11.1:60
+          :TP                 D=30
+          :O 
+          :TE 
+
+PC13.31.11.3 OR-A (0,2,2,0,0,0)
+          :11                 PC13.31.32.1.111:20
+          :12      -          PC13.31.32.1.127:22
+          :21                 PC13.31.42.1.111:20
+          :22      -          PC13.31.42.1.127:22
+          :60 
+
+PC13.31.11.4 OR-A (0,3,2,0,0,0)
+          :11                 PC13.1.1.1:37
+          :12      -          PC13.31.32.1.127:22
+          :13      -          PC13.31.42.1.127:22
+          :21      -          PC13.1.1.1:37
+          :22                 PC13.31.11.3:60
+          :60 
+
+PC13.31.11.5 AND-O (2,3,3,0,0,0)
+          :1                  1
+          :2                  1
+          :11      -          PC13.31.11.1:60
+          :12                 PC13.31.11.2:O
+          :13                 PC13.31.11.4:60
+          :21                 PC13.31.12.1.110:AUTO
+          :22                 PC13.31.12.1.110:E1
+          :23                 PC13.31.12.1.110:E2
+          :60                                     N=(82PIC622_Eolom)
+
+PC13.31.11.6 MOVE (B,2)
+          :1                  =821P622.B5R
+          :2                  0
+          :21                                     N=(82PIC622_11SeqE1)
+          :22 
+
+PC13.31.11.7 MOVE (R,2)
+          :1                  =821P622.R5R
+          :2                  D=0.000000
+          :21                                     N=(82PIC622_1190E1Ref)
+          :22 
+
+PCD-PAGE    6
+"82PIC622: Input Processing"
+
+PC13.31.11.8 SUB (R)
+          :1                  =82M130.SSP_
+          :2                  D=0.000000
+          :20 
+
+PC13.31.11.9 SUB (R)
+          :1                  D=1.800000E+03
+          :2                  D=0.000000
+          :20 
+
+PC13.31.11.10 DIV-MR (2,2)
+          :1                  PC13.31.11.8:20
+          :2                  D=1.000000E+02
+          :21                 PC13.31.11.9:20
+          :22                 D=1.000000E+00
+          :40 
+
+PC13.31.11.11 MUX-N (R,4)
+          :AERR 
+          :A1                 PC13.31.11.4:60
+          :A2                 PC13.31.11.2:O
+          :A3                 0
+          :A4                 1
+          :IA1                PC13.31.11.10:40
+          :IA2                D=2.000000E+01
+          :IA3                D=0.000000
+          :IA4                D=0.000000
+          :O                                      N=(82PIC622_Eoref)
+
+PCD-PAGE    7
+"82PIC622: Periformer Headbox"
+
+PC13.31.12 FUNCM 
+
+PC13.31.12.1 BLOCK 
+          :ON                 1
+          :RUN 
+
+PC13.31.12.1.100 MOVE (R,1)
+          :1                  PC13.31.11.11:O
+          :21 
+
+PC13.31.12.1.110 PIDCON (1,1,1,1,1,0)
+          :TRACKA             2
+          :TRACKB             2
+          :TRACKC             2
+          :REVACT             1
+          :DERIV              0
+          :HOTINIT            0
+          :PARAM1             =82PIC622:PARAM1
+          :PARAM2             =82PIC622:PARAM2
+          :PARAM3A            =82PIC622:PARAM3
+          :MV                 =82PIC622.MV
+          :SPEED1             D=9.000000E+01
+          :SPEED4             D=2.000000E+01
+          :MANENBL            1
+          :AUTOENBL           1
+          :DBINST             =82PIC622
+          :PARAM4             =82PIC622:PARAM4
+          :PARAM5             =82PIC622:PARAM5
+          :PARAM6             =82PIC622:PARAM6
+          :AUTOSP 
+          :WSP                                    N=(82PIC622_WSP)
+          :DEV                                    N=(82PIC622_Dev)
+          :OUTP 
+          :BAL 
+          :MAN 
+          :AUTO                                   N=(82PIC622_AUT)
+          :OUT=LL                                 N=(82PIC622_OutLL)
+          :OUT=HL                                 N=(82PIC622_OutHL)
+          :PARAM3B            =82PIC622:PARAM3
+          :E1ENBL             1
+          :E2ENBL             0
+          :E3ENBL             0
+          :EXTREF1            PC13.31.11.7:21
+          :EXTREF2            D=0.000000
+          :EXTREF3            D=0.000000
+          :SPEED2             D=4.500000E+02
+          :SPEED3             D=4.500000E+02
+          :E1                                     N=(82PIC622_E1)
+          :E2                                     N=(82PIC622_E2)
+          :E3 
+          :BALOUT 
+          :E1FL               0
+          :E2FL               0
+          :E3FL               0
+          :SEQE1              PC13.31.11.6:21
+          :SEQE2              0
+          :SEQE3              0
+          :LOCALFL            0
+          :LOCAL              0
+          :BALIN              0
+          :MANFL              0
+          :AUTOFL             0
+          :SEQMAN             0
+          :SEQAUTO            0
+          :BALREF             D=0.000000
+          :PARAM7             =82PIC622:PARAM7
+          :ALCBLK             =82PIC622.MV:ERR
+          :SP=LL                                  N=(82PIC622_SPLL)
+          :SP=HL                                  N=(82PIC622_SPHL)
+          :MV_LT_L2 
+          :MV_LT_L1 
+          :MV_GT_H1 
+          :MV_GT_H2 
+          :DEV_LT_L 
+          :DEV_GT_H 
+          :CLAMP              0
+          :CLAMPREF           D=0.000000
+          :EOLIM              PC13.31.11.5:60
+          :EOLL               PC13.31.12.1.100:21
+          :EOHL               PC13.31.12.1.100:21
+          :PARAM8             =82PIC622:PARAM8
+          :OLIMERR                                N=(82PIC622_INT)
+
+PC13.31.12.1.111 MOVE (R,2)
+          :1                  PC13.31.12.1.110:OUTP
+          :2                  PC13.31.12.1.110:OUTP
+          :21                 =82PIC622:POUT
+          :22                                     N=(82PIC622_OUT)
+
+PCD-PAGE    8
+"82PIC622: Output Processing"
+
+PC13.31.13 FUNCM 
+
+PC13.31.13.1 OR (4)
+          :1                  PC13.31.12.1.110:AUTO
+          :2                  PC13.31.12.1.110:E1
+          :3                  PC13.31.12.1.110:E2
+          :4                  0
+          :20 
+
+PC13.31.13.2 AND-O (2,3,3,0,0,0)
+          :1                  1
+          :2                  1
+          :11                 0
+          :12                 PC13.31.12.1.110:SP=HL
+          :13                 PC13.31.12.1.110:OUT=HL
+          :21                 0
+          :22                 PC13.31.12.1.110:SP=HL
+          :23                 PC13.31.12.1.110:OUT=LL
+          :60 
+
+PC13.31.13.3 AND-O (2,3,3,0,0,0)
+          :1                  1
+          :2                  1
+          :11                 0
+          :12                 PC13.31.12.1.110:SP=LL
+          :13                 PC13.31.12.1.110:OUT=LL
+          :21                 0
+          :22                 PC13.31.12.1.110:SP=LL
+          :23                 PC13.31.12.1.110:OUT=HL
+          :60 
+
+PC13.31.13.4 MOVE (B,4)
+          :1                  PC13.31.13.1:20
+          :2                  PC13.31.12.1.110:E1
+          :3                  PC13.31.13.2:60
+          :4                  PC13.31.13.3:60
+          :21                 =822P622.B5S
+          :22                 =822P622.B5S:VALUE2
+          :23                 =822P622.B5S:VALUE3
+          :24                 =822P622.B5S:VALUE4
+
+PC13.31.13.5 MOVE (R,4)
+          :1                  =82PIC622.MV
+          :2                  PC13.31.12.1.110:WSP
+          :3                  =82PIC622:SETPH
+          :4                  =82PIC622:SETPL
+          :21                 =822P622.R17S
+          :22                 =822P622.R18S
+          :23                 =822P622.R19S
+          :24                 =822P622.R20S
+
+PC13.31.13.6 COMP (R,0)
+          :I1                 PC13.31.12.1.110:WSP
+          :I2                 PC13.31.13.7:21
+          :I1>I2 
+          :I1=I2 
+          :I1<I2 
+
+PC13.31.13.7 MOVE (R,1)
+          :1                  PC13.31.12.1.110:WSP
+          :21 
+
+PC13.31.13.8 SW-C (R,1)
+          :ACT     -          PC13.31.13.6:I1=I2
+          :11                 D=0.000000
+          :12                 D=0.000000,
+                                                  N=(82PIC622_DZ)
+          :13 
+
+PC13.31.13.9 P-DEADB 
+          :I                  D=1.000000E+00
+          :K                  D=0.000000
+          :DEADB              PC13.31.13.8:13
+          :OHL                D=1.000000E+02
+          :OLL                D=0.000000
+          :O 
+          :O=HL 
+          :O=LL 
+          :ERR 
+
+PCD-PAGE    9
+"82ZIC626: Input Processing"
+
+PC13.31.21 FUNCM 
+
+PC13.31.21.1 MOVE (B,2)
+          :1                  =821Z626.B8R
+          :2                  0
+          :21                                     N=(82ZIC626_1190SeqE)
+          :22 
+
+PC13.31.21.2 MOVE (R,2)
+          :1                  =821Z626.R7R
+          :2                  D=0.000000
+          :21                                     N=(82ZIC626_1190ERef)
+          :22 
+
+PCD-PAGE   10
+"82ZIC626: Input Processing/Linearise MV"
+
+PC13.31.21.3 REG-G (R,30,0,0,30)
+          :S                  1
+          :L                  0
+          :WR                 0
+          :AWR                D=0
+          :R                  0
+          :AERR 
+          :I1                 D=0.000000
+          :I2                 D=4.000000E+00
+          :I3                 D=7.200000E+00
+          :I4                 D=1.040000E+01
+          :I5                 D=1.360000E+01
+          :I6                 D=1.680000E+01
+          :I7                 D=2.000000E+01
+          :I8                 D=2.000000E+01
+          :I9                 D=2.000000E+01
+          :I10                D=2.000000E+01
+          :I11                D=2.000000E+01
+          :I12                D=2.000000E+01
+          :I13                D=2.000000E+01
+          :I14                D=2.000000E+01
+          :I15                D=2.000000E+01
+          :I16                D=2.000000E+01
+          :I17                D=2.000000E+01
+          :I18                D=2.000000E+01
+          :I19                D=2.000000E+01
+          :I20                D=2.000000E+01
+          :I21                D=2.000000E+01
+          :I22                D=2.000000E+01
+          :I23                D=2.000000E+01
+          :I24                D=2.000000E+01
+          :I25                D=2.000000E+01
+          :I26                D=2.000000E+01
+          :I27                D=2.000000E+01
+          :I28                D=2.000000E+01
+          :I29                D=2.000000E+01
+          :I30                D=2.000000E+01
+          :O 
+
+PC13.31.21.4 REG-G (R,30,0,0,30)
+          :S                  1
+          :L                  0
+          :WR                 0
+          :AWR                D=0
+          :R                  0
+          :AERR 
+          :I1                 D=5.000000E+00
+          :I2                 D=5.000000E+00
+          :I3                 D=8.635000E+00
+          :I4                 D=1.286600E+01
+          :I5                 D=1.767900E+01
+          :I6                 D=2.305900E+01
+          :I7                 D=2.899000E+01
+          :I8                 D=3.000000E+01
+          :I9                 D=3.000000E+01
+          :I10                D=3.000000E+01
+          :I11                D=3.000000E+01
+          :I12                D=3.000000E+01
+          :I13                D=3.000000E+01
+          :I14                D=3.000000E+01
+          :I15                D=3.000000E+01
+          :I16                D=3.000000E+01
+          :I17                D=3.000000E+01
+          :I18                D=3.000000E+01
+          :I19                D=3.000000E+01
+          :I20                D=3.000000E+01
+          :I21                D=3.000000E+01
+          :I22                D=3.000000E+01
+          :I23                D=3.000000E+01
+          :I24                D=3.000000E+01
+          :I25                D=3.000000E+01
+          :I26                D=3.000000E+01
+          :I27                D=3.000000E+01
+          :I28                D=3.000000E+01
+          :I29                D=3.000000E+01
+          :I30                D=3.000000E+01
+          :O 
+
+PC13.31.21.5 FUNG-1V (30)
+          :X                  =82ZIC626.MV
+          :BAL                0
+          :BALREF             D=0.000000
+          :XTAB               PC13.31.21.3:O
+          :YTAB               PC13.31.21.4:O
+          :Y                                      N=(82ZIC626MV_Linear),
+                                                  U=mm
+          :ERR 
+          :BALREFO 
+
+PCD-PAGE   11
+"82ZIC626: Headbox Slice Gap"
+
+PC13.31.22 FUNCM 
+
+PC13.31.22.1 BLOCK 
+          :ON                 1
+          :RUN 
+
+PC13.31.22.1.110 MANSTN (1)
+          :TRACKA             2
+          :TRACKB             1
+          :HOTINIT            0
+          :PARAM1             =82ZIC626:PARAM1
+          :PARAM2             =82ZIC626:PARAM2
+          :PARAM3A            =82ZIC626:PARAM3
+          :MV                 =82ZIC626.MV
+          :EXTREF             PC13.31.21.2:21
+          :SPEED              D=2.000000E+01
+          :SEQMAN             0
+          :SEQE1              PC13.31.21.1:21
+          :DBINST             =82ZIC626
+          :PARAM4             =82ZIC626:PARAM4
+          :PARAM5             =82ZIC626:PARAM5
+          :PARAM6             =82ZIC626:PARAM6
+          :OUTREF 
+          :OUT 
+          :MAN                                    N=(82ZIC626_MAN)
+          :E1                                     N=(82ZIC626_E1)
+          :OUT=LL                                 N=(82ZIC626_OutLL)
+          :OUT=HL                                 N=(82ZIC626_OutHL)
+          :PARAM3B            =82ZIC626:PARAM3
+          :PARAM7             =82ZIC626:PARAM7
+          :ALCBLK             =82ZIC626.MV:ERR
+          :MV_LT_L2 
+          :MV_LT_L1 
+          :MV_GT_H1 
+          :MV_GT_H2 
+
+PC13.31.22.1.111 SW-C (R,1)
+          :ACT                0
+          :11                 D=0.000000
+          :12                 PC13.31.22.1.110:OUT
+          :13 
+
+PC13.31.22.1.112 MOVE (R,2)
+          :1                  PC13.31.22.1.111:13
+          :2                  PC13.31.22.1.111:13
+          :21                                     N=(82ZIC626_OUT)
+          :22                 =82ZIC626:POUT
+
+PCD-PAGE   12
+"82ZIC626: Output Processing"
+
+PC13.31.23 FUNCM 
+
+PC13.31.23.1 DIV-MR (2,2)
+          :1                  PC13.31.22.1.112:21
+          :2                  D=1.000000E+02
+          :21                 =82ZIC626.MV:RANGEMAX
+          :22                 D=0.000000
+          :40 
+
+PC13.31.23.2 DIV-MR (2,2)
+          :1                  =82ZIC626.MV
+          :2                  D=1.000000E+02
+          :21                 =82ZIC626.MV:RANGEMAX
+          :22                 D=0.000000
+          :40 
+
+PC13.31.23.3 CON-PU1 (1)
+          :REFV               PC13.31.23.1:40
+          :I                  PC13.31.23.2:40
+          :BLK                0
+          :PF                 D=0
+          :ACTT               D=0.0
+          :TPMIN              D=0.0
+          :TGAP               D=0.0
+          :K                  D=0.000000
+          :DEADB              D=0.000000
+          :TMBC               D=0.0
+          :MAXDEV             D=0.000000
+          :TPAMIN             D=0.0
+          :TPAC               D=0.000000
+          :SIM                D=0
+          :BAL                D=0
+          :BALREF             D=0.000000
+          :DBPOS              D=0.000000
+          :DBREF              D=0.000000
+          :DEV 
+          :INC 
+          :DEC 
+          :ERR 
+
+PC13.31.23.4 MOVE (B,5)
+          :1                  PC13.31.22.1.110:E1
+          :2                  PC13.31.22.1.110:E1
+          :3                  PC13.31.22.1.110:OUT=HL
+          :4                  PC13.31.22.1.110:OUT=LL
+          :5                  =82ZIC626.MV:ERR
+          :21                 =822Z626.B7S
+          :22                 =822Z626.B7S:VALUE2
+          :23                 =822Z626.B7S:VALUE3
+          :24                 =822Z626.B7S:VALUE4
+          :25                 =822Z626.B7S:VALUE5
+
+PC13.31.23.5 MOVE (R,4)
+          :1                  =82ZIC626.MV
+          :2                  PC13.31.22.1.112:21
+          :3                  =82ZIC626:OUTPH
+          :4                  =82ZIC626:OUTPL
+          :21                 =822Z626.R1S
+          :22                 =822Z626.R2S
+          :23                 =822Z626.R3S
+          :24                 =822Z626.R4S
+
+PCD-PAGE   13
+"82M130: Input Processing"
+
+PC13.31.31 FUNCM 
+
+PC13.31.31.1 MOVE (B,1)
+          :1                  PC13.31.1.7:13
+          :21                                     N=(82M130_Activate)
+
+PC13.31.31.2 SUB (R)
+          :1                  D=1.800000E+03
+          :2                  D=0.000000
+          :20 
+
+PC13.31.31.3 MUL (R,3)
+          :1                  PC13.31.31.2:20
+          :2                  PC13.31.12.1.111:22
+          :3                  D=1.000000E-02
+          :20 
+
+PC13.31.31.4 ADD (R,2)
+          :1                  PC13.31.31.3:20
+          :2                  D=0.000000
+          :20                                     N=(82M130_SpeedRef)
+
+PCD-PAGE   14
+"82M130: Fan Pump 1"
+
+PC13.31.32 FUNCM 
+
+PC13.31.32.1 BLOCK 
+          :ON                 1
+          :RUN 
+
+PC13.31.32.1.101 MOVE (B,2)
+          :1                  0
+          :2                  PC13.31.31.1:21
+          :21 
+          :22 
+
+PC13.31.32.1.102 OR (3)
+          :1                  0
+          :2                  =MMC_X.82M130:59
+          :3                  PC13.31.31.1:21
+          :20 
+
+PC13.31.32.1.105 COMP-R (1,1)
+          :I                  PC13.31.1.2:21
+          :HHYS               MD=1.000000E+00
+          :H1                 D=1.000000E+01
+          :I<H1 
+          :I>=H1 
+          :LHYS               PC13.31.32.1.105:HHYS
+          :L1                 D=5.000000E+00
+          :I>L1 
+          :I<=L1 
+
+PC13.31.32.1.106 TOFF 
+          :I                  PC13.31.32.1.105:I>=H1
+          :TD                 D=20
+          :O 
+          :TE 
+
+PC13.31.32.1.109 AND-O (1,2,0,0,0,0)
+          :1                  1
+          :11      -          PC13.31.32.1.110:SEQ
+          :12      -          PC13.31.32.1.110:LOC
+          :60 
+
+PC13.31.32.1.110 MOTCON (0,0,1,0,0,1)
+          :PARAM              =82M130:PC_PARM
+          :ME                 1
+          :M1                 1
+          :M2                 PC13.31.1.1:21
+          :M3                 1
+          :M4                 1
+          :IC1                1
+          :IC2                1
+          :IB1                PC13.1.1.1:34
+          :IB2                1
+          :IB3                PC13.31.1.12:I>=H1
+          :IB4                1
+          :IBF                0
+          :IA                 PC13.31.32.1.109:60
+          :T1                 D=5
+          :T2                 D=7
+          :T3                 D=4
+          :STF                1
+          :START              PC13.31.32.1.102:20
+          :STOP               PC13.31.32.1.101:22
+          :ACK1               PC13.31.32.1.106:O
+          :MC                 PC13.31.1.2:21
+          :RESULT             =82M130:PC_RES
+          :RMORD              =82M130:MORD
+          :NOINT 
+          :TRIP                                   N=(82M130_TRIP)
+          :BLK                                    N=(82M130_BLK)
+          :RFS 
+          :SO1                =82M130.CMD:VALUE7,
+                                                  N=(82M130_MSTR)
+          :SACK 
+          :RUN                =122T124A.B1:VALUE3,
+                                                  N=(82M130_RUN)
+          :SEQ                                    N=(82M130_SEQ)
+          :LE                 0
+          :L1                 0
+          :L2                 0
+          :L0                 1
+          :LOC                                    N=(82M130_LOC)
+          :X1                 0
+          :X2                 0
+          :ALENX1             1
+          :ALENX2             1
+          :Y1                                     N=(82M130_ORDLOC)
+          :Y2                                     N=(82M130_ORDAUTO)
+          :Y3                                     N=(82M130_ORDE1)
+
+PCD-PAGE   15
+"82M130  Fan Pump #1"
+
+PC13.31.32.1.111 AND (2)
+          :1                  PC13.31.32.1.110:RFS
+          :2                  PC13.31.32.1.110:SEQ
+          :20                 =122T124A.B1:VALUE5,
+                                                  N=(82M130_RDY)
+
+PC13.31.32.1.121 TRIGG 
+          :1                  0
+          :5 
+
+PC13.31.32.1.122 TRIGG 
+          :1                  PC13.31.31.1:21
+          :5 
+
+PC13.31.32.1.123 SR-OO (1,4)
+          :1                  PC13.31.32.1.110:Y1
+          :11                 PC13.31.32.1.110:Y2
+          :12                 PC13.31.32.1.110:Y3
+          :13                 PC13.31.32.1.121:5
+          :14                 PC13.31.32.1.122:5
+          :20 
+
+PC13.31.32.1.124 OR (2)
+          :1                  PC13.31.32.1.123:20
+          :2                  0
+          :20                 =82M130:BOOLD
+
+PC13.31.32.1.125 SR-OO (2,3)
+          :1                  PC13.31.32.1.110:Y3
+          :2                  PC13.31.32.1.122:5
+          :11                 PC13.31.32.1.110:Y1
+          :12                 PC13.31.32.1.110:Y2
+          :13                 PC13.31.32.1.121:5
+          :20                 =82M130:BOOLF
+
+PC13.31.32.1.126 AND (2)
+          :1       -          PC13.31.32.1.124:20
+          :2       -          PC13.31.32.1.125:20
+          :20                 =82M130:BOOLE
+
+PC13.31.32.1.127 MOVE (B,3)
+          :1                  PC13.31.32.1.124:20
+          :2                  PC13.31.32.1.125:20
+          :3                  PC13.31.32.1.126:20
+          :21                                     N=(82M130_LOCAL)
+          :22                                     N=(82M130_E1)
+          :23                                     N=(82M130_AUTO)
+
+PCD-PAGE   16
+"82M130  Fan Pump #1"
+
+PC13.31.32.1.131 MOVE (R,7)
+          :1                  =82M130.ST
+          :2                  PC13.31.1.2:21
+          :3                  =82M130:REALAMIN
+          :4                  =82M130:REALAMAX
+          :5                  =82M130:REALBMAX
+          :6                  =82M130:REALBMIN
+          :7                  D=1.000000E+01
+          :21                 =82M130:REALA
+          :22                 =82M130:REALC
+          :23                 =82M130:RRESMIN
+          :24                 =82M130:RRESMAX
+          :25                 =82M130:RPARMAX
+          :26                 =82M130:RPARMIN
+          :27 
+
+PC13.31.32.1.132 DIV (R)
+          :1                  PC13.31.32.1.131:22
+          :2                  CD=1.200000E+00
+          :20                 =82M130:REALE
+          :REM 
+
+PC13.31.32.1.133 TON 
+          :I                  PC13.31.32.1.110:RUN
+          :TD                 D=1
+          :O 
+          :TE 
+
+PC13.31.32.1.134 AND-O (1,2,0,0,0,0)
+          :1                  PC13.31.32.1.133:O
+          :11                 PC13.31.32.1.127:22
+          :12                 PC13.31.32.1.127:23
+          :60 
+
+PC13.31.32.1.135 SW-C (R,1)
+          :ACT                PC13.31.32.1.133:O
+          :11                 PC13.31.32.1.131:21
+          :12                 D=0.000000
+          :13 
+
+PC13.31.32.1.136 SW-C (R,1)
+          :ACT                PC13.31.32.1.127:22
+          :11                 PC13.31.31.4:20
+          :12                 =MMC_X.82M130:65
+          :13 
+
+PC13.31.32.1.137 RAMP 
+          :I                  PC13.31.32.1.136:13
+          :STEP+              D=1.000000E+00
+          :STEP-              D=1.000000E+00
+          :SLOPE+             PC13.31.32.1.131:27
+          :SLOPE-             PC13.31.32.1.131:27
+          :BAL     -          PC13.31.32.1.134:60
+          :BALREF             PC13.31.32.1.135:13
+          :OHL                =82M130:REALBMAX
+          :OLL                =82M130:REALBMIN
+          :O                  =82M130:REALB
+          :O=HL               =82M130:BOOLA
+          :O=LL               =82M130:BOOLB
+          :ERR 
+
+PC13.31.32.1.138 MOVE (R,1)
+          :1                  PC13.31.32.1.137:O
+          :21                                     N=(82M130_SSP)
+
+PC13.31.32.1.139 OR-A (0,2,2,0,0,0)
+          :11                 PC13.31.32.1.127:21
+          :12                 1
+          :21                 PC13.31.32.1.125:20
+          :22                 1
+          :60 
+
+PC13.31.32.1.140 AND (2)
+          :1                  PC13.31.32.1.133:O
+          :2                  PC13.31.32.1.139:60
+          :20 
+
+PC13.31.32.1.141 SW-C (R,1)
+          :ACT                PC13.31.32.1.140:20
+          :11                 PC13.31.32.1.137:O
+          :12                 =MMC_X.82M130:65
+          :13                 =MMC_X.82M130:65
+
+PCD-PAGE   17
+"82M131: Input Processing"
+
+PC13.31.41 FUNCM 
+
+PC13.31.41.1 MOVE (B,1)
+          :1                  PC13.31.1.7:13
+          :21                                     N=(82M131_Activate)
+
+PC13.31.41.2 MOVE (R,1)
+          :1                  PC13.31.31.4:20
+          :21                                     N=(82M131_SpeedRef)
+
+PCD-PAGE   18
+"82M131: Fan Pump2"
+
+PC13.31.42 FUNCM 
+
+PC13.31.42.1 BLOCK 
+          :ON                 1
+          :RUN 
+
+PC13.31.42.1.101 MOVE (B,2)
+          :1                  0
+          :2                  PC13.31.41.1:21
+          :21 
+          :22 
+
+PC13.31.42.1.102 OR (3)
+          :1                  0
+          :2                  =MMC_X.82M131:59
+          :3                  PC13.31.41.1:21
+          :20 
+
+PC13.31.42.1.105 COMP-R (1,1)
+          :I                  PC13.31.1.2:22
+          :HHYS               MD=1.000000E+00
+          :H1                 D=1.000000E+01
+          :I<H1 
+          :I>=H1 
+          :LHYS               PC13.31.42.1.105:HHYS
+          :L1                 D=5.000000E+00
+          :I>L1 
+          :I<=L1 
+
+PC13.31.42.1.106 TOFF 
+          :I                  PC13.31.42.1.105:I>=H1
+          :TD                 D=20
+          :O 
+          :TE 
+
+PC13.31.42.1.109 AND-O (1,2,0,0,0,0)
+          :1                  1
+          :11      -          PC13.31.42.1.110:SEQ
+          :12      -          PC13.31.42.1.110:LOC
+          :60 
+
+PC13.31.42.1.110 MOTCON (0,0,1,0,0,1)
+          :PARAM              =82M131:PC_PARM
+          :ME                 1
+          :M1                 1
+          :M2                 PC13.31.1.1:22
+          :M3                 1
+          :M4                 1
+          :IC1                1
+          :IC2                1
+          :IB1                PC13.1.1.1:34
+          :IB2                1
+          :IB3                PC13.31.1.12:I>=H1
+          :IB4                1
+          :IBF                0
+          :IA                 PC13.31.42.1.109:60
+          :T1                 D=5
+          :T2                 D=7
+          :T3                 D=4
+          :STF                1
+          :START              PC13.31.42.1.102:20
+          :STOP               PC13.31.42.1.101:22
+          :ACK1               PC13.31.42.1.106:O
+          :MC                 PC13.31.1.2:22
+          :RESULT             =82M131:PC_RES
+          :RMORD              =82M131:MORD
+          :NOINT 
+          :TRIP                                   N=(82M131_TRIP)
+          :BLK                                    N=(82M131_BLK)
+          :RFS 
+          :SO1                =82M131.CMD:VALUE7,
+                                                  N=(82M131_MSTR)
+          :SACK 
+          :RUN                =122T124A.B1:VALUE4,
+                                                  N=(82M131_RUN)
+          :SEQ                                    N=(82M131_SEQ)
+          :LE                 0
+          :L1                 0
+          :L2                 0
+          :L0                 1
+          :LOC                                    N=(82M131_LOC)
+          :X1                 0
+          :X2                 0
+          :ALENX1             1
+          :ALENX2             1
+          :Y1                                     N=(82M131_ORDLOC)
+          :Y2                                     N=(82M131_ORDAUTO)
+          :Y3                                     N=(82M131_ORDE1)
+
+PCD-PAGE   19
+"82M131  Fan Pump #2"
+
+PC13.31.42.1.111 AND (2)
+          :1                  PC13.31.42.1.110:RFS
+          :2                  PC13.31.42.1.110:SEQ
+          :20                 =122T124A.B1:VALUE6,
+                                                  N=(82M131_RDY)
+
+PC13.31.42.1.121 TRIGG 
+          :1                  0
+          :5 
+
+PC13.31.42.1.122 TRIGG 
+          :1                  PC13.31.41.1:21
+          :5 
+
+PC13.31.42.1.123 SR-OO (1,4)
+          :1                  PC13.31.42.1.110:Y1
+          :11                 PC13.31.42.1.110:Y2
+          :12                 PC13.31.42.1.110:Y3
+          :13                 PC13.31.42.1.121:5
+          :14                 PC13.31.42.1.122:5
+          :20 
+
+PC13.31.42.1.124 OR (2)
+          :1                  PC13.31.42.1.123:20
+          :2                  0
+          :20                 =82M131:BOOLD
+
+PC13.31.42.1.125 SR-OO (2,3)
+          :1                  PC13.31.42.1.110:Y3
+          :2                  PC13.31.42.1.122:5
+          :11                 PC13.31.42.1.110:Y1
+          :12                 PC13.31.42.1.110:Y2
+          :13                 PC13.31.42.1.121:5
+          :20                 =82M131:BOOLF
+
+PC13.31.42.1.126 AND (2)
+          :1       -          PC13.31.42.1.124:20
+          :2       -          PC13.31.42.1.125:20
+          :20                 =82M131:BOOLE
+
+PC13.31.42.1.127 MOVE (B,3)
+          :1                  PC13.31.42.1.124:20
+          :2                  PC13.31.42.1.125:20
+          :3                  PC13.31.42.1.126:20
+          :21                                     N=(82M131_LOCAL)
+          :22                                     N=(82M131_E1)
+          :23                                     N=(82M131_AUTO)
+
+PCD-PAGE   20
+"82M131  Fan Pump #2"
+
+PC13.31.42.1.131 MOVE (R,7)
+          :1                  =82M131.ST
+          :2                  PC13.31.1.2:22
+          :3                  =82M131:REALAMIN
+          :4                  =82M131:REALAMAX
+          :5                  =82M131:REALBMAX
+          :6                  =82M131:REALBMIN
+          :7                  D=1.000000E+01
+          :21                 =82M131:REALA
+          :22                 =82M131:REALC
+          :23                 =82M131:RRESMIN
+          :24                 =82M131:RRESMAX
+          :25                 =82M131:RPARMAX
+          :26                 =82M131:RPARMIN
+          :27 
+
+PC13.31.42.1.132 DIV (R)
+          :1                  PC13.31.42.1.131:22
+          :2                  CD=1.200000E+00
+          :20                 =82M131:REALE
+          :REM 
+
+PC13.31.42.1.133 TON 
+          :I                  PC13.31.42.1.110:RUN
+          :TD                 D=1
+          :O 
+          :TE 
+
+PC13.31.42.1.134 AND-O (1,2,0,0,0,0)
+          :1                  PC13.31.42.1.133:O
+          :11                 PC13.31.42.1.127:22
+          :12                 PC13.31.42.1.127:23
+          :60 
+
+PC13.31.42.1.135 SW-C (R,1)
+          :ACT                PC13.31.42.1.133:O
+          :11                 PC13.31.42.1.131:21
+          :12                 D=0.000000
+          :13 
+
+PC13.31.42.1.136 SW-C (R,1)
+          :ACT                PC13.31.42.1.127:22
+          :11                 PC13.31.41.2:21
+          :12                 =MMC_X.82M131:65
+          :13 
+
+PC13.31.42.1.137 RAMP 
+          :I                  PC13.31.42.1.136:13
+          :STEP+              D=1.000000E+00
+          :STEP-              D=1.000000E+00
+          :SLOPE+             PC13.31.42.1.131:27
+          :SLOPE-             PC13.31.42.1.131:27
+          :BAL     -          PC13.31.42.1.134:60
+          :BALREF             PC13.31.42.1.135:13
+          :OHL                =82M131:REALBMAX
+          :OLL                =82M131:REALBMIN
+          :O                  =82M131:REALB
+          :O=HL               =82M131:BOOLA
+          :O=LL               =82M131:BOOLB
+          :ERR 
+
+PC13.31.42.1.138 MOVE (R,1)
+          :1                  PC13.31.42.1.137:O
+          :21                                     N=(82M131_SSP)
+
+PC13.31.42.1.139 OR-A (0,2,2,0,0,0)
+          :11                 PC13.31.42.1.127:21
+          :12                 1
+          :21                 PC13.31.42.1.125:20
+          :22                 1
+          :60 
+
+PC13.31.42.1.140 AND (2)
+          :1                  PC13.31.42.1.133:O
+          :2                  PC13.31.42.1.139:60
+          :20 
+
+PC13.31.42.1.141 SW-C (R,1)
+          :ACT                PC13.31.42.1.140:20
+          :11                 PC13.31.42.1.137:O
+          :12                 =MMC_X.82M131:65
+          :13                 =MMC_X.82M131:65
+
+PCD-PAGE   21
+"82FIA627   Slice Flow Calc."
+
+PC13.31.51 FUNCM 
+
+PC13.31.51.1 ADD (R,2)
+          :1                  =82M132.ST
+          :2                  =821EFLUX.R9R
+          :20 
+
+PC13.31.51.2 DIV-MR (2,1)
+          :1                  =82ZIC626.MV
+          :2                  D=3.430000E+00
+          :21                 D=1.000000E+03
+          :40 
+
+PC13.31.51.3 MUL (R,2)
+          :1                  PC13.31.51.1:20
+          :2                  PC13.31.51.2:40
+          :20                 =82FIA627:CALC_VAL
+
+PCD-PAGE   22
+"Fan Pumps & Slice Gap: Output Processing"
+
+PC13.31.101 FUNCM 
+
+PC13.31.101.1 OR-A (2,4,0,0,0,0)
+          :1                  PC13.1.1.1:37
+          :2                  0
+          :11      -          PC13.1.1.1:37
+          :12                 PC13.31.32.1.110:RUN
+          :13                 1
+          :14                 1
+          :60 
+
+PC13.31.101.2 SW-C (R,1)
+          :ACT                PC13.31.101.1:60
+          :11                 PC13.31.32.1.138:21
+          :12                 PC13.31.42.1.138:21
+          :13 
+
+PC13.31.101.3 RAMP 
+          :I                  PC13.31.101.2:13
+          :STEP+              D=1.000000E+00
+          :STEP-              D=1.000000E+00
+          :SLOPE+             D=2.000000E+01
+          :SLOPE-             D=2.000000E+01
+          :BAL                0
+          :BALREF             D=0.000000
+          :OHL                D=1.500000E+03
+          :OLL                =82M130.SSP:RANGEMIN
+          :O                  =82M130.SSP_
+          :O=HL 
+          :O=LL 
+          :ERR 
+
+PC13.31.101.4 MOVE (B,3)
+          :1                  PC13.1.1.1:37
+          :2                  0
+          :3                  0
+          :21                 =122T124A.B1:VALUE7
+          :22 
+          :23 
+
+PC13.31.101.5 AND (4)
+          :1                  PC13.1.1.1:34
+          :2                  PC13.31.1.12:I>=H1
+          :3                  1
+          :4                  1
+          :20                 =82M13X.INT
+
+PC13.31.101.6 AND (4)
+          :1                  PC13.31.101.5:20
+          :2                  PC13.31.1.7:13
+          :3                  1
+          :4                  1
+          :20                 =82M13X.GST
+
+PCD-PAGE   23
+"Periformer: Input Processing"
+
+PC13.32 CONTRM (1000,6,0)
+          :ON                 1
+          :SINGLE             0
+          :R                  0
+          :RUN 
+          :MODP 
+
+PC13.32.1 FUNCM 
+
+PC13.32.1.1 MOVE (B,6)
+          :1                  =82M066.RDY
+          :2                  =82M101.RDY
+          :3                  0
+          :4                  0
+          :5                  0
+          :6                  =82MOTOR.RUN:VALUE12
+          :21                                     N=(82M066_Ready)
+          :22                                     N=(82M101_Ready)
+          :23 
+          :24 
+          :25 
+          :26                                     N=(83M133_RUN)
+
+PC13.32.1.2 MOVE (R,3)
+          :1                  =82M066.IT
+          :2                  =82M101.IT
+          :3                  D=0.000000
+          :21                                     N=(82M066_IT)
+          :22                                     N=(82M101_IT)
+          :23 
+
+PCD-PAGE   24
+"82M066: Input Processing"
+
+PC13.32.11 FUNCM 
+
+PC13.32.11.1 OR (2)
+          :1                  PC13.32.12.1.110:INDA
+          :2                  PC13.1.1.1:31
+          :20                                     N=(83M132_Run)
+
+PC13.32.11.2 OR-A (2,3,0,0,0,0)
+          :1       -          PC13.32.12.1.110:INDA
+          :2                  0
+          :11                 PC13.1.1.1:31
+          :12                 PC13.32.1.1:26
+          :13                 1
+          :60                                     N=Periformer_Run
+
+PC13.32.11.3 AND-O (2,3,0,0,0,0)
+          :1                  PC13.1.1.1:30
+          :2                  1
+          :11                 1
+          :12                 0
+          :13                 0
+          :60                                     N=(82M066_Activate)
+
+PC13.32.11.4 OSC-B 
+          :EN                 PC13.1.1.1:30
+          :TP                 D=30
+          :TC                 D=1:0
+          :O                                      N=(82HSV690_RUN)
+
+PCD-PAGE   25
+"82M066: Periformer Doctors"
+
+PC13.32.12 FUNCM 
+
+PC13.32.12.1 BLOCK 
+          :ON                 1
+          :RUN 
+
+PC13.32.12.1.100 MOVE (B,2)
+          :1                  PC13.32.11.3:60
+          :2                  D=1
+          :21 
+          :22 
+
+PC13.32.12.1.102 OR (3)
+          :1                  PC13.32.12.1.110:INDA
+          :2                  =MMC_X.82M066:59
+          :3                  D=0
+          :20 
+
+PC13.32.12.1.105 COMP-R (1,1)
+          :I                  PC13.32.1.2:21
+          :HHYS               MD=2.000000E-02
+          :H1                 D=1.005000E-01
+          :I<H1 
+          :I>=H1 
+          :LHYS               PC13.32.12.1.105:HHYS
+          :L1                 D=5.000000E+00
+          :I>L1 
+          :I<=L1 
+
+PC13.32.12.1.109 OR-A (1,2,0,0,0,0)
+          :1                  1
+          :11      -          PC13.32.12.1.110:SEQ
+          :12      -          =MMC_X.82M066:93
+          :60                                     N=(82M066_IA)
+
+PC13.32.12.1.110 MOTCON (0,0,0,1,0,0)
+          :PARAM              =82M066:PC_PARM
+          :ME                 1
+          :M1                 1
+          :M2                 PC13.32.1.1:21
+          :M3                 1
+          :M4                 1
+          :IC1                1
+          :IC2                1
+          :IB1                PC13.32.11.1:20
+          :IB2                1
+          :IB3                PC13.32.11.2:60
+          :IB4                1
+          :IBF                0
+          :IA                 PC13.32.12.1.109:60
+          :T1                 D=5
+          :T2                 D=7
+          :T3                 D=1
+          :STF                1
+          :START              PC13.32.12.1.102:20
+          :STOP               PC13.32.12.1.100:22
+          :ACK1               PC13.32.12.1.105:I>=H1
+          :MC                 PC13.32.1.2:21
+          :RESULT             =82M066:PC_RES
+          :RMORD              =82M066:MORD
+          :NOINT 
+          :TRIP                                   N=(82M066_TRIP)
+          :BLK                                    N=(82M066_BLK)
+          :RFS 
+          :SO1                                    N=(82M066_MSTR)
+          :SACK 
+          :RUN                                    N=(82M066_RUN)
+          :SEQ 
+          :MAN     -          PC13.32.12.1.110:SEQ
+          :AUTO               PC13.32.12.1.110:SEQ
+          :A1                 PC13.32.12.1.100:21
+          :A2                 0
+          :A0                 PC13.32.12.1.100:21
+          :INDM 
+          :INDA                                   N=(82M066_AUTO)
+
+PC13.32.12.1.111 AND (2)
+          :1                  PC13.32.12.1.110:RFS
+          :2                  PC13.32.12.1.110:SEQ
+          :20                                     N=(82M066_RDY)
+
+PCD-PAGE   26
+"82M101: Input Processing"
+
+PC13.32.21 FUNCM 
+
+PC13.32.21.1 AND-O (2,3,0,0,0,0)
+          :1                  PC13.1.3.7:20
+          :2                  1
+          :11                 1
+          :12                 0
+          :13                 0
+          :60                                     N=(82M101_Activate)
+
+PCD-PAGE   27
+"82M101: Mist Extract Fan"
+
+PC13.32.22 FUNCM 
+
+PC13.32.22.1 BLOCK 
+          :ON                 1
+          :RUN 
+
+PC13.32.22.1.100 MOVE (B,2)
+          :1                  PC13.32.21.1:60
+          :2                  D=1
+          :21 
+          :22 
+
+PC13.32.22.1.102 OR (3)
+          :1                  PC13.32.22.1.110:INDA
+          :2                  =MMC_X.82M101:59
+          :3                  D=0
+          :20 
+
+PC13.32.22.1.105 COMP-R (1,1)
+          :I                  PC13.32.1.2:22
+          :HHYS               MD=1.000000E+00
+          :H1                 D=1.455000E+01
+          :I<H1 
+          :I>=H1 
+          :LHYS               PC13.32.22.1.105:HHYS
+          :L1                 D=5.000000E+00
+          :I>L1 
+          :I<=L1 
+
+PC13.32.22.1.109 OR-A (1,2,0,0,0,0)
+          :1                  1
+          :11      -          PC13.32.22.1.110:SEQ
+          :12      -          =MMC_X.82M101:93
+          :60                                     N=(82M101_IA)
+
+PC13.32.22.1.110 MOTCON (0,0,0,1,0,0)
+          :PARAM              =82M101:PC_PARM
+          :ME                 1
+          :M1                 1
+          :M2                 PC13.32.1.1:22
+          :M3                 1
+          :M4                 1
+          :IC1                1
+          :IC2                1
+          :IB1                1
+          :IB2                1
+          :IB3                1
+          :IB4                1
+          :IBF                0
+          :IA                 PC13.32.22.1.109:60
+          :T1                 D=5
+          :T2                 D=7
+          :T3                 D=1
+          :STF                1
+          :START              PC13.32.22.1.102:20
+          :STOP               PC13.32.22.1.100:22
+          :ACK1               PC13.32.22.1.105:I>=H1
+          :MC                 PC13.32.1.2:22
+          :RESULT             =82M101:PC_RES
+          :RMORD              =82M101:MORD
+          :NOINT 
+          :TRIP                                   N=(82M101_TRIP)
+          :BLK                                    N=(82M101_BLK)
+          :RFS 
+          :SO1                                    N=(82M101_MSTR)
+          :SACK 
+          :RUN                                    N=(82M101_RUN)
+          :SEQ 
+          :MAN     -          PC13.32.22.1.110:SEQ
+          :AUTO               PC13.32.22.1.110:SEQ
+          :A1                 PC13.32.22.1.100:21
+          :A2                 0
+          :A0                 PC13.32.22.1.100:21
+          :INDM 
+          :INDA                                   N=(82M101_AUTO)
+
+PC13.32.22.1.111 AND (2)
+          :1                  PC13.32.22.1.110:RFS
+          :2                  PC13.32.22.1.110:SEQ
+          :20                                     N=(82M101_RDY)
+
+PCD-PAGE   28
+"Periformer: Output Processing"
+
+PC13.32.101 FUNCM 
+
+PC13.32.101.1 MOVE (B,6)
+          :1                  PC13.32.12.1.110:SO1
+          :2                  PC13.32.12.1.110:RUN
+          :3                  PC13.32.22.1.110:SO1
+          :4                  PC13.32.22.1.110:RUN
+          :5                  PC13.32.11.4:O
+          :6                  0
+          :21                 =82M066.MSTR
+          :22 
+          :23                 =82M101.MSTR
+          :24 
+          :25                 =82HSV690.SV
+          :26 
+
+PCD-PAGE   29
+"Vacuum Forming Shoe & Lickup: Input Processing"
+
+PC13.33 CONTRM (500,2,0)
+          :ON                 1
+          :SINGLE             0
+          :R                  0
+          :RUN 
+          :MODP 
+
+PC13.33.11 FUNCM 
+
+PC13.33.11.1 COMP (R,0)
+          :I1                 =82M132.ST
+          :I2                 D=5.000000E+02
+          :I1>I2 
+          :I1=I2 
+          :I1<I2 
+
+PC13.33.11.2 AND-O (2,3,3,0,0,0)
+          :1                  1
+          :2                  1
+          :11                 PC13.33.11.1:I1<I2
+          :12      -          PC13.31.32.1.110:RUN
+          :13      -          PC13.31.42.1.110:RUN
+          :21                 PC13.33.12.1.110:AUTO
+          :22                 PC13.33.12.1.110:E1
+          :23                 PC13.33.12.1.110:E2
+          :60                                     N=(82PIC630_Eolim)
+
+PCD-PAGE   30
+"82PIC630: Vacuum Forming Shoe"
+
+PC13.33.12 FUNCM 
+
+PC13.33.12.1 BLOCK 
+          :ON                 1
+          :RUN 
+
+PC13.33.12.1.100 MOVE (R,1)
+          :1                  D=0.000000
+          :21 
+
+PC13.33.12.1.110 PIDCON (1,1,1,1,1,0)
+          :TRACKA             2
+          :TRACKB             2
+          :TRACKC             2
+          :REVACT             1
+          :DERIV              0
+          :HOTINIT            0
+          :PARAM1             =82PIC630:PARAM1
+          :PARAM2             =82PIC630:PARAM2
+          :PARAM3A            =82PIC630:PARAM3
+          :MV                 =82PIC630.MV
+          :SPEED1             D=3.000000E+00
+          :SPEED4             D=2.000000E+01
+          :MANENBL            1
+          :AUTOENBL           1
+          :DBINST             =82PIC630
+          :PARAM4             =82PIC630:PARAM4
+          :PARAM5             =82PIC630:PARAM5
+          :PARAM6             =82PIC630:PARAM6
+          :AUTOSP 
+          :WSP                                    N=(82PIC630_WSP)
+          :DEV 
+          :OUTP 
+          :BAL 
+          :MAN 
+          :AUTO                                   N=(82PIC630_AUT)
+          :OUT=LL 
+          :OUT=HL 
+          :PARAM3B            =82PIC630:PARAM3
+          :E1ENBL             1
+          :E2ENBL             1
+          :E3ENBL             0
+          :EXTREF1            D=0.000000
+          :EXTREF2            D=0.000000
+          :EXTREF3            D=0.000000
+          :SPEED2             D=1.500000E+01
+          :SPEED3             D=1.500000E+01
+          :E1                                     N=(82PIC630_E1)
+          :E2                                     N=(82PIC630_E2)
+          :E3 
+          :BALOUT 
+          :E1FL               0
+          :E2FL               0
+          :E3FL               0
+          :SEQE1              0
+          :SEQE2              0
+          :SEQE3              0
+          :LOCALFL            0
+          :LOCAL              0
+          :BALIN              0
+          :MANFL              0
+          :AUTOFL             0
+          :SEQMAN             0
+          :SEQAUTO            0
+          :BALREF             D=0.000000
+          :PARAM7             =82PIC630:PARAM7
+          :ALCBLK             =82PIC630.MV:ERR
+          :SP=LL 
+          :SP=HL 
+          :MV_LT_L2 
+          :MV_LT_L1 
+          :MV_GT_H1 
+          :MV_GT_H2 
+          :DEV_LT_L 
+          :DEV_GT_H 
+          :CLAMP              0
+          :CLAMPREF           D=0.000000
+          :EOLIM              PC13.33.11.2:60
+          :EOLL               PC13.33.12.1.100:21
+          :EOHL               PC13.33.12.1.100:21
+          :PARAM8             =82PIC630:PARAM8
+          :OLIMERR                                N=(82PIC630_INT)
+
+PC13.33.12.1.111 MOVE (R,2)
+          :1                  PC13.33.12.1.110:OUTP
+          :2                  PC13.33.12.1.110:OUTP
+          :21                 =82PIC630:POUT
+          :22                 =82PIC630.OUT
+
+PCD-PAGE   31
+"82PIC637: Input Processing"
+
+PC13.33.21 FUNCM 
+
+PCD-PAGE   32
+"82PIC637: Vacuum Lickup"
+
+PC13.33.22 FUNCM 
+
+PC13.33.22.1 BLOCK 
+          :ON                 1
+          :RUN 
+
+PC13.33.22.1.100 MOVE (R,1)
+          :1                  D=0.000000
+          :21 
+
+PC13.33.22.1.110 PIDCON (1,1,1,1,1,0)
+          :TRACKA             2
+          :TRACKB             2
+          :TRACKC             2
+          :REVACT             1
+          :DERIV              0
+          :HOTINIT            0
+          :PARAM1             =82PIC637:PARAM1
+          :PARAM2             =82PIC637:PARAM2
+          :PARAM3A            =82PIC637:PARAM3
+          :MV                 =82PIC637.MV
+          :SPEED1             D=3.000000E+00
+          :SPEED4             D=2.000000E+01
+          :MANENBL            1
+          :AUTOENBL           1
+          :DBINST             =82PIC637
+          :PARAM4             =82PIC637:PARAM4
+          :PARAM5             =82PIC637:PARAM5
+          :PARAM6             =82PIC637:PARAM6
+          :AUTOSP 
+          :WSP                                    N=(82PIC637_WSP)
+          :DEV 
+          :OUTP 
+          :BAL 
+          :MAN 
+          :AUTO                                   N=(82PIC637_AUT)
+          :OUT=LL 
+          :OUT=HL 
+          :PARAM3B            =82PIC637:PARAM3
+          :E1ENBL             1
+          :E2ENBL             1
+          :E3ENBL             0
+          :EXTREF1            D=0.000000
+          :EXTREF2            D=0.000000
+          :EXTREF3            D=0.000000
+          :SPEED2             D=1.500000E+01
+          :SPEED3             D=1.500000E+01
+          :E1                                     N=(82PIC637_E1)
+          :E2                                     N=(82PIC637_E2)
+          :E3 
+          :BALOUT 
+          :E1FL               0
+          :E2FL               0
+          :E3FL               0
+          :SEQE1              0
+          :SEQE2              0
+          :SEQE3              0
+          :LOCALFL            0
+          :LOCAL              0
+          :BALIN              0
+          :MANFL              0
+          :AUTOFL             0
+          :SEQMAN             0
+          :SEQAUTO            0
+          :BALREF             D=0.000000
+          :PARAM7             =82PIC637:PARAM7
+          :ALCBLK             =82PIC637.MV:ERR
+          :SP=LL 
+          :SP=HL 
+          :MV_LT_L2 
+          :MV_LT_L1 
+          :MV_GT_H1 
+          :MV_GT_H2 
+          :DEV_LT_L 
+          :DEV_GT_H 
+          :CLAMP              0
+          :CLAMPREF           D=0.000000
+          :EOLIM              0
+          :EOLL               PC13.33.22.1.100:21
+          :EOHL               PC13.33.22.1.100:21
+          :PARAM8             =82PIC637:PARAM8
+          :OLIMERR                                N=(82PIC637_INT)
+
+PC13.33.22.1.111 MOVE (R,2)
+          :1                  PC13.33.22.1.110:OUTP
+          :2                  PC13.33.22.1.110:OUTP
+          :21                 =82PIC637:POUT
+          :22                 =82PIC637.OUT
+
+PCD-PAGE   33
+"82HSV632: Input Processing/B44"
+
+PC13.33.31 FUNCM 
+
+PC13.33.31.2 COMP (R,0)
+          :I1                 =82FIC480.OUT
+          :I2                 D=-1.000000E+01
+          :I1>I2 
+          :I1=I2 
+          :I1<I2 
+
+PC13.33.31.3 AND (2)
+          :1       -          PC13.31.32.1.110:RUN
+          :2       -          PC13.31.42.1.110:RUN
+          :20 
+
+PC13.33.31.4 AND-O (2,3,0,0,0,0)
+          :1                  PC13.1.1.1:31
+          :2                  1
+          :11                 PC13.33.31.2:I1<I2
+          :12                 PC13.33.31.3:20
+          :13                 =82HSV632.SV
+          :60                                     N=(82HSV632_Activate)
+
+PC13.33.31.6 SW-C (B,1)
+          :ACT     -          PC13.33.32.1.110:INDA
+          :11                 0
+          :12                 =82HSV632.SV
+          :13 
+
+PC13.33.31.8 TON 
+          :I                  PC13.33.31.6:13
+          :TD                 D=10:0
+          :O                                      N=(82HSV632_Clsoe)
+          :TE 
+
+PCD-PAGE   34
+"82HSV632: Vacuum Shoe Cleaning"
+
+PC13.33.32 FUNCM 
+
+PC13.33.32.1 BLOCK 
+          :ON                 1
+          :RUN 
+
+PC13.33.32.1.100 MOVE (B,1)
+          :1                  PC13.33.31.4:60
+          :21 
+
+PC13.33.32.1.101 OR (2)
+          :1                  =MMC_X.82HSV632:57
+          :2                  D=0
+          :20 
+
+PC13.33.32.1.102 TRIGG 
+          :1                  PC13.33.32.1.101:20
+          :5 
+
+PC13.33.32.1.103 OR (2)
+          :1                  =MMC_X.82HSV632:58
+          :2                  PC13.33.31.8:O
+          :20 
+
+PC13.33.32.1.104 TRIGG 
+          :1                  PC13.33.32.1.103:20
+          :5 
+
+PC13.33.32.1.110 VALVECON (0,1)
+          :PARAM              =82HSV632:PC_PARM
+          :FLT1               1
+          :FLT2               1
+          :IC1                1
+          :IC2                1
+          :IB1                1
+          :IB2                1
+          :IB3                1
+          :IB4                1
+          :IBF                0
+          :IA                 1
+          :T1                 D=1
+          :T2                 D=15
+          :FINV               0
+          :OPEN               PC13.33.32.1.102:5
+          :CLOSE              PC13.33.32.1.104:5
+          :TOPN               0
+          :TCLS               0
+          :LSOPN              PC13.33.32.1.110:OPN
+          :LSCLS   -          PC13.33.32.1.110:OPN
+          :LSMEM              0
+          :RESULT             =82HSV632:PC_RES
+          :RMORD              =82HSV632:MORD
+          :NOINT 
+          :TEST 
+          :NORD 
+          :BLK 
+          :IPOS 
+          :RDY 
+          :OPN                =82HSV632.SV
+          :OPNP 
+          :OPNL 
+          :CLS                                    N=(82HSV632_CLS)
+          :CLSP 
+          :CLSL 
+          :SEQ 
+          :MAN                0
+          :AUTO               PC13.33.31.4:60
+          :AOPN               PC13.33.32.1.100:21
+          :ACLS    -          PC13.33.32.1.100:21
+          :INDM 
+          :INDA                                   N=(82HSV632_AUT)
+
+PC13.33.32.1.111 AND (2)
+          :1                  PC13.33.32.1.110:RDY
+          :2                  PC13.33.32.1.110:SEQ
+          :20                                     N=(82HSV632_RDY)
+
+PCD-PAGE   35
+"83HSV633: Input Processing/B44"
+
+PC13.33.41 FUNCM 
+
+PC13.33.41.2 COMP (R,0)
+          :I1                 =82M132.ST
+          :I2                 D=1.000000E+02
+          :I1>I2 
+          :I1=I2 
+          :I1<I2 
+
+PC13.33.41.3 COMP (R,0)
+          :I1                 =82M132.ST
+          :I2                 D=5.000000E+00
+          :I1>I2 
+          :I1=I2 
+          :I1<I2 
+
+PC13.33.41.4 AND-O (2,3,0,0,0,0)
+          :1       -          PC13.31.32.1.110:RUN
+          :2       -          PC13.31.42.1.110:RUN
+          :11                 PC13.33.41.2:I1>I2
+          :12      -          PC13.33.41.3:I1<I2
+          :13                 0
+          :60                                     N=(82HSV633_Activate)
+
+PC13.33.41.5 AND (2)
+          :1                  PC13.33.41.4:60
+          :2       -          PC13.33.42.1.110:INDA
+          :20 
+
+PC13.33.41.6 TON 
+          :I                  PC13.33.41.5:20
+          :TD                 D=20:0
+          :O 
+          :TE 
+
+PC13.33.41.7 TRIGG 
+          :1                  PC13.33.41.4:60
+          :5 
+
+PC13.33.41.8 AND-O (2,3,0,0,0,0)
+          :1                  1
+          :2                  1
+          :11                 PC13.33.41.7:5
+          :12                 PC13.33.41.6:O
+          :13                 0
+          :60                                     N=(82HSV633_Auto)
+
+PCD-PAGE   36
+"82HSV633: Vacuum Shoe Lube"
+
+PC13.33.42 FUNCM 
+
+PC13.33.42.1 BLOCK 
+          :ON                 1
+          :RUN 
+
+PC13.33.42.1.100 MOVE (B,1)
+          :1                  PC13.33.41.4:60
+          :21 
+
+PC13.33.42.1.101 OR (2)
+          :1                  =MMC_X.82HSV633:57
+          :2                  D=0
+          :20 
+
+PC13.33.42.1.102 TRIGG 
+          :1                  PC13.33.42.1.101:20
+          :5 
+
+PC13.33.42.1.103 OR (2)
+          :1                  =MMC_X.82HSV633:58
+          :2                  D=0
+          :20 
+
+PC13.33.42.1.104 TRIGG 
+          :1                  PC13.33.42.1.103:20
+          :5 
+
+PC13.33.42.1.110 VALVECON (0,1)
+          :PARAM              =82HSV633:PC_PARM
+          :FLT1               1
+          :FLT2               1
+          :IC1                1
+          :IC2                1
+          :IB1                1
+          :IB2                1
+          :IB3                1
+          :IB4                1
+          :IBF                0
+          :IA                 1
+          :T1                 D=1
+          :T2                 D=15
+          :FINV               0
+          :OPEN               PC13.33.42.1.102:5
+          :CLOSE              PC13.33.42.1.104:5
+          :TOPN               0
+          :TCLS               0
+          :LSOPN              PC13.33.42.1.110:OPN
+          :LSCLS   -          PC13.33.42.1.110:OPN
+          :LSMEM              0
+          :RESULT             =82HSV633:PC_RES
+          :RMORD              =82HSV633:MORD
+          :NOINT 
+          :TEST 
+          :NORD 
+          :BLK 
+          :IPOS 
+          :RDY 
+          :OPN 
+          :OPNP 
+          :OPNL 
+          :CLS                =82HSV633.SV,
+                                                  N=(82HSV633_CLS)
+          :CLSP 
+          :CLSL 
+          :SEQ 
+          :MAN                0
+          :AUTO               PC13.33.41.8:60
+          :AOPN               PC13.33.42.1.100:21
+          :ACLS    -          PC13.33.42.1.100:21
+          :INDM 
+          :INDA                                   N=(82HSV633_AUT)
+
+PC13.33.42.1.111 AND (2)
+          :1                  PC13.33.42.1.110:RDY
+          :2                  PC13.33.42.1.110:SEQ
+          :20                                     N=(82HSV633_RDY)
+
+PCD-PAGE   37
+"82HSV635: Input Processing/AB1044"
+
+PC13.33.51 FUNCM 
+
+PC13.33.51.1 TON 
+          :I                  =82ZSV693.ZSD
+          :TD                 D=20
+          :O 
+          :TE 
+
+PC13.33.51.2 OR-A (0,3,3,0,0,0)
+          :11                 1
+          :12                 =82ZSV693.ZSD
+          :13                 1
+          :21                 =82ZSV693.ZSU
+          :22                 1
+          :23                 1
+          :60 
+
+PC13.33.51.3 OR-A (0,3,3,3,0,0)
+          :11                 PC13.1.1.1:37
+          :12                 PC13.31.32.1.110:RUN
+          :13                 PC13.31.42.1.110:RUN
+          :21      -          PC13.1.1.1:37
+          :22                 PC13.31.32.1.110:RUN
+          :23      -          PC13.31.42.1.111:20
+          :31      -          PC13.1.1.1:37
+          :32                 PC13.31.42.1.110:RUN
+          :33      -          PC13.31.32.1.111:20
+          :60                                     N=FanPumpsRun
+
+PC13.33.51.4 AND (2)
+          :1                  PC13.33.51.2:60
+          :2                  PC13.33.51.3:60
+          :20                                     N=(82HSV635_Activate)
+
+PCD-PAGE   38
+"82HSV635: Lickup Knockoff"
+
+PC13.33.52 FUNCM 
+
+PC13.33.52.1 BLOCK 
+          :ON                 1
+          :RUN 
+
+PC13.33.52.1.100 MOVE (B,1)
+          :1                  PC13.33.51.4:20
+          :21 
+
+PC13.33.52.1.101 OR (2)
+          :1                  =MMC_X.82HSV635:57
+          :2                  D=0
+          :20 
+
+PC13.33.52.1.102 TRIGG 
+          :1                  PC13.33.52.1.101:20
+          :5 
+
+PC13.33.52.1.103 OR (2)
+          :1                  =MMC_X.82HSV635:58
+          :2                  D=0
+          :20 
+
+PC13.33.52.1.104 TRIGG 
+          :1                  PC13.33.52.1.103:20
+          :5 
+
+PC13.33.52.1.110 VALVECON (0,1)
+          :PARAM              =82HSV635:PC_PARM
+          :FLT1               1
+          :FLT2               1
+          :IC1                1
+          :IC2                1
+          :IB1                1
+          :IB2                1
+          :IB3                1
+          :IB4                1
+          :IBF                0
+          :IA                 1
+          :T1                 D=1
+          :T2                 D=15
+          :FINV               0
+          :OPEN               PC13.33.52.1.102:5
+          :CLOSE              PC13.33.52.1.104:5
+          :TOPN               0
+          :TCLS               0
+          :LSOPN              PC13.33.52.1.110:OPN
+          :LSCLS   -          PC13.33.52.1.110:OPN
+          :LSMEM              0
+          :RESULT             =82HSV635:PC_RES
+          :RMORD              =82HSV635:MORD
+          :NOINT 
+          :TEST 
+          :NORD 
+          :BLK 
+          :IPOS 
+          :RDY 
+          :OPN                =82HSV635.SV,
+                                                  N=(82HSV635_SV)
+          :OPNP 
+          :OPNL 
+          :CLS                                    N=(82HSV635_CLS)
+          :CLSP 
+          :CLSL 
+          :SEQ 
+          :MAN                0
+          :AUTO               PC13.33.51.4:20
+          :AOPN               PC13.33.52.1.100:21
+          :ACLS    -          PC13.33.52.1.100:21
+          :INDM 
+          :INDA                                   N=(82HSV635_AUT)
+
+PC13.33.52.1.111 AND (2)
+          :1                  PC13.33.52.1.110:RDY
+          :2                  PC13.33.52.1.110:SEQ
+          :20                                     N=(82HSV635_RDY)
+
+PCD-PAGE   39
+"82HSV638: Input Processing"
+
+PC13.33.61 FUNCM 
+
+PC13.33.61.1 AND-O (3,2,0,0,0,0)
+          :1                  PC13.1.1.1:24
+          :2                  1
+          :3                  1
+          :11      -          PC13.1.1.1:35
+          :12                 0
+          :60                                     N=(82HSV638_Activate)
+
+PCD-PAGE   40
+"82HSV638: Felt Shower Water Selection Valve"
+
+PC13.33.62 FUNCM 
+
+PC13.33.62.1 BLOCK 
+          :ON                 1
+          :RUN 
+
+PC13.33.62.1.100 MOVE (B,1)
+          :1                  PC13.33.61.1:60
+          :21 
+
+PC13.33.62.1.101 OR (2)
+          :1                  =MMC_X.82HSV638:57
+          :2                  D=0
+          :20 
+
+PC13.33.62.1.102 TRIGG 
+          :1                  PC13.33.62.1.101:20
+          :5 
+
+PC13.33.62.1.103 OR (2)
+          :1                  =MMC_X.82HSV638:58
+          :2                  D=0
+          :20 
+
+PC13.33.62.1.104 TRIGG 
+          :1                  PC13.33.62.1.103:20
+          :5 
+
+PC13.33.62.1.110 VALVECON (0,1)
+          :PARAM              =82HSV638:PC_PARM
+          :FLT1               1
+          :FLT2               1
+          :IC1                1
+          :IC2                1
+          :IB1                PC13.1.1.1:24
+          :IB2                1
+          :IB3                1
+          :IB4                1
+          :IBF                0
+          :IA                 1
+          :T1                 D=1
+          :T2                 D=15
+          :FINV               0
+          :OPEN               PC13.33.62.1.102:5
+          :CLOSE              PC13.33.62.1.104:5
+          :TOPN               0
+          :TCLS               0
+          :LSOPN              PC13.33.62.1.110:OPN
+          :LSCLS   -          PC13.33.62.1.110:OPN
+          :LSMEM              0
+          :RESULT             =82HSV638:PC_RES
+          :RMORD              =82HSV638:MORD
+          :NOINT 
+          :TEST 
+          :NORD 
+          :BLK 
+          :IPOS 
+          :RDY 
+          :OPN                =82HSV638.SVA,
+                              =82HSV638.SVB,
+                                                  N=(82HSV638_SV)
+          :OPNP 
+          :OPNL 
+          :CLS 
+          :CLSP 
+          :CLSL 
+          :SEQ 
+          :MAN                0
+          :AUTO               0
+          :AOPN               PC13.33.62.1.100:21
+          :ACLS    -          PC13.33.62.1.100:21
+          :INDM 
+          :INDA                                   N=(82HSV638_AUT)
+
+PC13.33.62.1.111 AND (2)
+          :1                  PC13.33.62.1.110:RDY
+          :2                  PC13.33.62.1.110:SEQ
+          :20                                     N=(82HSV638_RDY)
+
+PCD-PAGE   41
+"Pickup: Input Processing"
+
+PC13.34 CONTRM (1000,7,0)
+          :ON                 1
+          :SINGLE             0
+          :R                  0
+          :RUN 
+          :MODP 
+
+PC13.34.1 FUNCM 
+
+PC13.34.1.1 TON 
+          :I                  =82HSV911.PSH
+          :TD                 D=10
+          :O 
+          :TE 
+
+PC13.34.1.3 TOFF 
+          :I                  =82M135.SS
+          :TD                 D=1
+          :O 
+          :TE 
+
+PC13.34.1.2 AND (6)
+          :1                  PC13.34.1.1:O
+          :2                  PC13.34.1.3:O
+          :3                  =82M136.RUN
+          :4                  PC13.1.1.1:34
+          :5                  PC13.34.12.1.110:OPN
+          :6                  PC13.33.51.3:60
+          :20                                     N=(82ZSV693_Activate)
+
+PCD-PAGE   42
+"82ZSV693: Pickup Position"
+
+PC13.34.12 FUNCM 
+
+PC13.34.12.1 BLOCK 
+          :ON                 1
+          :RUN 
+
+PC13.34.12.1.100 MOVE (B,1)
+          :1                  PC13.34.1.2:20
+          :21 
+
+PC13.34.12.1.101 OR (2)
+          :1                  =MMC_X.82ZSV693:57
+          :2                  D=0
+          :20 
+
+PC13.34.12.1.102 TRIGG 
+          :1                  PC13.34.12.1.101:20
+          :5 
+
+PC13.34.12.1.103 OR (2)
+          :1                  =MMC_X.82ZSV693:58
+          :2                  D=0
+          :20 
+
+PC13.34.12.1.104 TRIGG 
+          :1                  PC13.34.12.1.103:20
+          :5 
+
+PC13.34.12.1.105 TOFF 
+          :I                  =82M135.SS
+          :TD                 D=1
+          :O 
+          :TE 
+
+PC13.34.12.1.110 VALVECON (0,1)
+          :PARAM              =82ZSV693:PC_PARM
+          :FLT1               1
+          :FLT2               1
+          :IC1                1
+          :IC2                1
+          :IB1                =82HSV911.PSH
+          :IB2                PC13.34.12.1.105:O
+          :IB3                =82M136.RUN
+          :IB4                PC13.1.1.1:34
+          :IBF                0
+          :IA                 PC13.33.51.3:60
+          :T1                 D=1
+          :T2                 D=15
+          :FINV               0
+          :OPEN               PC13.34.12.1.102:5
+          :CLOSE              PC13.34.12.1.104:5
+          :TOPN               0
+          :TCLS               0
+          :LSOPN              PC13.34.12.1.110:OPN
+          :LSCLS   -          PC13.34.12.1.110:OPN
+          :LSMEM              0
+          :RESULT             =82ZSV693:PC_RES
+          :RMORD              =82ZSV693:MORD
+          :NOINT 
+          :TEST 
+          :NORD 
+          :BLK 
+          :IPOS 
+          :RDY 
+          :OPN                =82ZSV693.SV,
+                                                  N=(82ZSV693_SV)
+          :OPNP 
+          :OPNL 
+          :CLS                                    N=(82ZSV693_CLS)
+          :CLSP 
+          :CLSL 
+          :SEQ 
+          :MAN                0
+          :AUTO               PC13.34.1.2:20
+          :AOPN               PC13.34.12.1.100:21
+          :ACLS    -          PC13.34.12.1.100:21
+          :INDM 
+          :INDA                                   N=(82ZSV693_AUT)
+
+PC13.34.12.1.111 AND (2)
+          :1                  PC13.34.12.1.110:RDY
+          :2                  PC13.34.12.1.110:SEQ
+          :20                                     N=(82ZSV693_RDY)
+
+PCD-PAGE   43
+"82ZSV693: Output Processing"
+
+PC13.34.13 FUNCM 
+
+PC13.34.13.2 AND (2)
+          :1                  =82ZSV693.ZSD
+          :2       -          =82ZSV693.ZSU
+          :20                                     N=LickupDown
+
+PC13.34.13.3 AND (3)
+          :1                  PC13.34.13.2:20
+          :2                  =82FIC480.STF
+          :3                  1
+          :20                                     N=MakingPaper
+
+PC13.34.13.1 MOVE (B,2)
+          :1                  PC13.34.13.3:20
+          :2                  PC13.34.13.2:20
+          :21                 =122T124A.B2:VALUE9,
+                              =822Z970.B8S:VALUE2,
+                              =122T123E.B1:VALUE2
+          :22 
+
+END PC13

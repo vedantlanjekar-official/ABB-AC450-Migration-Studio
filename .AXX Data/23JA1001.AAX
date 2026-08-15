@@ -1,0 +1,473 @@
+BEGIN PC10
+
+HEADER
+     IEC_BasedOn    CHH PIDs
+     IEC_Prepared   R Couper
+     IEC_Approved   R Burden
+     IEC_Title2     PM2 \ Initialisation
+     IEC_Project1   Carter Holt Harvey Tissue
+     IEC_Project2   Kawerau Mill
+     IEC_Project3   PM2 \ Control System Upgrade
+     IEC_RespDept   NZABB/IAD
+     IEC_DocNo      22-PC10
+     IEC_Language   E
+
+PCD-PAGE    1
+"Initialisation"
+
+PC10 PCPGM (40,12)
+          :ON                 1
+          :R                  0
+          :RUN                                    N=PC10_Running
+
+PC10.1 CONTRM (2000,4,0)
+          :ON                 1
+          :SINGLE             0
+          :R                  0
+          :RUN 
+          :MODP 
+
+PC10.1.1 FUNCM 
+
+PC10.1.1.1 OSC-B 
+          :EN                 1
+          :TP                 D=10
+          :TC                 D=6:0:0
+          :O                                      N=(6Hourly_Blip)
+
+PC10.1.1.5 TON 
+          :I                  PC10:RUN
+          :TD                 D=20
+          :O                                      N=PC10_Going_20secs
+          :TE 
+
+PC10.1.1.6 TON 
+          :I                  PC10:RUN
+          :TD                 D=30
+          :O                                      N=PC10_Going_30secs
+          :TE 
+
+PCD-PAGE 
+"PIDCON Derivative & Integral Action Setup"
+
+PC10.2 CONTRM (2000,5,0)
+          :ON                 0
+          :SINGLE             PC10.1.1.5:O
+          :R                  0
+          :RUN 
+          :MODP 
+
+PC10.2.1 FUNCM 
+
+PC10.2.1.1 MOVE (B,15)
+          :1                  D=1
+          :2                  D=1
+          :3                  D=1
+          :4                  D=1
+          :5                  D=1
+          :6                  D=1
+          :7                  D=1
+          :8                  D=1
+          :9                  D=1
+          :10                 D=1
+          :11                 D=1
+          :12                 D=1
+          :13                 D=1
+          :14                 D=1
+          :15                 D=1
+          :21                 =82LIC428:BLK_D
+          :22                 =82LIC428A:BLK_D
+          :23                 =82LIC430:BLK_D
+          :24                 =82FIC480:BLK_D
+          :25                 =82PIC622:BLK_D
+          :26                 =82PIC630:BLK_D
+          :27                 =82PIC637:BLK_D
+          :28                 =82LIC660:BLK_D
+          :29                 =82PIC700:BLK_D
+          :30                 =82LIC410:BLK_D
+          :31                 =82LIC650:BLK_D
+          :32                 =82LIC702:BLK_D
+          :33                 =82LIC720:BLK_D
+          :34                 =82KIC722:BLK_D
+          :35                 =82PIC972:BLK_D
+
+PC10.2.1.2 MOVE (B,15)
+          :1                  D=1
+          :2                  D=1
+          :3                  D=1
+          :4                  D=1
+          :5                  D=1
+          :6                  D=1
+          :7                  D=1
+          :8                  D=1
+          :9                  D=1
+          :10                 D=1
+          :11                 D=1
+          :12                 D=1
+          :13                 D=1
+          :14                 D=1
+          :15                 D=1
+          :21                 =82PIC750:BLK_D
+          :22                 =82FIC753:BLK_D
+          :23                 =82FIC754:BLK_D
+          :24                 =82FIC758:BLK_D
+          :25                 =82LIC762:BLK_D
+          :26                 =82LIC768:BLK_D
+          :27                 =82LIC770:BLK_D
+          :28                 =82PIC950:BLK_D
+          :29                 =82PIC953:BLK_D
+          :30                 =82M134S:BLK_D
+          :31                 =82M140C:BLK_D
+          :32                 =82LIC440:BLK_D
+          :33 
+          :34                 =82LIC650A:BLK_D
+          :35                 =82PIC664:BLK_D
+
+PC10.2.1.3 MOVE (B,15)
+          :1                  D=1
+          :2                  D=1
+          :3                  D=1
+          :4                  D=1
+          :5                  D=1
+          :6                  D=1
+          :7                  D=1
+          :8                  D=1
+          :9                  D=1
+          :10                 D=1
+          :11                 D=1
+          :12                 D=1
+          :13                 D=1
+          :14                 D=1
+          :15                 D=1
+          :21                 =82TIC760:BLK_D
+          :22 
+          :23 
+          :24 
+          :25 
+          :26 
+          :27 
+          :28 
+          :29 
+          :30 
+          :31 
+          :32 
+          :33 
+          :34 
+          :35 
+
+PCD-PAGE 
+"PIDCON Derivative & Integral Action Setup"
+
+PC10.2.1.4 MOVE (B,15)
+          :1                  D=0
+          :2                  D=0
+          :3                  D=0
+          :4                  D=0
+          :5                  D=0
+          :6                  D=0
+          :7                  D=0
+          :8                  D=0
+          :9                  D=0
+          :10                 D=0
+          :11                 D=0
+          :12                 D=0
+          :13                 D=0
+          :14                 D=0
+          :15                 D=0
+          :21                 =82LIC428:BLK_I
+          :22                 =82LIC428A:BLK_I
+          :23                 =82LIC430:BLK_I
+          :24                 =82FIC480:BLK_I
+          :25                 =82PIC622:BLK_I
+          :26                 =82PIC630:BLK_I
+          :27                 =82PIC637:BLK_I
+          :28                 =82LIC660:BLK_I
+          :29                 =82PIC700:BLK_I
+          :30                 =82LIC410:BLK_I
+          :31                 =82LIC650:BLK_I
+          :32                 =82LIC702:BLK_I
+          :33                 =82LIC720:BLK_I
+          :34                 =82KIC722:BLK_I
+          :35                 =82PIC972:BLK_I
+
+PC10.2.1.5 MOVE (B,15)
+          :1                  D=0
+          :2                  D=0
+          :3                  D=0
+          :4                  D=0
+          :5                  D=0
+          :6                  D=0
+          :7                  D=0
+          :8                  D=0
+          :9                  D=0
+          :10                 D=0
+          :11                 D=0
+          :12                 D=0
+          :13                 D=0
+          :14                 D=0
+          :15                 D=0
+          :21                 =82PIC750:BLK_I
+          :22                 =82FIC753:BLK_I
+          :23                 =82FIC754:BLK_I
+          :24                 =82FIC758:BLK_I
+          :25                 =82LIC762:BLK_I
+          :26                 =82LIC768:BLK_I
+          :27                 =82LIC770:BLK_I
+          :28                 =82PIC950:BLK_I
+          :29                 =82PIC953:BLK_I
+          :30                 =82M134S:BLK_I
+          :31                 =82M140C:BLK_I
+          :32                 =82LIC440:BLK_I
+          :33 
+          :34                 =82LIC650A:BLK_I
+          :35                 =82PIC664:BLK_I
+
+PC10.2.1.6 MOVE (B,15)
+          :1                  D=0
+          :2                  D=0
+          :3                  D=0
+          :4                  D=0
+          :5                  D=0
+          :6                  D=0
+          :7                  D=0
+          :8                  D=0
+          :9                  D=0
+          :10                 D=0
+          :11                 D=0
+          :12                 D=0
+          :13                 D=0
+          :14                 D=0
+          :15                 D=0
+          :21                 =82TIC760:BLK_I
+          :22 
+          :23 
+          :24 
+          :25 
+          :26 
+          :27 
+          :28 
+          :29 
+          :30 
+          :31 
+          :32 
+          :33 
+          :34 
+          :35 
+
+PCD-PAGE 
+"PIDCON Setpoint Capture"
+
+PC10.3 CONTRM (2000,6,0)
+          :ON                 0
+          :SINGLE             PC10.1.1.1:O
+          :R                  0
+          :RUN 
+          :MODP 
+
+PC10.3.1 FUNCM 
+
+PC10.3.1.1 MOVE (R,15)
+          :1                  =82LIC428:SETP
+          :2                  =82LIC428A:SETP
+          :3                  =82LIC430:SETP
+          :4                  =82FIC480:SETP
+          :5                  =82PIC622:SETP
+          :6                  =82PIC630:SETP
+          :7                  =82PIC637:SETP
+          :8                  =82LIC660:SETP
+          :9                  =82PIC700:SETP
+          :10                 =82LIC410:SETP
+          :11                 =82LIC650:SETP
+          :12                 =82LIC702:SETP
+          :13                 =82LIC720:SETP
+          :14                 =82KIC722:SETP
+          :15                 =82PIC972:SETP
+          :21                 =22PID1_4:HI_LIM2
+          :22                 =22PID1_4:HI_LIM1
+          :23                 =22PID1_4:LO_LIM1
+          :24                 =22PID1_4:LO_LIM2
+          :25                 =22PID5_8:HI_LIM2
+          :26                 =22PID5_8:HI_LIM1
+          :27                 =22PID5_8:LO_LIM1
+          :28                 =22PID5_8:LO_LIM2
+          :29                 =22PID9_12:HI_LIM2
+          :30                 =22PID9_12:HI_LIM1
+          :31                 =22PID9_12:LO_LIM1
+          :32                 =22PID9_12:LO_LIM2
+          :33                 =22PID13_16:HI_LIM2
+          :34                 =22PID13_16:HI_LIM1
+          :35                 =22PID13_16:LO_LIM1
+
+PC10.3.1.2 MOVE (R,15)
+          :1                  =82PIC750:SETP
+          :2                  =82FIC753:SETP
+          :3                  =82FIC754:SETP
+          :4                  =82FIC758:SETP
+          :5                  =82LIC762:SETP
+          :6                  =82LIC768:SETP
+          :7                  =82LIC770:SETP
+          :8                  =82PIC950:SETP
+          :9                  =82PIC953:SETP
+          :10                 =82M134S:SETP
+          :11                 =82M140C:SETP
+          :12                 =82LIC440:SETP
+          :13                 D=0.000000
+          :14                 =82LIC650A:SETP
+          :15                 =82PIC664:SETP
+          :21                 =22PID13_16:LO_LIM2
+          :22                 =22PID17_20:HI_LIM2
+          :23                 =22PID17_20:HI_LIM1
+          :24                 =22PID17_20:LO_LIM1
+          :25                 =22PID17_20:LO_LIM2
+          :26                 =22PID21_24:HI_LIM2
+          :27                 =22PID21_24:HI_LIM1
+          :28                 =22PID21_24:LO_LIM1
+          :29                 =22PID21_24:LO_LIM2
+          :30                 =22PID25_28:HI_LIM2
+          :31                 =22PID25_28:HI_LIM1
+          :32                 =22PID25_28:LO_LIM1
+          :33                 =22PID25_28:LO_LIM2
+          :34                 =22PID29_32:HI_LIM2
+          :35                 =22PID29_32:HI_LIM1
+
+PC10.3.1.3 MOVE (R,15)
+          :1                  =82TIC760:SETP
+          :2                  D=0.000000
+          :3                  D=0.000000
+          :4                  D=0.000000
+          :5                  D=0.000000
+          :6                  D=0.000000
+          :7                  D=0.000000
+          :8                  D=0.000000
+          :9                  D=0.000000
+          :10                 D=0.000000
+          :11                 D=0.000000
+          :12                 D=0.000000
+          :13                 D=0.000000
+          :14                 D=0.000000
+          :15                 D=0.000000
+          :21 
+          :22 
+          :23 
+          :24 
+          :25 
+          :26 
+          :27 
+          :28 
+          :29 
+          :30 
+          :31 
+          :32 
+          :33 
+          :34 
+          :35 
+
+PCD-PAGE 
+"PIDCON Setpoint Reloading"
+
+PC10.4 CONTRM (2000,7,0)
+          :ON                 0
+          :SINGLE             PC10.1.1.5:O
+          :R                  0
+          :RUN 
+          :MODP 
+
+PC10.4.1 FUNCM 
+
+PC10.4.1.1 MOVE (R,15)
+          :1                  =22PID1_4:HI_LIM2
+          :2                  =22PID1_4:HI_LIM1
+          :3                  =22PID1_4:LO_LIM1
+          :4                  =22PID1_4:LO_LIM2
+          :5                  =22PID5_8:HI_LIM2
+          :6                  =22PID5_8:HI_LIM1
+          :7                  =22PID5_8:LO_LIM1
+          :8                  =22PID5_8:LO_LIM2
+          :9                  =22PID9_12:HI_LIM2
+          :10                 =22PID9_12:HI_LIM1
+          :11                 =22PID9_12:LO_LIM1
+          :12                 =22PID9_12:LO_LIM2
+          :13                 =22PID13_16:HI_LIM2
+          :14                 =22PID13_16:HI_LIM1
+          :15                 =22PID13_16:LO_LIM1
+          :21                 =82LIC428:SETP
+          :22                 =82LIC428A:SETP
+          :23                 =82LIC430:SETP
+          :24                 =82FIC480:SETP
+          :25                 =82PIC622:SETP
+          :26                 =82PIC630:SETP
+          :27                 =82PIC637:SETP
+          :28                 =82LIC660:SETP
+          :29                 =82PIC700:SETP
+          :30                 =82LIC410:SETP
+          :31                 =82LIC650:SETP
+          :32                 =82LIC702:SETP
+          :33                 =82LIC720:SETP
+          :34                 =82KIC722:SETP
+          :35                 =82PIC972:SETP
+
+PC10.4.1.2 MOVE (R,15)
+          :1                  =22PID13_16:LO_LIM2
+          :2                  =22PID17_20:HI_LIM2
+          :3                  =22PID17_20:HI_LIM1
+          :4                  =22PID17_20:LO_LIM1
+          :5                  =22PID17_20:LO_LIM2
+          :6                  =22PID21_24:HI_LIM2
+          :7                  =22PID21_24:HI_LIM1
+          :8                  =22PID21_24:LO_LIM1
+          :9                  =22PID21_24:LO_LIM2
+          :10                 =22PID25_28:HI_LIM2
+          :11                 =22PID25_28:HI_LIM1
+          :12                 =22PID25_28:LO_LIM1
+          :13                 =22PID25_28:LO_LIM2
+          :14                 =22PID29_32:HI_LIM2
+          :15                 =22PID29_32:HI_LIM1
+          :21                 =82PIC750:SETP
+          :22                 =82FIC753:SETP
+          :23                 =82FIC754:SETP
+          :24                 =82FIC758:SETP
+          :25                 =82LIC762:SETP
+          :26                 =82LIC768:SETP
+          :27                 =82LIC770:SETP
+          :28                 =82PIC950:SETP
+          :29                 =82PIC953:SETP
+          :30                 =82M134S:SETP
+          :31                 =82M140C:SETP
+          :32                 =82LIC440:SETP
+          :33 
+          :34                 =82LIC650A:SETP
+          :35                 =82PIC664:SETP
+
+PC10.4.1.3 MOVE (R,15)
+          :1                  =22PID29_32:LO_LIM1
+          :2                  D=0.000000
+          :3                  D=0.000000
+          :4                  D=0.000000
+          :5                  D=0.000000
+          :6                  D=0.000000
+          :7                  D=0.000000
+          :8                  D=0.000000
+          :9                  D=0.000000
+          :10                 D=0.000000
+          :11                 D=0.000000
+          :12                 D=0.000000
+          :13                 D=0.000000
+          :14                 D=0.000000
+          :15                 D=0.000000
+          :21                 =82TIC760:SETP
+          :22 
+          :23 
+          :24 
+          :25 
+          :26 
+          :27 
+          :28 
+          :29 
+          :30 
+          :31 
+          :32 
+          :33 
+          :34 
+          :35 
+
+END PC10

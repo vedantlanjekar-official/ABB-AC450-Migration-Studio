@@ -1,0 +1,1967 @@
+BEGIN PC11
+
+HEADER
+     IEC_BasedOn    PM2
+     IEC_Prepared   MKinsler
+     IEC_Approved   MKinsler
+     IEC_Title2     PM2\Node22
+     IEC_Title3     White Water System
+     IEC_Project1   Carter Holt Harvey Tissue
+     IEC_Project2   Kawerau Mill
+     IEC_Project3   PM2\Control System Upgrade
+     IEC_RespDept   NZABB\IAD
+     IEC_RevInd     1
+     IEC_DocNo      PM2-N22-PC11
+     IEC_Language   E
+
+PCD-PAGE    1
+"White Water: Input Processing"
+
+PC11 PCPGM (40,1)
+          :ON                 1
+          :R                  0
+          :RUN 
+
+PC11.1 CONTRM (1000,1,0)
+          :ON                 1
+          :SINGLE             0
+          :R                  0
+          :RUN 
+          :MODP 
+
+PC11.1.1 FUNCM 
+
+PCD-PAGE    2
+"Lean & Cloudy White Water: Input Processing"
+
+PC11.31 CONTRM (1000,2,0)
+          :ON                 1
+          :SINGLE             0
+          :R                  0
+          :RUN 
+          :MODP 
+
+PC11.31.1 FUNCM 
+
+PC11.31.1.1 MOVE (B,5)
+          :1                  =122T124A.B2
+          :2                  =82GRPSTART:VALUE4
+          :3                  =82M135.RUN
+          :4                  0
+          :5                  =82M073.RDY
+          :21                                     N=(82FireEM_Shutdown)
+          :22                                     N=(82M073_GStart)
+          :23                                     N=(82M135_RUN)
+          :24 
+          :25                                     N=(82M073_Ready)
+
+PC11.31.1.2 MOVE (R,1)
+          :1                  =82M073.IT
+          :21                                     N=(82M073_IT)
+
+PCD-PAGE    3
+"82LIC660: Input Processing/B56"
+
+PC11.31.11 FUNCM 
+
+PC11.31.11.2 SUB (R)
+          :1                  =82LIC660.MV:RANGEMAX
+          :2                  =82LIC660.MV:RANGEMIN
+          :20 
+
+PC11.31.11.3 MUL (R,2)
+          :1                  PC11.31.11.2:20
+          :2                  D=1.000000E-02
+          :20 
+
+PC11.31.11.4 COMP-R (2,2)
+          :I                  =82LIC660.MV
+          :HHYS               PC11.31.11.3:20
+          :H1                 D=9.000000E+01
+          :H2                 D=8.000000E+01
+          :I<H1 
+          :I>=H1                                  N=(82LIC660_H1)
+          :I>=H2                                  N=(82LIC660_H2)
+          :LHYS               PC11.31.11.3:20
+          :L1                 D=2.000000E+01
+          :L2                 D=1.000000E+01
+          :I>L1 
+          :I<=L1                                  N=(82LIC660_L1)
+          :I<=L2                                  N=(82LIC660_L2)
+
+PC11.31.11.1 AND-O (2,3,3,0,0,0)
+          :1                  1
+          :2                  1
+          :11                 0
+          :12                 0
+          :13                 0
+          :21                 PC11.31.12.1.110:AUTO
+          :22                 PC11.31.12.1.110:E1
+          :23                 PC11.31.12.1.110:E2
+          :60                                     N=(82LIC660_Eolim)
+
+PCD-PAGE    4
+"82LIC660: Felt Water Tank"
+
+PC11.31.12 FUNCM 
+
+PC11.31.12.1 BLOCK 
+          :ON                 1
+          :RUN 
+
+PC11.31.12.1.100 MOVE (R,1)
+          :1                  D=0.000000
+          :21 
+
+PC11.31.12.1.110 PIDCON (1,1,1,1,1,0)
+          :TRACKA             2
+          :TRACKB             2
+          :TRACKC             2
+          :REVACT             1
+          :DERIV              0
+          :HOTINIT            0
+          :PARAM1             =82LIC660:PARAM1
+          :PARAM2             =82LIC660:PARAM2
+          :PARAM3A            =82LIC660:PARAM3
+          :MV                 =82LIC660.MV
+          :SPEED1             D=6.706000E+02
+          :SPEED4             D=2.000000E+01
+          :MANENBL            1
+          :AUTOENBL           1
+          :DBINST             =82LIC660
+          :PARAM4             =82LIC660:PARAM4
+          :PARAM5             =82LIC660:PARAM5
+          :PARAM6             =82LIC660:PARAM6
+          :AUTOSP 
+          :WSP                                    N=(82LIC660_WSP)
+          :DEV 
+          :OUTP 
+          :BAL 
+          :MAN 
+          :AUTO                                   N=(82LIC660_AUT)
+          :OUT=LL 
+          :OUT=HL 
+          :PARAM3B            =82LIC660:PARAM3
+          :E1ENBL             1
+          :E2ENBL             1
+          :E3ENBL             0
+          :EXTREF1            D=0.000000
+          :EXTREF2            D=0.000000
+          :EXTREF3            D=0.000000
+          :SPEED2             D=3.353000E+03
+          :SPEED3             D=3.353000E+03
+          :E1                                     N=(82LIC660_E1)
+          :E2                                     N=(82LIC660_E2)
+          :E3 
+          :BALOUT 
+          :E1FL               0
+          :E2FL               0
+          :E3FL               0
+          :SEQE1              0
+          :SEQE2              0
+          :SEQE3              0
+          :LOCALFL            0
+          :LOCAL              0
+          :BALIN              0
+          :MANFL              0
+          :AUTOFL             0
+          :SEQMAN             0
+          :SEQAUTO            0
+          :BALREF             D=0.000000
+          :PARAM7             =82LIC660:PARAM7
+          :ALCBLK             =82LIC660.MV:ERR
+          :SP=LL 
+          :SP=HL 
+          :MV_LT_L2 
+          :MV_LT_L1 
+          :MV_GT_H1 
+          :MV_GT_H2 
+          :DEV_LT_L 
+          :DEV_GT_H 
+          :CLAMP              0
+          :CLAMPREF           D=0.000000
+          :EOLIM              PC11.31.11.1:60
+          :EOLL               PC11.31.12.1.100:21
+          :EOHL               PC11.31.12.1.100:21
+          :PARAM8             =82LIC660:PARAM8
+          :OLIMERR                                N=(82LIC660_INT)
+
+PC11.31.12.1.111 MOVE (R,2)
+          :1                  PC11.31.12.1.110:OUTP
+          :2                  PC11.31.12.1.110:OUTP
+          :21                 =82LIC660:POUT
+          :22                 =82LIC660.OUT
+
+PCD-PAGE    5
+"82PIC664: Input Processing"
+
+PC11.31.21 FUNCM 
+
+PC11.31.21.1 SUB (R)
+          :1                  =82PIC664.MV:RANGEMAX
+          :2                  =82PIC664.MV:RANGEMIN
+          :20 
+
+PC11.31.21.2 MUL (R,2)
+          :1                  PC11.31.21.1:20
+          :2                  D=1.000000E-02
+          :20 
+
+PC11.31.21.3 COMP-R (2,3)
+          :I                  =82PIC664.MV
+          :HHYS               PC11.31.21.2:20
+          :H1                 D=8.000000E+01
+          :H2                 D=9.000000E+01
+          :I<H1 
+          :I>=H1                                  N=(82PIC664_H1)
+          :I>=H2                                  N=(82PIC664_H2)
+          :LHYS               PC11.31.21.2:20
+          :L1                 D=4.000000E+01
+          :L2                 D=2.000000E+01
+          :L3                 D=1.000000E+01
+          :I>L1 
+          :I<=L1                                  N=(82PIC664_L1)
+          :I<=L2                                  N=(82PIC664_L2)
+          :I<=L3                                  N=(82PIC664_L3)
+
+PC11.31.21.4 AND-O (2,3,3,0,0,0)
+          :1                  1
+          :2                  1
+          :11      -          PC11.31.32.1.110:RUN
+          :12                 0
+          :13                 0
+          :21                 PC11.31.22.1.110:AUTO
+          :22                 PC11.31.22.1.110:E1
+          :23                 PC11.31.22.1.110:E2
+          :60                                     N=(82PIC664_Eolim)
+
+PC11.31.21.5 AND (2)
+          :1                  PC11.31.32.1.110:RUN
+          :2       -          PC11.31.32.1.127:22
+          :20                                     N=(82PIC664_Bal)
+
+PC11.31.21.6 AND (2)
+          :1       -          PC11.31.21.5:20
+          :2                  PC11.31.32.1.110:RUN
+          :20                                     N=(82PIC664_SeqAuto)
+
+PC11.31.21.7 SUB (R)
+          :1                  =82M073.SSP
+          :2                  =82M073.SSP:RANGEMIN
+          :20 
+
+PC11.31.21.8 SUB (R)
+          :1                  =82M073.SSP:RANGEMAX
+          :2                  =82M073.SSP:RANGEMIN
+          :20 
+
+PC11.31.21.9 DIV-MR (2,2)
+          :1                  PC11.31.21.7:20
+          :2                  D=1.000000E+02
+          :21                 PC11.31.21.8:20
+          :22                 D=1.000000E+00
+          :40                                     N=(82PIC664_BalRef)
+
+PC11.31.21.10 MOVE (R,1)
+          :1                  D=8.500000E+01
+          :21                                     N=(82PIC664_ExtRef1)
+
+PCD-PAGE    6
+"82PIC664: Felt Water Showers"
+
+PC11.31.22 FUNCM 
+
+PC11.31.22.1 BLOCK 
+          :ON                 1
+          :RUN 
+
+PC11.31.22.1.100 MOVE (R,1)
+          :1                  D=0.000000
+          :21 
+
+PC11.31.22.1.110 PIDCON (1,1,1,1,1,0)
+          :TRACKA             2
+          :TRACKB             2
+          :TRACKC             2
+          :REVACT             1
+          :DERIV              0
+          :HOTINIT            0
+          :PARAM1             =82PIC664:PARAM1
+          :PARAM2             =82PIC664:PARAM2
+          :PARAM3A            =82PIC664:PARAM3
+          :MV                 =82PIC664.MV
+          :SPEED1             D=2.000000E+01
+          :SPEED4             D=2.000000E+01
+          :MANENBL            1
+          :AUTOENBL           1
+          :DBINST             =82PIC664
+          :PARAM4             =82PIC664:PARAM4
+          :PARAM5             =82PIC664:PARAM5
+          :PARAM6             =82PIC664:PARAM6
+          :AUTOSP 
+          :WSP                                    N=(82PIC664_WSP)
+          :DEV 
+          :OUTP 
+          :BAL 
+          :MAN 
+          :AUTO                                   N=(82PIC664_AUT)
+          :OUT=LL 
+          :OUT=HL 
+          :PARAM3B            =82PIC664:PARAM3
+          :E1ENBL             0
+          :E2ENBL             0
+          :E3ENBL             0
+          :EXTREF1            PC11.31.21.10:21
+          :EXTREF2            D=0.000000
+          :EXTREF3            D=0.000000
+          :SPEED2             D=1.000000E+02
+          :SPEED3             D=1.000000E+02
+          :E1                                     N=(82PIC664_E1)
+          :E2                                     N=(82PIC664_E2)
+          :E3 
+          :BALOUT 
+          :E1FL               0
+          :E2FL               0
+          :E3FL               0
+          :SEQE1              0
+          :SEQE2              0
+          :SEQE3              0
+          :LOCALFL            0
+          :LOCAL              0
+          :BALIN              PC11.31.21.5:20
+          :MANFL              0
+          :AUTOFL             0
+          :SEQMAN             0
+          :SEQAUTO            PC11.31.21.6:20
+          :BALREF             PC11.31.21.9:40
+          :PARAM7             =82PIC664:PARAM7
+          :ALCBLK             =82PIC664.MV:ERR
+          :SP=LL 
+          :SP=HL 
+          :MV_LT_L2 
+          :MV_LT_L1 
+          :MV_GT_H1 
+          :MV_GT_H2 
+          :DEV_LT_L 
+          :DEV_GT_H 
+          :CLAMP              0
+          :CLAMPREF           D=0.000000
+          :EOLIM              PC11.31.21.4:60
+          :EOLL               PC11.31.22.1.100:21
+          :EOHL               PC11.31.22.1.100:21
+          :PARAM8             =82PIC664:PARAM8
+          :OLIMERR                                N=(82PIC664_INT)
+
+PC11.31.22.1.111 MOVE (R,2)
+          :1                  PC11.31.22.1.110:OUTP
+          :2                  PC11.31.22.1.110:OUTP
+          :21                 =82PIC664:POUT
+          :22                                     N=(82PIC664_OUT)
+
+PCD-PAGE    7
+"82M073: Input Processing"
+
+PC11.31.31 FUNCM 
+
+PC11.31.31.5 OR (2)
+          :1       -          PC11.31.11.4:I<=L2
+          :2       -          PC11.31.32.1.110:SEQ
+          :20                                     N=(82LIC660L2_IL)
+
+PC11.31.31.1 AND (5)
+          :1                  PC11.31.1.1:22
+          :2                  PC11.31.1.1:21
+          :3                  PC11.31.1.1:23
+          :4                  PC11.31.31.5:20
+          :5                  1
+          :20                                     N=(82M073_Activate)
+
+PC11.31.31.2 SUB (R)
+          :1                  =82M073.SSP:RANGEMAX
+          :2                  =82M073.SSP:RANGEMIN
+          :20 
+
+PC11.31.31.3 MUL (R,3)
+          :1                  PC11.31.31.2:20
+          :2                  PC11.31.22.1.111:22
+          :3                  D=1.000000E-02
+          :20 
+
+PC11.31.31.4 ADD (R,2)
+          :1                  PC11.31.31.3:20
+          :2                  =82M073.SSP:RANGEMIN
+          :20                                     N=(82M073_SpeedRef)
+
+PCD-PAGE    8
+"82M073: Felt Spray Pump P15"
+
+PC11.31.32 FUNCM 
+
+PC11.31.32.1 BLOCK 
+          :ON                 1
+          :RUN 
+
+PC11.31.32.1.101 MOVE (B,2)
+          :1                  0
+          :2                  PC11.31.31.1:20
+          :21 
+          :22 
+
+PC11.31.32.1.102 OR (3)
+          :1                  0
+          :2                  =MMC_X.82M073:59
+          :3                  PC11.31.31.1:20
+          :20 
+
+PC11.31.32.1.105 COMP-R (1,1)
+          :I                  PC11.31.1.2:21
+          :HHYS               MD=1.000000E+00
+          :H1                 D=1.000000E+01
+          :I<H1 
+          :I>=H1 
+          :LHYS               PC11.31.32.1.105:HHYS
+          :L1                 D=5.000000E+00
+          :I>L1 
+          :I<=L1 
+
+PC11.31.32.1.109 AND-O (1,2,0,0,0,0)
+          :1                  1
+          :11      -          PC11.31.32.1.110:SEQ
+          :12      -          PC11.31.32.1.110:LOC
+          :60 
+
+PC11.31.32.1.110 MOTCON (0,0,1,0,0,1)
+          :PARAM              =82M073:PC_PARM
+          :ME                 1
+          :M1                 1
+          :M2                 PC11.31.1.1:25
+          :M3                 1
+          :M4                 1
+          :IC1                1
+          :IC2                1
+          :IB1                PC11.31.1.1:21
+          :IB2                PC11.31.31.5:20
+          :IB3                PC11.31.1.1:23
+          :IB4                1
+          :IBF                0
+          :IA                 PC11.31.32.1.109:60
+          :T1                 D=5
+          :T2                 D=7
+          :T3                 D=4
+          :STF                1
+          :START              PC11.31.32.1.102:20
+          :STOP               PC11.31.32.1.101:22
+          :ACK1               PC11.31.32.1.105:I>=H1
+          :MC                 PC11.31.1.2:21
+          :RESULT             =82M073:PC_RES
+          :RMORD              =82M073:MORD
+          :NOINT 
+          :TRIP                                   N=(82M073_TRIP)
+          :BLK                                    N=(82M073_BLK)
+          :RFS 
+          :SO1                                    N=(82M073_MSTR)
+          :SACK 
+          :RUN                                    N=(82M073_RUN)
+          :SEQ                                    N=(82M073_SEQ)
+          :LE                 0
+          :L1                 0
+          :L2                 0
+          :L0                 1
+          :LOC                                    N=(82M073_LOC)
+          :X1                 0
+          :X2                 0
+          :ALENX1             1
+          :ALENX2             1
+          :Y1                                     N=(82M073_ORDLOC)
+          :Y2                                     N=(82M073_ORDAUTO)
+          :Y3                                     N=(82M073_ORDE1)
+
+PCD-PAGE    9
+"82M073:  Felt Spray Pump P15"
+
+PC11.31.32.1.111 AND (2)
+          :1                  PC11.31.32.1.110:RFS
+          :2                  PC11.31.32.1.110:SEQ
+          :20                                     N=(82M073_RDY)
+
+PC11.31.32.1.121 TRIGG 
+          :1                  0
+          :5 
+
+PC11.31.32.1.122 TRIGG 
+          :1                  PC11.31.31.1:20
+          :5 
+
+PC11.31.32.1.123 SR-OO (1,4)
+          :1                  PC11.31.32.1.110:Y1
+          :11                 PC11.31.32.1.110:Y2
+          :12                 PC11.31.32.1.110:Y3
+          :13                 PC11.31.32.1.121:5
+          :14                 PC11.31.32.1.122:5
+          :20 
+
+PC11.31.32.1.124 OR (2)
+          :1                  PC11.31.32.1.123:20
+          :2                  0
+          :20                 =82M073:BOOLD
+
+PC11.31.32.1.125 SR-OO (2,3)
+          :1                  PC11.31.32.1.110:Y3
+          :2                  PC11.31.32.1.122:5
+          :11                 PC11.31.32.1.110:Y1
+          :12                 PC11.31.32.1.110:Y2
+          :13                 PC11.31.32.1.121:5
+          :20                 =82M073:BOOLF
+
+PC11.31.32.1.126 AND (2)
+          :1       -          PC11.31.32.1.124:20
+          :2       -          PC11.31.32.1.125:20
+          :20                 =82M073:BOOLE
+
+PC11.31.32.1.127 MOVE (B,3)
+          :1                  PC11.31.32.1.124:20
+          :2                  PC11.31.32.1.125:20
+          :3                  PC11.31.32.1.126:20
+          :21                                     N=(82M073_LOCAL)
+          :22                                     N=(82M073_E1)
+          :23                                     N=(82M073_AUTO)
+
+PCD-PAGE   10
+"82M073: Felt Spray Pump P15"
+
+PC11.31.32.1.131 MOVE (R,7)
+          :1                  =82M073.ST
+          :2                  PC11.31.1.2:21
+          :3                  =82M073:REALAMIN
+          :4                  =82M073:REALAMAX
+          :5                  =82M073:REALBMAX
+          :6                  =82M073:REALBMIN
+          :7                  D=1.000000E+02
+          :21                 =82M073:REALA
+          :22                 =82M073:REALC
+          :23                 =82M073:RRESMIN
+          :24                 =82M073:RRESMAX
+          :25                 =82M073:RPARMAX
+          :26                 =82M073:RPARMIN
+          :27 
+
+PC11.31.32.1.132 DIV (R)
+          :1                  PC11.31.32.1.131:22
+          :2                  CD=1.200000E+00
+          :20                 =82M073:REALE
+          :REM 
+
+PC11.31.32.1.133 TON 
+          :I                  PC11.31.32.1.110:RUN
+          :TD                 D=1
+          :O 
+          :TE 
+
+PC11.31.32.1.134 AND-O (1,2,0,0,0,0)
+          :1                  PC11.31.32.1.133:O
+          :11                 PC11.31.32.1.127:22
+          :12                 PC11.31.32.1.127:23
+          :60 
+
+PC11.31.32.1.135 SW-C (R,1)
+          :ACT                PC11.31.32.1.133:O
+          :11                 PC11.31.32.1.131:21
+          :12                 D=0.000000
+          :13 
+
+PC11.31.32.1.136 SW-C (R,1)
+          :ACT                PC11.31.32.1.127:22
+          :11                 PC11.31.31.4:20
+          :12                 =MMC_X.82M073:65
+          :13 
+
+PC11.31.32.1.137 RAMP 
+          :I                  PC11.31.32.1.136:13
+          :STEP+              D=1.000000E+03
+          :STEP-              D=1.000000E+03
+          :SLOPE+             PC11.31.32.1.131:27
+          :SLOPE-             PC11.31.32.1.131:27
+          :BAL     -          PC11.31.32.1.134:60
+          :BALREF             PC11.31.32.1.135:13
+          :OHL                =82M073:REALBMAX
+          :OLL                =82M073:REALBMIN
+          :O                  =82M073:REALB
+          :O=HL               =82M073:BOOLA
+          :O=LL               =82M073:BOOLB
+          :ERR 
+
+PC11.31.32.1.138 MOVE (R,1)
+          :1                  PC11.31.32.1.137:O
+          :21                 =82M073.SSP
+
+PC11.31.32.1.139 OR-A (0,2,2,0,0,0)
+          :11                 PC11.31.32.1.127:21
+          :12                 1
+          :21                 PC11.31.32.1.125:20
+          :22                 1
+          :60 
+
+PC11.31.32.1.140 AND (2)
+          :1                  PC11.31.32.1.133:O
+          :2                  PC11.31.32.1.139:60
+          :20 
+
+PC11.31.32.1.141 SW-C (R,1)
+          :ACT                PC11.31.32.1.140:20
+          :11                 PC11.31.32.1.137:O
+          :12                 =MMC_X.82M073:65
+          :13                 =MMC_X.82M073:65
+
+PCD-PAGE   11
+"Felt Spray Tank: Output Processing"
+
+PC11.31.101 FUNCM 
+
+PC11.31.101.1 MOVE (B,4)
+          :1                  PC11.31.32.1.110:SO1
+          :2                  PC11.31.32.1.110:RUN
+          :3                  PC11.31.32.1.110:SEQ
+          :4                  PC11.31.32.1.111:20
+          :21                 =82M073.MSTR
+          :22                 =82MOTOR.RUN:VALUE7
+          :23                 =82MOTOR.RUN:VALUE8
+          :24                 =82MOTOR.RUN:VALUE9
+
+PCD-PAGE   12
+"LP & HP Pumps (+Dilution): Input Processing"
+
+PC11.32 CONTRM (1000,3,0)
+          :ON                 1
+          :SINGLE             0
+          :R                  0
+          :RUN 
+          :MODP 
+
+PC11.32.1 FUNCM 
+
+PC11.32.1.1 MOVE (B,10)
+          :1                  =82M023.RDY
+          :2                  =82M027.RDY
+          :3                  =82M083.RDY
+          :4                  0
+          :5                  0
+          :6                  =82GRPSTART
+          :7                  =82GRPSTART:VALUE2
+          :8                  =122F124A.B1:VALUE16
+          :9                  0
+          :10                 0
+          :21                                     N=(82M023_Ready)
+          :22                                     N=(82M027_Ready)
+          :23                                     N=(82M083_Ready)
+          :24 
+          :25 
+          :26                                     N=(82M023_GStart)
+          :27                                     N=(82M027_GStart)
+          :28                                     N=(82M083_GStart)
+          :29 
+          :30 
+
+PC11.32.1.2 MOVE (R,3)
+          :1                  =82M023.IT
+          :2                  =82M027.IT
+          :3                  =82M083.IT
+          :21                                     N=(82M023_IT)
+          :22                                     N=(82M027_IT)
+          :23                                     N=(82M083_IT)
+
+PCD-PAGE   13
+"82HSV688: Input Processing"
+
+PC11.32.11 FUNCM 
+
+PC11.32.11.1 OR-A (2,3,0,0,0,0)
+          :1                  0
+          :2                  0
+          :11                 PC11.32.22.1.110:RUN
+          :12                 1
+          :13                 1
+          :60                                     N=(82HSV688_Activate)
+
+PCD-PAGE   14
+"82HSV688: HP shower Pump (P10) Isolation"
+
+PC11.32.12 FUNCM 
+
+PC11.32.12.1 BLOCK 
+          :ON                 1
+          :RUN 
+
+PC11.32.12.1.100 MOVE (B,1)
+          :1                  PC11.32.11.1:60
+          :21 
+
+PC11.32.12.1.101 OR (2)
+          :1                  =MMC_X.82HSV688:57
+          :2                  D=0
+          :20 
+
+PC11.32.12.1.102 TRIGG 
+          :1                  PC11.32.12.1.101:20
+          :5 
+
+PC11.32.12.1.103 OR (2)
+          :1                  =MMC_X.82HSV688:58
+          :2                  D=0
+          :20 
+
+PC11.32.12.1.104 TRIGG 
+          :1                  PC11.32.12.1.103:20
+          :5 
+
+PC11.32.12.1.110 VALVECON (0,1)
+          :PARAM              =82HSV688:PC_PARM
+          :FLT1               1
+          :FLT2               1
+          :IC1                1
+          :IC2                1
+          :IB1                1
+          :IB2                1
+          :IB3                1
+          :IB4                1
+          :IBF                0
+          :IA                 1
+          :T1                 D=1
+          :T2                 D=15
+          :FINV               0
+          :OPEN               PC11.32.12.1.102:5
+          :CLOSE              PC11.32.12.1.104:5
+          :TOPN               0
+          :TCLS               0
+          :LSOPN              PC11.32.12.1.110:OPN
+          :LSCLS   -          PC11.32.12.1.110:OPN
+          :LSMEM              0
+          :RESULT             =82HSV688:PC_RES
+          :RMORD              =82HSV688:MORD
+          :NOINT 
+          :TEST 
+          :NORD 
+          :BLK 
+          :IPOS 
+          :RDY 
+          :OPN                =82HSV688.SV
+          :OPNP 
+          :OPNL 
+          :CLS                                    N=(82HSV688_CLS)
+          :CLSP 
+          :CLSL 
+          :SEQ 
+          :MAN                0
+          :AUTO               PC11.32.11.1:60
+          :AOPN               PC11.32.12.1.100:21
+          :ACLS    -          PC11.32.12.1.100:21
+          :INDM 
+          :INDA                                   N=(82HSV688_AUT)
+
+PC11.32.12.1.111 AND (2)
+          :1                  PC11.32.12.1.110:RDY
+          :2                  PC11.32.12.1.110:SEQ
+          :20                                     N=(82HSV688_RDY)
+
+PCD-PAGE   15
+"82M023: Input Processing"
+
+PC11.32.21 FUNCM 
+
+PC11.32.21.4 OR (2)
+          :1                  0
+          :2       -          PC11.33.41.3:I<=L2
+          :20                                     N=(82LIC430L1_M023)
+
+PC11.32.21.5 OR (2)
+          :1                  0
+          :2       -          PC11.33.41.3:I<=L2
+          :20                                     N=(82LIC430L1_M027)
+
+PC11.32.21.6 OR (2)
+          :1                  0
+          :2       -          PC11.33.11.10:I<=L2
+          :20                                     N=(82LIC428L1_M083)
+
+PC11.32.21.1 AND (2)
+          :1                  PC11.32.1.1:26
+          :2                  PC11.32.21.4:20
+          :20                                     N=(82M023_Activate)
+
+PC11.32.21.2 AND (2)
+          :1                  PC11.32.1.1:27
+          :2                  PC11.32.21.5:20
+          :20                                     N=(82M027_Activate)
+
+PC11.32.21.3 AND (2)
+          :1                  PC11.32.1.1:28
+          :2                  PC11.32.21.6:20
+          :20                                     N=(82M083_Activate)
+
+PC11.32.21.10 TRIGG 
+          :1                  PC11.32.21.3:20
+          :5 
+
+PC11.32.21.11 TRIGG 
+          :1                  PC11.32.42.1.110:INDA
+          :5 
+
+PC11.32.21.12 OR (3)
+          :1                  PC11.32.21.10:5
+          :2                  PC11.32.21.11:5
+          :3                  0
+          :20                                     N=(82M083_ReleaseAuto)
+
+PCD-PAGE   16
+"82M023: P10 HP Showers"
+
+PC11.32.22 FUNCM 
+
+PC11.32.22.1 BLOCK 
+          :ON                 1
+          :RUN 
+
+PC11.32.22.1.100 MOVE (B,2)
+          :1                  PC11.32.21.1:20
+          :2                  D=1
+          :21 
+          :22 
+
+PC11.32.22.1.102 OR (3)
+          :1                  PC11.32.22.1.110:INDA
+          :2                  =MMC_X.82M023:59
+          :3                  D=0
+          :20 
+
+PC11.32.22.1.105 COMP-R (1,1)
+          :I                  PC11.32.1.2:21
+          :HHYS               MD=1.000000E+00
+          :H1                 D=1.800000E+01
+          :I<H1 
+          :I>=H1 
+          :LHYS               PC11.32.22.1.105:HHYS
+          :L1                 D=5.000000E+00
+          :I>L1 
+          :I<=L1 
+
+PC11.32.22.1.109 OR-A (1,2,0,0,0,0)
+          :1                  1
+          :11      -          PC11.32.22.1.110:SEQ
+          :12      -          =MMC_X.82M023:93
+          :60                                     N=(82M023_IA)
+
+PC11.32.22.1.110 MOTCON (0,0,0,1,0,0)
+          :PARAM              =82M023:PC_PARM
+          :ME                 1
+          :M1                 1
+          :M2                 PC11.32.1.1:21
+          :M3                 1
+          :M4                 1
+          :IC1                1
+          :IC2                1
+          :IB1                PC11.32.21.4:20
+          :IB2                1
+          :IB3                1
+          :IB4                1
+          :IBF                0
+          :IA                 PC11.32.22.1.109:60
+          :T1                 D=5
+          :T2                 D=7
+          :T3                 D=1
+          :STF                1
+          :START              PC11.32.22.1.102:20
+          :STOP               PC11.32.22.1.100:22
+          :ACK1               PC11.32.22.1.105:I>=H1
+          :MC                 PC11.32.1.2:21
+          :RESULT             =82M023:PC_RES
+          :RMORD              =82M023:MORD
+          :NOINT 
+          :TRIP                                   N=(82M023_TRIP)
+          :BLK                                    N=(82M023_BLK)
+          :RFS 
+          :SO1                                    N=(82M023_MSTR)
+          :SACK 
+          :RUN                                    N=(82M023_RUN)
+          :SEQ 
+          :MAN     -          PC11.32.22.1.110:SEQ
+          :AUTO               PC11.32.22.1.110:SEQ
+          :A1                 PC11.32.22.1.100:21
+          :A2                 0
+          :A0                 PC11.32.22.1.100:21
+          :INDM 
+          :INDA                                   N=(82M023_AUTO)
+
+PC11.32.22.1.111 AND (2)
+          :1                  PC11.32.22.1.110:RFS
+          :2                  PC11.32.22.1.110:SEQ
+          :20                                     N=(82M023_RDY)
+
+PCD-PAGE   17
+"82M027: P11 LP Showers"
+
+PC11.32.32 FUNCM 
+
+PC11.32.32.1 BLOCK 
+          :ON                 1
+          :RUN 
+
+PC11.32.32.1.100 MOVE (B,2)
+          :1                  PC11.32.21.2:20
+          :2                  D=1
+          :21 
+          :22 
+
+PC11.32.32.1.102 OR (3)
+          :1                  PC11.32.32.1.110:INDA
+          :2                  =MMC_X.82M027:59
+          :3                  D=0
+          :20 
+
+PC11.32.32.1.105 COMP-R (1,1)
+          :I                  PC11.32.1.2:22
+          :HHYS               MD=1.000000E+00
+          :H1                 D=2.760000E+01
+          :I<H1 
+          :I>=H1 
+          :LHYS               PC11.32.32.1.105:HHYS
+          :L1                 D=5.000000E+00
+          :I>L1 
+          :I<=L1 
+
+PC11.32.32.1.109 OR-A (1,2,0,0,0,0)
+          :1                  1
+          :11      -          PC11.32.32.1.110:SEQ
+          :12      -          =MMC_X.82M027:93
+          :60                                     N=(82M027_IA)
+
+PC11.32.32.1.110 MOTCON (0,0,0,1,0,0)
+          :PARAM              =82M027:PC_PARM
+          :ME                 1
+          :M1                 1
+          :M2                 PC11.32.1.1:22
+          :M3                 1
+          :M4                 1
+          :IC1                1
+          :IC2                1
+          :IB1                PC11.32.21.5:20
+          :IB2                1
+          :IB3                1
+          :IB4                1
+          :IBF                0
+          :IA                 PC11.32.32.1.109:60
+          :T1                 D=5
+          :T2                 D=7
+          :T3                 D=1
+          :STF                1
+          :START              PC11.32.32.1.102:20
+          :STOP               PC11.32.32.1.100:22
+          :ACK1               PC11.32.32.1.105:I>=H1
+          :MC                 PC11.32.1.2:22
+          :RESULT             =82M027:PC_RES
+          :RMORD              =82M027:MORD
+          :NOINT 
+          :TRIP                                   N=(82M027_TRIP)
+          :BLK                                    N=(82M027_BLK)
+          :RFS 
+          :SO1                                    N=(82M027_MSTR)
+          :SACK 
+          :RUN                                    N=(82M027_RUN)
+          :SEQ 
+          :MAN     -          PC11.32.32.1.110:SEQ
+          :AUTO               PC11.32.32.1.110:SEQ
+          :A1                 PC11.32.32.1.100:21
+          :A2                 0
+          :A0                 PC11.32.32.1.100:21
+          :INDM 
+          :INDA                                   N=(82M027_AUTO)
+
+PC11.32.32.1.111 AND (2)
+          :1                  PC11.32.32.1.110:RFS
+          :2                  PC11.32.32.1.110:SEQ
+          :20                                     N=(82M027_RDY)
+
+PCD-PAGE   18
+"82M083: P12A Dilution Water"
+
+PC11.32.42 FUNCM 
+
+PC11.32.42.1 BLOCK 
+          :ON                 1
+          :RUN 
+
+PC11.32.42.1.100 MOVE (B,2)
+          :1                  PC11.32.21.3:20
+          :2                  D=1
+          :21 
+          :22 
+
+PC11.32.42.1.102 OR (3)
+          :1                  PC11.32.21.12:20
+          :2                  =MMC_X.82M083:59
+          :3                  D=0
+          :20 
+
+PC11.32.42.1.105 COMP-R (1,1)
+          :I                  PC11.32.1.2:23
+          :HHYS               MD=1.000000E+00
+          :H1                 D=5.460000E+00
+          :I<H1 
+          :I>=H1 
+          :LHYS               PC11.32.42.1.105:HHYS
+          :L1                 D=5.000000E+00
+          :I>L1 
+          :I<=L1 
+
+PC11.32.42.1.109 OR-A (1,2,0,0,0,0)
+          :1                  1
+          :11      -          PC11.32.42.1.110:SEQ
+          :12      -          =MMC_X.82M083:93
+          :60                                     N=(82M083_IA)
+
+PC11.32.42.1.110 MOTCON (0,0,0,1,0,0)
+          :PARAM              =82M083:PC_PARM
+          :ME                 1
+          :M1                 1
+          :M2                 PC11.32.1.1:23
+          :M3                 1
+          :M4                 1
+          :IC1                1
+          :IC2                1
+          :IB1                PC11.32.21.6:20
+          :IB2                1
+          :IB3                1
+          :IB4                1
+          :IBF                0
+          :IA                 PC11.32.42.1.109:60
+          :T1                 D=5
+          :T2                 D=7
+          :T3                 D=1
+          :STF                1
+          :START              PC11.32.42.1.102:20
+          :STOP               PC11.32.42.1.100:22
+          :ACK1               PC11.32.42.1.105:I>=H1
+          :MC                 PC11.32.1.2:23
+          :RESULT             =82M083:PC_RES
+          :RMORD              =82M083:MORD
+          :NOINT 
+          :TRIP                                   N=(82M083_TRIP)
+          :BLK                                    N=(82M083_BLK)
+          :RFS 
+          :SO1                                    N=(82M083_MSTR)
+          :SACK 
+          :RUN                                    N=(82M083_RUN)
+          :SEQ 
+          :MAN     -          PC11.32.42.1.110:SEQ
+          :AUTO               PC11.32.42.1.110:SEQ
+          :A1                 PC11.32.42.1.100:21
+          :A2                 0
+          :A0                 PC11.32.42.1.100:21
+          :INDM 
+          :INDA                                   N=(82M083_AUTO)
+
+PC11.32.42.1.111 AND (2)
+          :1                  PC11.32.42.1.110:RFS
+          :2                  PC11.32.42.1.110:SEQ
+          :20                                     N=(82M083_RDY)
+
+PCD-PAGE   19
+"LP & HP Pumps (+Dilution): Output Processing"
+
+PC11.32.101 FUNCM 
+
+PC11.32.101.1 MOVE (B,12)
+          :1                  PC11.32.22.1.110:SO1
+          :2                  PC11.32.22.1.110:RUN
+          :3                  PC11.32.22.1.110:INDA
+          :4                  PC11.32.22.1.111:20
+          :5                  PC11.32.32.1.110:SO1
+          :6                  PC11.32.32.1.110:RUN
+          :7                  PC11.32.32.1.110:INDA
+          :8                  PC11.32.32.1.111:20
+          :9                  PC11.32.42.1.110:SO1
+          :10                 PC11.32.42.1.110:RUN
+          :11                 PC11.32.42.1.110:INDA
+          :12                 PC11.32.42.1.111:20
+          :21                 =82M023.MSTR
+          :22                 =82MOTOR.RUN
+          :23                 =82MOTOR.RUN:VALUE2
+          :24                 =82MOTOR.RUN:VALUE3
+          :25                 =82BIOCIDE,
+                              =82M027.MSTR
+          :26                 =122T124A.B1:VALUE8
+          :27                 =82MOTOR.RUN:VALUE4
+          :28                 =82MOTOR.RUN:VALUE5
+          :29                 =82M083.MSTR
+          :30                 =122T124A.B1:VALUE11,
+                              =122T141A.B1:VALUE3,
+                              =82MOTOR.RUN:VALUE15
+          :31                 =82MOTOR.RUN:VALUE13
+          :32                 =82MOTOR.RUN:VALUE14,
+                              =122T124A.B4
+
+PCD-PAGE 
+"Lean & Cloudy White Water: Input Processing"
+
+PC11.33 CONTRM (1000,4,0)
+          :ON                 1
+          :SINGLE             0
+          :R                  0
+          :RUN 
+          :MODP 
+
+PC11.33.1 FUNCM 
+
+PC11.33.1.1 MOVE (B,4)
+          :1                  =82M040.RDY
+          :2                  0
+          :3                  =122F124A.B1:VALUE7
+          :4                  0
+          :21                                     N=(82M040_Ready)
+          :22 
+          :23                                     N=(82M040_Activate)
+          :24 
+
+PC11.33.1.2 MOVE (R,2)
+          :1                  =791L403.R2R
+          :2                  =82M040.IT
+          :21                                     N=(79LIA403)
+          :22                                     N=(82M040_IT)
+
+PCD-PAGE   21
+"82LIC428: Input Processing/B39"
+
+PC11.33.11 FUNCM 
+
+PC11.33.11.5 AND-O (2,3,3,0,0,0)
+          :1                  1
+          :2                  1
+          :11                 PC11.33.41.3:I<=L1
+          :12                 0
+          :13                 0
+          :21                 PC11.33.12.1.110:AUTO
+          :22                 PC11.33.12.1.110:E1
+          :23                 PC11.33.12.1.110:E2
+          :60                                     N=(82LIC428_Eolim)
+
+PC11.33.11.8 SUB (R)
+          :1                  =82LIC428.MV:RANGEMAX
+          :2                  =82LIC428.MV:RANGEMIN
+          :20 
+
+PC11.33.11.9 MUL (R,2)
+          :1                  PC11.33.11.8:20
+          :2                  D=1.000000E-02
+          :20 
+
+PC11.33.11.10 COMP-R (2,3)
+          :I                  =82LIC428.MV
+          :HHYS               PC11.33.11.9:20
+          :H1                 D=8.000000E+01
+          :H2                 D=9.000000E+01
+          :I<H1 
+          :I>=H1                                  N=(82LIC428_H1)
+          :I>=H2                                  N=(82LIC428_H2)
+          :LHYS               PC11.33.11.9:20
+          :L1                 D=4.000000E+01
+          :L2                 D=2.000000E+01
+          :L3                 D=1.000000E+01
+          :I>L1 
+          :I<=L1                                  N=(82LIC428_L1)
+          :I<=L2                                  N=(82LIC428_L2)
+          :I<=L3                                  N=(82LIC428_L3)
+
+PCD-PAGE   22
+"82LIC428: Cloudy White Water Empty"
+
+PC11.33.12 FUNCM 
+
+PC11.33.12.1 BLOCK 
+          :ON                 1
+          :RUN 
+
+PC11.33.12.1.100 MOVE (R,1)
+          :1                  D=0.000000
+          :21 
+
+PC11.33.12.1.110 PIDCON (1,1,1,1,1,0)
+          :TRACKA             2
+          :TRACKB             2
+          :TRACKC             2
+          :REVACT             1
+          :DERIV              0
+          :HOTINIT            0
+          :PARAM1             =82LIC428:PARAM1
+          :PARAM2             =82LIC428:PARAM2
+          :PARAM3A            =82LIC428:PARAM3
+          :MV                 =82LIC428.MV
+          :SPEED1             D=2.000000E+01
+          :SPEED4             D=2.000000E+01
+          :MANENBL            1
+          :AUTOENBL           1
+          :DBINST             =82LIC428
+          :PARAM4             =82LIC428:PARAM4
+          :PARAM5             =82LIC428:PARAM5
+          :PARAM6             =82LIC428:PARAM6
+          :AUTOSP 
+          :WSP                                    N=(82LIC428_WSP)
+          :DEV 
+          :OUTP 
+          :BAL 
+          :MAN 
+          :AUTO                                   N=(82LIC428_AUT)
+          :OUT=LL 
+          :OUT=HL 
+          :PARAM3B            =82LIC428:PARAM3
+          :E1ENBL             0
+          :E2ENBL             0
+          :E3ENBL             0
+          :EXTREF1            D=0.000000
+          :EXTREF2            D=0.000000
+          :EXTREF3            D=0.000000
+          :SPEED2             D=1.000000E+02
+          :SPEED3             D=1.000000E+02
+          :E1                                     N=(82LIC428_E1)
+          :E2                                     N=(82LIC428_E2)
+          :E3 
+          :BALOUT 
+          :E1FL               0
+          :E2FL               0
+          :E3FL               0
+          :SEQE1              0
+          :SEQE2              0
+          :SEQE3              0
+          :LOCALFL            0
+          :LOCAL              0
+          :BALIN              0
+          :MANFL              0
+          :AUTOFL             0
+          :SEQMAN             0
+          :SEQAUTO            0
+          :BALREF             D=0.000000
+          :PARAM7             =82LIC428:PARAM7
+          :ALCBLK             =82LIC428.MV:ERR
+          :SP=LL 
+          :SP=HL 
+          :MV_LT_L2 
+          :MV_LT_L1 
+          :MV_GT_H1 
+          :MV_GT_H2 
+          :DEV_LT_L 
+          :DEV_GT_H 
+          :CLAMP              0
+          :CLAMPREF           D=0.000000
+          :EOLIM              PC11.33.11.5:60
+          :EOLL               PC11.33.12.1.100:21
+          :EOHL               PC11.33.12.1.100:21
+          :PARAM8             =82LIC428:PARAM8
+          :OLIMERR                                N=(82LIC428_INT)
+
+PC11.33.12.1.111 MOVE (R,2)
+          :1                  PC11.33.12.1.110:OUTP
+          :2                  PC11.33.12.1.110:OUTP
+          :21                 =82LIC428:POUT
+          :22                 =82LIC428.OUT,
+                                                  N=(82LIC428_OUT)
+
+PCD-PAGE   23
+"82LIC428A: Input Processing/B39"
+
+PC11.33.21 FUNCM 
+
+PC11.33.21.1 AND-O (2,3,3,0,0,0)
+          :1                  1
+          :2                  1
+          :11      -          PC11.33.52.1.110:RUN
+          :12                 0
+          :13                 0
+          :21                 PC11.33.22.1.110:AUTO
+          :22                 PC11.33.22.1.110:E1
+          :23                 PC11.33.22.1.110:E2
+          :60                                     N=(82LIC428A_Eolim)
+
+PC11.33.21.2 AND (2)
+          :1                  PC11.33.52.1.110:RUN
+          :2       -          PC11.33.52.1.127:22
+          :20                                     N=(82LIC428A_Bal)
+
+PC11.33.21.3 AND (2)
+          :1       -          PC11.33.21.2:20
+          :2                  PC11.33.52.1.110:RUN
+          :20                                     N=(82LIC428A_SeqE1)
+
+PC11.33.21.4 SUB (R)
+          :1                  =82M040.SSP
+          :2                  =82M040.SSP:RANGEMIN
+          :20 
+
+PC11.33.21.5 SUB (R)
+          :1                  =82M040.SSP:RANGEMAX
+          :2                  =82M040.SSP:RANGEMIN
+          :20 
+
+PC11.33.21.6 DIV-MR (2,2)
+          :1                  PC11.33.21.4:20
+          :2                  D=1.000000E+02
+          :21                 PC11.33.21.5:20
+          :22                 D=1.000000E+00
+          :40                                     N=(82LIC428A_BalRef)
+
+PC11.33.21.7 MOVE (R,1)
+          :1                  D=8.500000E+01
+          :21                                     N=(82LIC428A_ExtRef1)
+
+PCD-PAGE   24
+"82LIC428A: Cloudy White Water Fill"
+
+PC11.33.22 FUNCM 
+
+PC11.33.22.1 BLOCK 
+          :ON                 1
+          :RUN 
+
+PC11.33.22.1.100 MOVE (R,1)
+          :1                  D=0.000000
+          :21 
+
+PC11.33.22.1.110 PIDCON (1,1,1,1,1,0)
+          :TRACKA             2
+          :TRACKB             2
+          :TRACKC             2
+          :REVACT             0
+          :DERIV              0
+          :HOTINIT            0
+          :PARAM1             =82LIC428A:PARAM1
+          :PARAM2             =82LIC428A:PARAM2
+          :PARAM3A            =82LIC428A:PARAM3
+          :MV                 =82LIC428.MV
+          :SPEED1             D=2.000000E+01
+          :SPEED4             D=2.000000E+01
+          :MANENBL            1
+          :AUTOENBL           1
+          :DBINST             =82LIC428A
+          :PARAM4             =82LIC428A:PARAM4
+          :PARAM5             =82LIC428A:PARAM5
+          :PARAM6             =82LIC428A:PARAM6
+          :AUTOSP 
+          :WSP                                    N=(82LIC428A_WSP)
+          :DEV 
+          :OUTP 
+          :BAL 
+          :MAN 
+          :AUTO                                   N=(82LIC428A_AUT)
+          :OUT=LL 
+          :OUT=HL 
+          :PARAM3B            =82LIC428A:PARAM3
+          :E1ENBL             1
+          :E2ENBL             0
+          :E3ENBL             0
+          :EXTREF1            PC11.33.21.7:21
+          :EXTREF2            D=0.000000
+          :EXTREF3            D=0.000000
+          :SPEED2             D=1.000000E+02
+          :SPEED3             D=1.000000E+02
+          :E1                                     N=(82LIC428A_E1)
+          :E2                                     N=(82LIC428A_E2)
+          :E3 
+          :BALOUT 
+          :E1FL               0
+          :E2FL               0
+          :E3FL               0
+          :SEQE1              PC11.33.21.3:20
+          :SEQE2              0
+          :SEQE3              0
+          :LOCALFL            0
+          :LOCAL              0
+          :BALIN              PC11.33.21.2:20
+          :MANFL              0
+          :AUTOFL             0
+          :SEQMAN             0
+          :SEQAUTO            0
+          :BALREF             PC11.33.21.6:40
+          :PARAM7             =82LIC428A:PARAM7
+          :ALCBLK             =82LIC428.MV:ERR
+          :SP=LL 
+          :SP=HL 
+          :MV_LT_L2 
+          :MV_LT_L1 
+          :MV_GT_H1 
+          :MV_GT_H2 
+          :DEV_LT_L 
+          :DEV_GT_H 
+          :CLAMP              0
+          :CLAMPREF           D=0.000000
+          :EOLIM              PC11.33.21.1:60
+          :EOLL               PC11.33.22.1.100:21
+          :EOHL               PC11.33.22.1.100:21
+          :PARAM8             =82LIC428A:PARAM8
+          :OLIMERR                                N=(82LIC428A_INT)
+
+PC11.33.22.1.111 MOVE (R,2)
+          :1                  PC11.33.22.1.110:OUTP
+          :2                  PC11.33.22.1.110:OUTP
+          :21                 =82LIC428A:POUT
+          :22                                     N=(82LIC428A_OUT)
+
+PCD-PAGE 
+"82LIC440: Input Processing"
+
+PC11.33.31 FUNCM 
+
+PC11.33.31.1 MUL (R,3)
+          :1                  =82LIC650.MV
+          :2                  D=1.000000E+00
+          :3                  D=3.200000E-01
+          :20 
+
+PC11.33.31.2 MUL (R,3)
+          :1                  =82LIC410.MV
+          :2                  D=1.000000E+00
+          :3                  D=6.800000E-01
+          :20 
+
+PC11.33.31.3 MUL (R,3)
+          :1                  PC11.33.1.2:21
+          :2                  D=1.000000E+00
+          :3                  D=2.307968E-01
+          :20 
+
+PC11.33.31.5 ADD (R,10)
+          :1                  PC11.33.31.1:20
+          :2                  PC11.33.31.2:20
+          :3                  D=0.000000
+          :4                  D=0.000000
+          :5                  D=0.000000
+          :6                  D=0.000000
+          :7                  D=0.000000
+          :8                  D=0.000000
+          :9                  D=0.000000
+          :10                 D=0.000000
+          :20 
+
+PC11.33.31.6 FILT-1P 
+          :I                  PC11.33.31.5:20
+          :K                  D=1.000000E+00
+          :T1                 D=1:40.0
+          :BAL                D=0
+          :BALREF             D=0.000000
+          :OHL                D=1.000000E+02
+          :OLL                D=0.000000
+          :O                  =82LIC440.MV:CALC_VAL
+          :O=HL 
+          :O=LL 
+          :ERR 
+
+PCD-PAGE 
+"82LIC440: Backwater System"
+
+PC11.33.32 FUNCM 
+
+PC11.33.32.1 BLOCK 
+          :ON                 1
+          :RUN 
+
+PC11.33.32.1.100 MOVE (R,1)
+          :1                  D=0.000000
+          :21 
+
+PC11.33.32.1.110 PIDCON (1,1,1,1,1,0)
+          :TRACKA             2
+          :TRACKB             2
+          :TRACKC             2
+          :REVACT             0
+          :DERIV              0
+          :HOTINIT            0
+          :PARAM1             =82LIC440:PARAM1
+          :PARAM2             =82LIC440:PARAM2
+          :PARAM3A            =82LIC440:PARAM3
+          :MV                 =82LIC440.MV
+          :SPEED1             D=2.000000E+01
+          :SPEED4             D=2.000000E+01
+          :MANENBL            1
+          :AUTOENBL           1
+          :DBINST             =82LIC440
+          :PARAM4             =82LIC440:PARAM4
+          :PARAM5             =82LIC440:PARAM5
+          :PARAM6             =82LIC440:PARAM6
+          :AUTOSP 
+          :WSP                                    N=(82LIC440_WSP)
+          :DEV 
+          :OUTP 
+          :BAL 
+          :MAN 
+          :AUTO                                   N=(82LIC440_AUT)
+          :OUT=LL 
+          :OUT=HL 
+          :PARAM3B            =82LIC440:PARAM3
+          :E1ENBL             1
+          :E2ENBL             1
+          :E3ENBL             0
+          :EXTREF1            D=0.000000
+          :EXTREF2            D=0.000000
+          :EXTREF3            D=0.000000
+          :SPEED2             D=1.000000E+02
+          :SPEED3             D=1.000000E+02
+          :E1                                     N=(82LIC440_E1)
+          :E2                                     N=(82LIC440_E2)
+          :E3 
+          :BALOUT 
+          :E1FL               0
+          :E2FL               0
+          :E3FL               0
+          :SEQE1              0
+          :SEQE2              0
+          :SEQE3              0
+          :LOCALFL            0
+          :LOCAL              0
+          :BALIN              0
+          :MANFL              0
+          :AUTOFL             0
+          :SEQMAN             0
+          :SEQAUTO            0
+          :BALREF             D=0.000000
+          :PARAM7             =82LIC440:PARAM7
+          :ALCBLK             =82LIC440.MV:ERR
+          :SP=LL 
+          :SP=HL 
+          :MV_LT_L2 
+          :MV_LT_L1 
+          :MV_GT_H1 
+          :MV_GT_H2 
+          :DEV_LT_L 
+          :DEV_GT_H 
+          :CLAMP              0
+          :CLAMPREF           D=0.000000
+          :EOLIM              0
+          :EOLL               PC11.33.32.1.100:21
+          :EOHL               PC11.33.32.1.100:21
+          :PARAM8             =82LIC440:PARAM8
+          :OLIMERR                                N=(82LIC440_INT)
+
+PC11.33.32.1.111 MOVE (R,2)
+          :1                  PC11.33.32.1.110:OUTP
+          :2                  PC11.33.32.1.110:OUTP
+          :21                 =82LIC440:POUT
+          :22                 =122T124B.R6,
+                                                  N=(82LIC440_OUT)
+
+PCD-PAGE   27
+"82LIC430: Input Processing"
+
+PC11.33.41 FUNCM 
+
+PC11.33.41.1 SUB (R)
+          :1                  =82LIC430.MV:RANGEMAX
+          :2                  =82LIC430.MV:RANGEMIN
+          :20 
+
+PC11.33.41.2 MUL (R,2)
+          :1                  PC11.33.41.1:20
+          :2                  D=1.000000E-02
+          :20 
+
+PC11.33.41.3 COMP-R (2,2)
+          :I                  =82LIC430.MV
+          :HHYS               PC11.33.41.2:20
+          :H1                 D=8.000000E+01
+          :H2                 D=9.000000E+01
+          :I<H1 
+          :I>=H1              =82LIC430.H2:VALUE2,
+                                                  N=(82LIC430_H1)
+          :I>=H2              =82LIC430.H2,
+                                                  N=(82LIC430_H2)
+          :LHYS               PC11.33.41.2:20
+          :L1                 D=5.000000E+01
+          :L2                 D=1.000000E+01
+          :I>L1 
+          :I<=L1              =82LIC430.H2:VALUE3,
+                                                  N=(82LIC430_L1)
+          :I<=L2              =82LIC430.H2:VALUE4,
+                                                  N=(82LIC430_L2)
+
+PC11.33.41.4 AND-O (2,3,3,0,0,0)
+          :1                  1
+          :2                  1
+          :11                 0
+          :12                 0
+          :13                 0
+          :21                 PC11.33.42.1.110:AUTO
+          :22                 PC11.33.42.1.110:E1
+          :23                 PC11.33.42.1.110:E2
+          :60                                     N=(82LIC430_Eolim)
+
+PC11.33.41.5 AND (2)
+          :1                  PC11.32.42.1.110:RUN
+          :2                  PC11.33.11.10:I<=L1
+          :20 
+
+PC11.33.41.6 MOVE (B,2)
+          :1       -          PC11.33.41.5:20
+          :2                  PC11.33.41.5:20
+          :21                                     N=(82LIC430_SeqE1)
+          :22                                     N=(82LIC430_SeqE2)
+
+PC11.33.41.7 MOVE (R,2)
+          :1                  D=5.000000E+01
+          :2                  D=9.000000E+01
+          :21                                     N=(82LIC430_Extref1)
+          :22                                     N=(82LIC430_Extref2)
+
+PCD-PAGE   28
+"82LIC430: Lean White Water Fill"
+
+PC11.33.42 FUNCM 
+
+PC11.33.42.1 BLOCK 
+          :ON                 1
+          :RUN 
+
+PC11.33.42.1.100 MOVE (R,1)
+          :1                  D=0.000000
+          :21 
+
+PC11.33.42.1.110 PIDCON (1,1,1,1,1,0)
+          :TRACKA             2
+          :TRACKB             2
+          :TRACKC             2
+          :REVACT             1
+          :DERIV              0
+          :HOTINIT            0
+          :PARAM1             =82LIC430:PARAM1
+          :PARAM2             =82LIC430:PARAM2
+          :PARAM3A            =82LIC430:PARAM3
+          :MV                 =82LIC430.MV
+          :SPEED1             D=2.000000E+01
+          :SPEED4             D=2.000000E+01
+          :MANENBL            1
+          :AUTOENBL           1
+          :DBINST             =82LIC430
+          :PARAM4             =82LIC430:PARAM4
+          :PARAM5             =82LIC430:PARAM5
+          :PARAM6             =82LIC430:PARAM6
+          :AUTOSP 
+          :WSP                                    N=(82LIC430_WSP)
+          :DEV 
+          :OUTP 
+          :BAL 
+          :MAN 
+          :AUTO                                   N=(82LIC430_AUT)
+          :OUT=LL 
+          :OUT=HL 
+          :PARAM3B            =82LIC430:PARAM3
+          :E1ENBL             1
+          :E2ENBL             1
+          :E3ENBL             0
+          :EXTREF1            PC11.33.41.7:21
+          :EXTREF2            PC11.33.41.7:22
+          :EXTREF3            D=0.000000
+          :SPEED2             D=1.000000E+02
+          :SPEED3             D=1.000000E+02
+          :E1                                     N=(82LIC430_E1)
+          :E2                                     N=(82LIC430_E2)
+          :E3 
+          :BALOUT 
+          :E1FL               0
+          :E2FL               0
+          :E3FL               0
+          :SEQE1              PC11.33.41.6:21
+          :SEQE2              0
+          :SEQE3              0
+          :LOCALFL            0
+          :LOCAL              0
+          :BALIN              0
+          :MANFL              0
+          :AUTOFL             0
+          :SEQMAN             0
+          :SEQAUTO            0
+          :BALREF             D=0.000000
+          :PARAM7             =82LIC430:PARAM7
+          :ALCBLK             =82LIC430.MV:ERR
+          :SP=LL 
+          :SP=HL 
+          :MV_LT_L2 
+          :MV_LT_L1 
+          :MV_GT_H1 
+          :MV_GT_H2 
+          :DEV_LT_L 
+          :DEV_GT_H 
+          :CLAMP              0
+          :CLAMPREF           D=0.000000
+          :EOLIM              PC11.33.41.4:60
+          :EOLL               PC11.33.42.1.100:21
+          :EOHL               PC11.33.42.1.100:21
+          :PARAM8             =82LIC430:PARAM8
+          :OLIMERR                                N=(82LIC430_INT)
+
+PC11.33.42.1.111 MOVE (R,2)
+          :1                  PC11.33.42.1.110:OUTP
+          :2                  PC11.33.42.1.110:OUTP
+          :21                 =82LIC430:POUT
+          :22                 =82LIC430.OUT
+
+PCD-PAGE   29
+"82M040: Input Processing"
+
+PC11.33.51 FUNCM 
+
+PC11.33.51.1 MOVE (B,2)
+          :1                  PC11.33.1.1:23
+          :2                  PC11.33.1.1:23
+          :21                                     N=(82M040_Activate))
+          :22                                     N=(82M040_SeqE1)
+
+PC11.33.51.2 SUB (R)
+          :1                  =82M040.SSP:RANGEMAX
+          :2                  =82M040.SSP:RANGEMIN
+          :20 
+
+PC11.33.51.3 MUL (R,3)
+          :1                  PC11.33.51.2:20
+          :2                  PC11.33.22.1.111:22
+          :3                  D=1.000000E-02
+          :20 
+
+PC11.33.51.4 ADD (R,2)
+          :1                  PC11.33.51.3:20
+          :2                  =82M040.SSP:RANGEMIN
+          :20                                     N=(82M040_SpeedRef)
+
+PC11.33.51.5 OR (2)
+          :1       -          PC11.33.11.10:I<=L2
+          :2       -          PC11.33.52.1.110:SEQ
+          :20                                     N=(82LIC428_L2))
+
+PCD-PAGE   30
+"82M040: P13 Cloudy Water Pump"
+
+PC11.33.52 FUNCM 
+
+PC11.33.52.1 BLOCK 
+          :ON                 1
+          :RUN 
+
+PC11.33.52.1.101 MOVE (B,2)
+          :1                  0
+          :2                  PC11.33.51.1:21
+          :21 
+          :22 
+
+PC11.33.52.1.102 OR (3)
+          :1                  0
+          :2                  =MMC_X.82M040:59
+          :3                  PC11.33.51.1:21
+          :20 
+
+PC11.33.52.1.105 COMP-R (1,1)
+          :I                  PC11.33.1.2:22
+          :HHYS               MD=1.000000E+00
+          :H1                 D=2.325000E+00
+          :I<H1 
+          :I>=H1 
+          :LHYS               PC11.33.52.1.105:HHYS
+          :L1                 D=5.000000E+00
+          :I>L1 
+          :I<=L1 
+
+PC11.33.52.1.109 AND-O (1,2,0,0,0,0)
+          :1                  1
+          :11      -          PC11.33.52.1.110:SEQ
+          :12      -          PC11.33.52.1.110:LOC
+          :60 
+
+PC11.33.52.1.110 MOTCON (0,0,1,0,0,1)
+          :PARAM              =82M040:PC_PARM
+          :ME                 1
+          :M1                 1
+          :M2                 PC11.33.1.1:21
+          :M3                 1
+          :M4                 1
+          :IC1                1
+          :IC2                1
+          :IB1                PC11.33.51.5:20
+          :IB2                1
+          :IB3                1
+          :IB4                1
+          :IBF                0
+          :IA                 PC11.33.52.1.109:60
+          :T1                 D=5
+          :T2                 D=7
+          :T3                 D=4
+          :STF                1
+          :START              PC11.33.52.1.102:20
+          :STOP               PC11.33.52.1.101:22
+          :ACK1               PC11.33.52.1.105:I>=H1
+          :MC                 PC11.33.1.2:22
+          :RESULT             =82M040:PC_RES
+          :RMORD              =82M040:MORD
+          :NOINT 
+          :TRIP                                   N=(82M040_TRIP)
+          :BLK                                    N=(82M040_BLK)
+          :RFS 
+          :SO1                                    N=(82M040_MSTR)
+          :SACK 
+          :RUN                                    N=(82M040_RUN)
+          :SEQ                                    N=(82M040_SEQ)
+          :LE                 0
+          :L1                 0
+          :L2                 0
+          :L0                 1
+          :LOC                                    N=(82M040_LOC)
+          :X1                 0
+          :X2                 0
+          :ALENX1             1
+          :ALENX2             1
+          :Y1                                     N=(82M040_ORDLOC)
+          :Y2                                     N=(82M040_ORDAUTO)
+          :Y3                                     N=(82M040_ORDE1)
+
+PCD-PAGE   31
+"82M040  P13 Cloudy Water"
+
+PC11.33.52.1.111 AND (2)
+          :1                  PC11.33.52.1.110:RFS
+          :2                  PC11.33.52.1.110:SEQ
+          :20                                     N=(82M040_RDY)
+
+PC11.33.52.1.121 TRIGG 
+          :1                  0
+          :5 
+
+PC11.33.52.1.122 TRIGG 
+          :1                  PC11.33.51.1:22
+          :5 
+
+PC11.33.52.1.123 SR-OO (1,4)
+          :1                  PC11.33.52.1.110:Y1
+          :11                 PC11.33.52.1.110:Y2
+          :12                 PC11.33.52.1.110:Y3
+          :13                 PC11.33.52.1.121:5
+          :14                 PC11.33.52.1.122:5
+          :20 
+
+PC11.33.52.1.124 OR (2)
+          :1                  PC11.33.52.1.123:20
+          :2                  0
+          :20                 =82M040:BOOLD
+
+PC11.33.52.1.125 SR-OO (2,3)
+          :1                  PC11.33.52.1.110:Y3
+          :2                  PC11.33.52.1.122:5
+          :11                 PC11.33.52.1.110:Y1
+          :12                 PC11.33.52.1.110:Y2
+          :13                 PC11.33.52.1.121:5
+          :20                 =82M040:BOOLF
+
+PC11.33.52.1.126 AND (2)
+          :1       -          PC11.33.52.1.124:20
+          :2       -          PC11.33.52.1.125:20
+          :20                 =82M040:BOOLE
+
+PC11.33.52.1.127 MOVE (B,3)
+          :1                  PC11.33.52.1.124:20
+          :2                  PC11.33.52.1.125:20
+          :3                  PC11.33.52.1.126:20
+          :21                                     N=(82M040_LOCAL)
+          :22                                     N=(82M040_E1)
+          :23                                     N=(82M040_AUTO)
+
+PCD-PAGE   32
+"82M040  P13 Cloudy Water"
+
+PC11.33.52.1.131 MOVE (R,7)
+          :1                  =82M040.ST
+          :2                  PC11.33.1.2:22
+          :3                  =82M040:REALAMIN
+          :4                  =82M040:REALAMAX
+          :5                  =82M040:REALBMAX
+          :6                  =82M040:REALBMIN
+          :7                  D=1.000000E+02
+          :21                 =82M040:REALA
+          :22                 =82M040:REALC
+          :23                 =82M040:RRESMIN
+          :24                 =82M040:RRESMAX
+          :25                 =82M040:RPARMAX
+          :26                 =82M040:RPARMIN
+          :27 
+
+PC11.33.52.1.132 DIV (R)
+          :1                  PC11.33.52.1.131:22
+          :2                  CD=1.200000E+00
+          :20                 =82M040:REALE
+          :REM 
+
+PC11.33.52.1.133 TON 
+          :I                  PC11.33.52.1.110:RUN
+          :TD                 D=1
+          :O 
+          :TE 
+
+PC11.33.52.1.134 AND-O (1,2,0,0,0,0)
+          :1                  PC11.33.52.1.133:O
+          :11                 PC11.33.52.1.127:22
+          :12                 PC11.33.52.1.127:23
+          :60 
+
+PC11.33.52.1.135 SW-C (R,1)
+          :ACT                PC11.33.52.1.133:O
+          :11                 PC11.33.52.1.131:21
+          :12                 D=0.000000
+          :13 
+
+PC11.33.52.1.136 SW-C (R,1)
+          :ACT                PC11.33.52.1.127:22
+          :11                 PC11.33.51.4:20
+          :12                 =MMC_X.82M040:65
+          :13 
+
+PC11.33.52.1.137 RAMP 
+          :I                  PC11.33.52.1.136:13
+          :STEP+              D=1.000000E+03
+          :STEP-              D=1.000000E+03
+          :SLOPE+             PC11.33.52.1.131:27
+          :SLOPE-             PC11.33.52.1.131:27
+          :BAL     -          PC11.33.52.1.134:60
+          :BALREF             PC11.33.52.1.135:13
+          :OHL                =82M040:REALBMAX
+          :OLL                =82M040:REALBMIN
+          :O                  =82M040:REALB
+          :O=HL               =82M040:BOOLA
+          :O=LL               =82M040:BOOLB
+          :ERR 
+
+PC11.33.52.1.138 MOVE (R,1)
+          :1                  PC11.33.52.1.137:O
+          :21                 =82M040.SSP
+
+PC11.33.52.1.139 OR-A (0,2,2,0,0,0)
+          :11                 PC11.33.52.1.127:21
+          :12                 1
+          :21                 PC11.33.52.1.125:20
+          :22                 1
+          :60 
+
+PC11.33.52.1.140 AND (2)
+          :1                  PC11.33.52.1.133:O
+          :2                  PC11.33.52.1.139:60
+          :20 
+
+PC11.33.52.1.141 SW-C (R,1)
+          :ACT                PC11.33.52.1.140:20
+          :11                 PC11.33.52.1.137:O
+          :12                 =MMC_X.82M040:65
+          :13                 =MMC_X.82M040:65
+
+PCD-PAGE   33
+"Lean & Cloudy White Water: Output Processing"
+
+PC11.33.101 FUNCM 
+
+PC11.33.101.1 MOVE (B,4)
+          :1                  PC11.33.52.1.110:SO1
+          :2                  PC11.33.52.1.110:RUN
+          :3                  PC11.33.52.1.110:SEQ
+          :4                  PC11.33.52.1.111:20
+          :21                 =82M040.MSTR
+          :22 
+          :23                 =122T124A.B1:VALUE9
+          :24                 =122T124A.B1:VALUE10
+
+END PC11

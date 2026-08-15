@@ -1,0 +1,4064 @@
+(* ************************************************************************  *)
+(* 23JA0301.AA generated with ONB*3.2.0.595 2018-01-23/11:37                 *)
+(* Pagelayout: IEC 1082  A4 landscape  English Rows: 95 Cols:195             *)
+(* QMP280 SW*6.0/10                     *02/01/05/Copyright 1997 ABB Industr *)
+(* QMV800 SW*6.0/5            (1/1) Generated 1997-04-22Copyright 1997 ABB I *)
+(* ************************************************************************  *)
+BEGIN PC3
+
+HEADER
+     Design_ch      TFM/ABC/AZ
+     Tech_ref       TFM/ABC/AZ
+     Resp_dept      CMH
+     Date           5-May-2000
+     R_Text1        PMR Logging
+     R_Text3        AccuRay 1190  7.0/0
+     R_Text4        COPYRIGHT 2000, AAB
+     Rev_Ind        000
+     Language       E
+
+PCD-PAGE    1
+"Data count and sampling time"
+
+PC3 PCPGM (40,15)
+          :ON                 D=1
+          :R                  D=0
+          :RUN 
+
+PC3.1 CONTRM (1000,34,0)
+          :ON                 PC3.5.1.12:O
+          :SINGLE             D=0
+          :R                  PC3.5.1.13:O
+          :RUN 
+          :MODP 
+
+PC3.1.1 FUNCM 
+
+PC3.1.1.1 MOVE (R,1)
+          :1                  =APMR.CONFIG1:REAL
+          :21                                     N=PMR_SAMPLE_RATE_R
+
+PC3.1.1.2 CONV (R,T)
+          :I                  PC3.1.1.1:21
+          :O                                      N=PMR_SAMPLE_RATE
+          :ERR 
+
+PC3.1.1.3 TIME 
+          :TIME 
+
+PC3.1.1.4 CONV (T,R)
+          :I                  PC3.1.1.3:TIME
+          :O                  =APMR.CTIME1,
+                                                  N=TIME
+          :ERR 
+
+PCD-PAGE 
+"BOOLEAN data group"
+
+PC3.1.1.31 SW-C (R,1)
+          :ACT                D=0
+          :11                 D=1.000000E+00
+          :12                 D=0.000000
+          :13 
+
+PC3.1.1.32 SW-C (R,1)
+          :ACT                D=0
+          :11                 D=1.000000E+00
+          :12                 D=0.000000
+          :13 
+
+PC3.1.1.33 SW-C (R,1)
+          :ACT                D=0
+          :11                 D=1.000000E+00
+          :12                 D=0.000000
+          :13 
+
+PC3.1.1.34 SW-C (R,1)
+          :ACT                D=0
+          :11                 D=1.000000E+00
+          :12                 D=0.000000
+          :13 
+
+PC3.1.1.35 SW-C (R,1)
+          :ACT                D=0
+          :11                 D=1.000000E+00
+          :12                 D=0.000000
+          :13 
+
+PC3.1.1.36 SW-C (R,1)
+          :ACT                D=0
+          :11                 D=1.000000E+00
+          :12                 D=0.000000
+          :13 
+
+PCD-PAGE 
+"BOOLEAN data group"
+
+PC3.1.1.37 SW-C (R,1)
+          :ACT                D=0
+          :11                 D=1.000000E+00
+          :12                 D=0.000000
+          :13 
+
+PC3.1.1.38 SW-C (R,1)
+          :ACT                D=0
+          :11                 D=1.000000E+00
+          :12                 D=0.000000
+          :13 
+
+PC3.1.1.39 SW-C (R,1)
+          :ACT                D=0
+          :11                 D=1.000000E+00
+          :12                 D=0.000000
+          :13 
+
+PC3.1.1.40 SW-C (R,1)
+          :ACT                D=0
+          :11                 D=1.000000E+00
+          :12                 D=0.000000
+          :13 
+
+PC3.1.1.41 SW-C (R,1)
+          :ACT                D=0
+          :11                 D=1.000000E+00
+          :12                 D=0.000000
+          :13 
+
+PC3.1.1.42 SW-C (R,1)
+          :ACT                D=0
+          :11                 D=1.000000E+00
+          :12                 D=0.000000
+          :13 
+
+PCD-PAGE 
+"BOOLEAN data group"
+
+PC3.1.1.43 SW-C (R,1)
+          :ACT                D=0
+          :11                 D=1.000000E+00
+          :12                 D=0.000000
+          :13 
+
+PC3.1.1.44 SW-C (R,1)
+          :ACT                D=0
+          :11                 D=1.000000E+00
+          :12                 D=0.000000
+          :13 
+
+PC3.1.1.45 SW-C (R,1)
+          :ACT                D=0
+          :11                 D=1.000000E+00
+          :12                 D=0.000000
+          :13 
+
+PC3.1.1.46 SW-C (R,1)
+          :ACT                D=0
+          :11                 D=1.000000E+00
+          :12                 D=0.000000
+          :13 
+
+PC3.1.1.47 SW-C (R,1)
+          :ACT                D=0
+          :11                 D=1.000000E+00
+          :12                 D=0.000000
+          :13 
+
+PC3.1.1.48 SW-C (R,1)
+          :ACT                D=0
+          :11                 D=1.000000E+00
+          :12                 D=0.000000
+          :13 
+
+PCD-PAGE 
+"BOOLEAN data group"
+
+PC3.1.1.49 SW-C (R,1)
+          :ACT                D=0
+          :11                 D=1.000000E+00
+          :12                 D=0.000000
+          :13 
+
+PC3.1.1.50 SW-C (R,1)
+          :ACT                D=0
+          :11                 D=1.000000E+00
+          :12                 D=0.000000
+          :13 
+
+PCD-PAGE 
+"REAL data group"
+
+PC3.1.1.101 MOVE (R,6)
+          :1                  PC3.1.1.4:O
+          :2                  PC3.1.1.31:13
+          :3                  PC3.1.1.32:13
+          :4                  PC3.1.1.33:13
+          :5                  PC3.1.1.34:13
+          :6                  PC3.1.1.35:13
+          :21                                     N=INPUT_1
+          :22                                     N=INPUT_2
+          :23                                     N=INPUT_3
+          :24                                     N=INPUT_4
+          :25                                     N=INPUT_5
+          :26                                     N=INPUT_6
+
+PC3.1.1.102 MOVE (R,6)
+          :1                  PC3.1.1.36:13
+          :2                  PC3.1.1.37:13
+          :3                  PC3.1.1.38:13
+          :4                  PC3.1.1.39:13
+          :5                  PC3.1.1.40:13
+          :6                  PC3.1.1.41:13
+          :21                                     N=INPUT_7
+          :22                                     N=INPUT_8
+          :23                                     N=INPUT_9
+          :24                                     N=INPUT_10
+          :25                                     N=INPUT_11
+          :26                                     N=INPUT_12
+
+PC3.1.1.103 MOVE (R,6)
+          :1                  PC3.1.1.42:13
+          :2                  PC3.1.1.43:13
+          :3                  PC3.1.1.44:13
+          :4                  PC3.1.1.45:13
+          :5                  PC3.1.1.46:13
+          :6                  PC3.1.1.47:13
+          :21                                     N=INPUT_13
+          :22                                     N=INPUT_14
+          :23                                     N=INPUT_15
+          :24                                     N=INPUT_16
+          :25                                     N=INPUT_17
+          :26                                     N=INPUT_18
+
+PC3.1.1.104 MOVE (R,6)
+          :1                  PC3.1.1.48:13
+          :2                  PC3.1.1.49:13
+          :3                  PC3.1.1.50:13
+          :4                  D=0.000000
+          :5                  D=0.000000
+          :6                  D=0.000000
+          :21                                     N=INPUT_19
+          :22                                     N=INPUT_20
+          :23                                     N=INPUT_21
+          :24                                     N=INPUT_22
+          :25                                     N=INPUT_23
+          :26                                     N=INPUT_24
+
+PC3.1.1.105 MOVE (R,6)
+          :1                  D=0.000000
+          :2                  D=0.000000
+          :3                  D=0.000000
+          :4                  D=0.000000
+          :5                  D=0.000000
+          :6                  D=0.000000
+          :21                                     N=INPUT_25
+          :22                                     N=INPUT_26
+          :23                                     N=INPUT_27
+          :24                                     N=INPUT_28
+          :25                                     N=INPUT_29
+          :26                                     N=INPUT_30
+
+PC3.1.1.106 MOVE (R,6)
+          :1                  D=0.000000
+          :2                  D=0.000000
+          :3                  D=0.000000
+          :4                  D=0.000000
+          :5                  D=0.000000
+          :6                  D=0.000000
+          :21                                     N=INPUT_31
+          :22                                     N=INPUT_32
+          :23                                     N=INPUT_33
+          :24                                     N=INPUT_34
+          :25                                     N=INPUT_35
+          :26                                     N=INPUT_36
+
+PCD-PAGE 
+"REAL data group"
+
+PC3.1.1.107 MOVE (R,6)
+          :1                  D=0.000000
+          :2                  D=0.000000
+          :3                  D=0.000000
+          :4                  D=0.000000
+          :5                  D=0.000000
+          :6                  D=0.000000
+          :21                                     N=INPUT_37
+          :22                                     N=INPUT_38
+          :23                                     N=INPUT_39
+          :24                                     N=INPUT_40
+          :25                                     N=INPUT_41
+          :26                                     N=INPUT_42
+
+PC3.1.1.108 MOVE (R,6)
+          :1                  D=0.000000
+          :2                  D=0.000000
+          :3                  D=0.000000
+          :4                  D=0.000000
+          :5                  D=0.000000
+          :6                  D=0.000000
+          :21                                     N=INPUT_43
+          :22                                     N=INPUT_44
+          :23                                     N=INPUT_45
+          :24                                     N=INPUT_46
+          :25                                     N=INPUT_47
+          :26                                     N=INPUT_48
+
+PC3.1.1.109 MOVE (R,6)
+          :1                  D=0.000000
+          :2                  D=0.000000
+          :3                  D=0.000000
+          :4                  D=0.000000
+          :5                  D=0.000000
+          :6                  D=0.000000
+          :21                                     N=INPUT_49
+          :22                                     N=INPUT_50
+          :23                                     N=INPUT_51
+          :24                                     N=INPUT_52
+          :25                                     N=INPUT_53
+          :26                                     N=INPUT_54
+
+PC3.1.1.110 MOVE (R,6)
+          :1                  D=0.000000
+          :2                  D=0.000000
+          :3                  D=0.000000
+          :4                  D=0.000000
+          :5                  D=0.000000
+          :6                  D=0.000000
+          :21                                     N=INPUT_55
+          :22                                     N=INPUT_56
+          :23                                     N=INPUT_57
+          :24                                     N=INPUT_58
+          :25                                     N=INPUT_59
+          :26                                     N=INPUT_60
+
+PC3.1.1.111 MOVE (R,6)
+          :1                  D=0.000000
+          :2                  D=0.000000
+          :3                  D=0.000000
+          :4                  D=0.000000
+          :5                  D=0.000000
+          :6                  D=0.000000
+          :21                                     N=INPUT_61
+          :22                                     N=INPUT_62
+          :23                                     N=INPUT_63
+          :24                                     N=INPUT_64
+          :25                                     N=INPUT_65
+          :26                                     N=INPUT_66
+
+PC3.1.1.112 MOVE (R,6)
+          :1                  D=0.000000
+          :2                  D=0.000000
+          :3                  D=0.000000
+          :4                  D=0.000000
+          :5                  D=0.000000
+          :6                  D=0.000000
+          :21                                     N=INPUT_67
+          :22                                     N=INPUT_68
+          :23                                     N=INPUT_69
+          :24                                     N=INPUT_70
+          :25                                     N=INPUT_71
+          :26                                     N=INPUT_72
+
+PCD-PAGE 
+"REAL data group"
+
+PC3.1.1.113 MOVE (R,6)
+          :1                  D=0.000000
+          :2                  D=0.000000
+          :3                  D=0.000000
+          :4                  D=0.000000
+          :5                  D=0.000000
+          :6                  D=0.000000
+          :21                                     N=INPUT_73
+          :22                                     N=INPUT_74
+          :23                                     N=INPUT_75
+          :24                                     N=INPUT_76
+          :25                                     N=INPUT_77
+          :26                                     N=INPUT_78
+
+PC3.1.1.114 MOVE (R,6)
+          :1                  D=0.000000
+          :2                  D=0.000000
+          :3                  D=0.000000
+          :4                  D=0.000000
+          :5                  D=0.000000
+          :6                  D=0.000000
+          :21                                     N=INPUT_79
+          :22                                     N=INPUT_80
+          :23                                     N=INPUT_81
+          :24                                     N=INPUT_82
+          :25                                     N=INPUT_83
+          :26                                     N=INPUT_84
+
+PC3.1.1.115 MOVE (R,6)
+          :1                  D=0.000000
+          :2                  D=0.000000
+          :3                  D=0.000000
+          :4                  D=0.000000
+          :5                  D=0.000000
+          :6                  D=0.000000
+          :21                                     N=INPUT_85
+          :22                                     N=INPUT_86
+          :23                                     N=INPUT_87
+          :24                                     N=INPUT_88
+          :25                                     N=INPUT_89
+          :26                                     N=INPUT_90
+
+PC3.1.1.116 MOVE (R,6)
+          :1                  D=0.000000
+          :2                  D=0.000000
+          :3                  D=0.000000
+          :4                  D=0.000000
+          :5                  D=0.000000
+          :6                  D=0.000000
+          :21                                     N=INPUT_91
+          :22                                     N=INPUT_92
+          :23                                     N=INPUT_93
+          :24                                     N=INPUT_94
+          :25                                     N=INPUT_95
+          :26                                     N=INPUT_96
+
+PC3.1.1.117 MOVE (R,6)
+          :1                  D=0.000000
+          :2                  D=0.000000
+          :3                  D=0.000000
+          :4                  D=0.000000
+          :5                  D=0.000000
+          :6                  D=0.000000
+          :21                                     N=INPUT_97
+          :22                                     N=INPUT_98
+          :23                                     N=INPUT_99
+          :24                                     N=INPUT_100
+          :25                                     N=INPUT_101
+          :26                                     N=INPUT_102
+
+PC3.1.1.118 MOVE (R,6)
+          :1                  D=0.000000
+          :2                  D=0.000000
+          :3                  D=0.000000
+          :4                  D=0.000000
+          :5                  D=0.000000
+          :6                  D=0.000000
+          :21                                     N=INPUT_103
+          :22                                     N=INPUT_104
+          :23                                     N=INPUT_105
+          :24                                     N=INPUT_106
+          :25                                     N=INPUT_107
+          :26                                     N=INPUT_108
+
+PCD-PAGE 
+"REAL data group"
+
+PC3.1.1.119 MOVE (R,6)
+          :1                  D=0.000000
+          :2                  D=0.000000
+          :3                  D=0.000000
+          :4                  D=0.000000
+          :5                  D=0.000000
+          :6                  D=0.000000
+          :21                                     N=INPUT_109
+          :22                                     N=INPUT_110
+          :23                                     N=INPUT_111
+          :24                                     N=INPUT_112
+          :25                                     N=INPUT_113
+          :26                                     N=INPUT_114
+
+PC3.1.1.120 MOVE (R,6)
+          :1                  D=0.000000
+          :2                  D=0.000000
+          :3                  D=0.000000
+          :4                  D=0.000000
+          :5                  D=0.000000
+          :6                  D=0.000000
+          :21                                     N=INPUT_115
+          :22                                     N=INPUT_116
+          :23                                     N=INPUT_117
+          :24                                     N=INPUT_118
+          :25                                     N=INPUT_119
+          :26                                     N=INPUT_120
+
+PC3.1.1.121 MOVE (R,6)
+          :1                  D=0.000000
+          :2                  D=0.000000
+          :3                  D=0.000000
+          :4                  D=0.000000
+          :5                  D=0.000000
+          :6                  D=0.000000
+          :21                                     N=INPUT_121
+          :22                                     N=INPUT_122
+          :23                                     N=INPUT_123
+          :24                                     N=INPUT_124
+          :25                                     N=INPUT_125
+          :26                                     N=INPUT_126
+
+PC3.1.1.122 MOVE (R,6)
+          :1                  D=0.000000
+          :2                  D=0.000000
+          :3                  D=0.000000
+          :4                  D=0.000000
+          :5                  D=0.000000
+          :6                  D=0.000000
+          :21                                     N=INPUT_127
+          :22                                     N=INPUT_128
+          :23                                     N=INPUT_129
+          :24                                     N=INPUT_130
+          :25                                     N=INPUT_131
+          :26                                     N=INPUT_132
+
+PC3.1.1.123 MOVE (R,6)
+          :1                  D=0.000000
+          :2                  D=0.000000
+          :3                  D=0.000000
+          :4                  D=0.000000
+          :5                  D=0.000000
+          :6                  D=0.000000
+          :21                                     N=INPUT_133
+          :22                                     N=INPUT_134
+          :23                                     N=INPUT_135
+          :24                                     N=INPUT_136
+          :25                                     N=INPUT_137
+          :26                                     N=INPUT_138
+
+PC3.1.1.124 MOVE (R,6)
+          :1                  D=0.000000
+          :2                  D=0.000000
+          :3                  D=0.000000
+          :4                  D=0.000000
+          :5                  D=0.000000
+          :6                  D=0.000000
+          :21                                     N=INPUT_139
+          :22                                     N=INPUT_140
+          :23                                     N=INPUT_141
+          :24                                     N=INPUT_142
+          :25                                     N=INPUT_143
+          :26                                     N=INPUT_144
+
+PCD-PAGE 
+"REAL data group"
+
+PC3.1.1.125 MOVE (R,6)
+          :1                  D=0.000000
+          :2                  D=0.000000
+          :3                  D=0.000000
+          :4                  D=0.000000
+          :5                  D=0.000000
+          :6                  D=0.000000
+          :21                                     N=INPUT_145
+          :22                                     N=INPUT_146
+          :23                                     N=INPUT_147
+          :24                                     N=INPUT_148
+          :25                                     N=INPUT_149
+          :26                                     N=INPUT_150
+
+PC3.1.1.126 MOVE (R,6)
+          :1                  D=0.000000
+          :2                  D=0.000000
+          :3                  D=0.000000
+          :4                  D=0.000000
+          :5                  D=0.000000
+          :6                  D=0.000000
+          :21                                     N=INPUT_151
+          :22                                     N=INPUT_152
+          :23                                     N=INPUT_153
+          :24                                     N=INPUT_154
+          :25                                     N=INPUT_155
+          :26                                     N=INPUT_156
+
+PC3.1.1.127 MOVE (R,6)
+          :1                  D=0.000000
+          :2                  D=0.000000
+          :3                  D=0.000000
+          :4                  D=0.000000
+          :5                  D=0.000000
+          :6                  D=0.000000
+          :21                                     N=INPUT_157
+          :22                                     N=INPUT_158
+          :23                                     N=INPUT_159
+          :24                                     N=INPUT_160
+          :25                                     N=INPUT_161
+          :26                                     N=INPUT_162
+
+PC3.1.1.128 MOVE (R,6)
+          :1                  D=0.000000
+          :2                  D=0.000000
+          :3                  D=0.000000
+          :4                  D=0.000000
+          :5                  D=0.000000
+          :6                  D=0.000000
+          :21                                     N=INPUT_163
+          :22                                     N=INPUT_164
+          :23                                     N=INPUT_165
+          :24                                     N=INPUT_166
+          :25                                     N=INPUT_167
+          :26                                     N=INPUT_168
+
+PC3.1.1.129 MOVE (R,6)
+          :1                  D=0.000000
+          :2                  D=0.000000
+          :3                  D=0.000000
+          :4                  D=0.000000
+          :5                  D=0.000000
+          :6                  D=0.000000
+          :21                                     N=INPUT_169
+          :22                                     N=INPUT_170
+          :23                                     N=INPUT_171
+          :24                                     N=INPUT_172
+          :25                                     N=INPUT_173
+          :26                                     N=INPUT_174
+
+PC3.1.1.130 MOVE (R,6)
+          :1                  D=0.000000
+          :2                  D=0.000000
+          :3                  D=0.000000
+          :4                  D=0.000000
+          :5                  D=0.000000
+          :6                  D=0.000000
+          :21                                     N=INPUT_175
+          :22                                     N=INPUT_176
+          :23                                     N=INPUT_177
+          :24                                     N=INPUT_178
+          :25                                     N=INPUT_179
+          :26                                     N=INPUT_180
+
+PCD-PAGE 
+"Status information for the PMR header"
+
+PC3.2 CONTRM (1000,35,0)
+          :ON                 PC3.5.1.12:O
+          :SINGLE             D=0
+          :R                  PC3.5.1.13:O
+          :RUN 
+          :MODP 
+
+PC3.2.1 FUNCM 
+
+PC3.2.1.129 TOFF 
+          :I                  PC3.2:RUN
+          :TD                 D=2
+          :O                                      N=LOG_ACTV_DLY_OFF
+          :TE 
+
+PC3.2.1.100 TEXT (R,1,4,20)
+          :FORM1              6
+          :FORM2              1
+          :EN                 1
+          :TLINE 
+          :POS1               D=1
+          :VAL1               PC3.1.1.1:21
+
+PC3.2.1.101 TEXT (A,5,20,72)
+          :FORM1              0
+          :FORM2              0
+          :EN                 1
+          :TLINE 
+          :POS1               D=2
+          :VAL1               D='Sampling time:'
+          :POS2               D=17
+          :VAL2               PC3.2.1.100:TLINE
+          :POS3               D=50
+          :VAL3               D='Start:'
+          :POS4               D=57
+          :VAL4               D='$DATE'
+          :POS5               D=68
+          :VAL5               D='$TIME'
+
+PC3.2.1.102 TEXT (A,8,20,72)
+          :FORM1              0
+          :FORM2              0
+          :EN                 1
+          :TLINE 
+          :POS1               D=2
+          :VAL1               D='Number of variables:'
+          :POS2               D=23
+          :VAL2               D='180'
+          :POS3               D=30
+          :VAL3               D='BOOLEAN:'
+          :POS4               D=39
+          :VAL4               D='20'
+          :POS5               D=46
+          :VAL5               D='REAL:'
+          :POS6               D=52
+          :VAL6               D='160'
+          :POS7               D=59
+          :VAL7               D='Columns:'
+          :POS8               D=68
+          :VAL8               D='6'
+
+PCD-PAGE 
+"PMR header active grade and shade names"
+
+PC3.2.1.121 TEXT (A,4,20,72)
+          :FORM1              0
+          :FORM2              0
+          :EN                 1
+          :TLINE 
+          :POS1               D=2
+          :VAL1               D='Active Grade:'
+          :POS2               D=15
+          :VAL2               D='XXX'
+          :POS3               D=37
+          :VAL3               D='Shade:'
+          :POS4               D=44
+          :VAL4               D='Slv Node or no Color'
+
+PC3.2.1.122 TEXT (IL,1,15,15)
+          :FORM1              11
+          :FORM2              0
+          :EN                 1
+          :TLINE 
+          :POS1               D=1
+          :VAL1               D=999
+
+PC3.2.1.123 TEXT (R,1,15,15)
+          :FORM1              11
+          :FORM2              0
+          :EN                 1
+          :TLINE 
+          :POS1               D=1
+          :VAL1               D=0.000000
+
+PC3.2.1.124 TEXT (A,3,15,72)
+          :FORM1              0
+          :FORM2              0
+          :EN                 1
+          :TLINE 
+          :POS1               D=2
+          :VAL1               D='Active Num:'
+          :POS2               D=15
+          :VAL2               PC3.2.1.122:TLINE
+          :POS3               D=44
+          :VAL3               PC3.2.1.123:TLINE
+
+PCD-PAGE 
+"PMR header preliminary grade and shade names"
+
+PC3.2.1.125 TEXT (A,4,20,72)
+          :FORM1              0
+          :FORM2              0
+          :EN                 1
+          :TLINE 
+          :POS1               D=2
+          :VAL1               D='Prelim Grade:'
+          :POS2               D=15
+          :VAL2               D='XXX'
+          :POS3               D=37
+          :VAL3               D='Shade:'
+          :POS4               D=44
+          :VAL4               D='Slv Node or no Color'
+
+PC3.2.1.126 TEXT (IL,1,15,15)
+          :FORM1              11
+          :FORM2              0
+          :EN                 1
+          :TLINE 
+          :POS1               D=1
+          :VAL1               D=999
+
+PC3.2.1.127 TEXT (R,1,15,15)
+          :FORM1              11
+          :FORM2              0
+          :EN                 1
+          :TLINE 
+          :POS1               D=1
+          :VAL1               D=0.000000
+
+PC3.2.1.128 TEXT (A,3,15,72)
+          :FORM1              0
+          :FORM2              0
+          :EN                 1
+          :TLINE 
+          :POS1               D=2
+          :VAL1               D='Prelim Num:'
+          :POS2               D=15
+          :VAL2               PC3.2.1.126:TLINE
+          :POS3               D=44
+          :VAL3               PC3.2.1.127:TLINE
+
+PCD-PAGE 
+"Tag names for the PMR header"
+
+PC3.2.1.1 TEXT (A,6,11,72)
+          :FORM1              0
+          :FORM2              0
+          :EN                 1
+          :TLINE 
+          :POS1               D=2
+          :VAL1               D='TIME'
+          :POS2               D=14
+          :VAL2               D='2GD-ONGRD'
+          :POS3               D=26
+          :VAL3               D='2GD-MANGRD'
+          :POS4               D=38
+          :VAL4               D='SPARE4'
+          :POS5               D=50
+          :VAL5               D='1SY0.F1SBRK'
+          :POS6               D=62
+          :VAL6               D='SPARE6'
+
+PC3.2.1.2 TEXT (A,6,11,72)
+          :FORM1              0
+          :FORM2              0
+          :EN                 1
+          :TLINE 
+          :POS1               D=2
+          :VAL1               D='SPARE7'
+          :POS2               D=14
+          :VAL2               D='SPARE8'
+          :POS3               D=26
+          :VAL3               D='SPARE9'
+          :POS4               D=38
+          :VAL4               D='SPARE10'
+          :POS5               D=50
+          :VAL5               D='SPARE11'
+          :POS6               D=62
+          :VAL6               D='SPARE12'
+
+PC3.2.1.3 TEXT (A,6,11,72)
+          :FORM1              0
+          :FORM2              0
+          :EN                 1
+          :TLINE 
+          :POS1               D=2
+          :VAL1               D='SPARE13'
+          :POS2               D=14
+          :VAL2               D='SPARE14'
+          :POS3               D=26
+          :VAL3               D='SPARE15'
+          :POS4               D=38
+          :VAL4               D='SPARE16'
+          :POS5               D=50
+          :VAL5               D='SPARE17'
+          :POS6               D=62
+          :VAL6               D='SPARE18'
+
+PCD-PAGE 
+"Tag names for the PMR header"
+
+PC3.2.1.4 TEXT (A,6,11,72)
+          :FORM1              0
+          :FORM2              0
+          :EN                 1
+          :TLINE 
+          :POS1               D=2
+          :VAL1               D='SPARE19'
+          :POS2               D=14
+          :VAL2               D='SPARE20'
+          :POS3               D=26
+          :VAL3               D='SPARE21'
+          :POS4               D=38
+          :VAL4               D='SPARE22'
+          :POS5               D=50
+          :VAL5               D='SPARE23'
+          :POS6               D=62
+          :VAL6               D='SPARE24'
+
+PC3.2.1.5 TEXT (A,6,11,72)
+          :FORM1              0
+          :FORM2              0
+          :EN                 1
+          :TLINE 
+          :POS1               D=2
+          :VAL1               D='SPARE25'
+          :POS2               D=14
+          :VAL2               D='SPARE26'
+          :POS3               D=26
+          :VAL3               D='SPARE27'
+          :POS4               D=38
+          :VAL4               D='SPARE28'
+          :POS5               D=50
+          :VAL5               D='SPARE29'
+          :POS6               D=62
+          :VAL6               D='SPARE30'
+
+PC3.2.1.6 TEXT (A,6,11,72)
+          :FORM1              0
+          :FORM2              0
+          :EN                 1
+          :TLINE 
+          :POS1               D=2
+          :VAL1               D='SPARE31'
+          :POS2               D=14
+          :VAL2               D='SPARE32'
+          :POS3               D=26
+          :VAL3               D='SPARE33'
+          :POS4               D=38
+          :VAL4               D='SPARE34'
+          :POS5               D=50
+          :VAL5               D='SPARE35'
+          :POS6               D=62
+          :VAL6               D='SPARE36'
+
+PCD-PAGE 
+"Tag names for the PMR header"
+
+PC3.2.1.7 TEXT (A,6,11,72)
+          :FORM1              0
+          :FORM2              0
+          :EN                 1
+          :TLINE 
+          :POS1               D=2
+          :VAL1               D='SPARE37'
+          :POS2               D=14
+          :VAL2               D='SPARE38'
+          :POS3               D=26
+          :VAL3               D='SPARE39'
+          :POS4               D=38
+          :VAL4               D='SPARE40'
+          :POS5               D=50
+          :VAL5               D='SPARE41'
+          :POS6               D=62
+          :VAL6               D='SPARE42'
+
+PC3.2.1.8 TEXT (A,6,11,72)
+          :FORM1              0
+          :FORM2              0
+          :EN                 1
+          :TLINE 
+          :POS1               D=2
+          :VAL1               D='SPARE43'
+          :POS2               D=14
+          :VAL2               D='SPARE44'
+          :POS3               D=26
+          :VAL3               D='SPARE45'
+          :POS4               D=38
+          :VAL4               D='SPARE46'
+          :POS5               D=50
+          :VAL5               D='SPARE47'
+          :POS6               D=62
+          :VAL6               D='SPARE48'
+
+PC3.2.1.9 TEXT (A,6,11,72)
+          :FORM1              0
+          :FORM2              0
+          :EN                 1
+          :TLINE 
+          :POS1               D=2
+          :VAL1               D='SPARE49'
+          :POS2               D=14
+          :VAL2               D='SPARE50'
+          :POS3               D=26
+          :VAL3               D='SPARE51'
+          :POS4               D=38
+          :VAL4               D='SPARE52'
+          :POS5               D=50
+          :VAL5               D='SPARE53'
+          :POS6               D=62
+          :VAL6               D='SPARE54'
+
+PCD-PAGE 
+"Tag names for the PMR header"
+
+PC3.2.1.10 TEXT (A,6,11,72)
+          :FORM1              0
+          :FORM2              0
+          :EN                 1
+          :TLINE 
+          :POS1               D=2
+          :VAL1               D='SPARE55'
+          :POS2               D=14
+          :VAL2               D='SPARE56'
+          :POS3               D=26
+          :VAL3               D='SPARE57'
+          :POS4               D=38
+          :VAL4               D='SPARE58'
+          :POS5               D=50
+          :VAL5               D='SPARE59'
+          :POS6               D=62
+          :VAL6               D='SPARE60'
+
+PC3.2.1.11 TEXT (A,6,11,72)
+          :FORM1              0
+          :FORM2              0
+          :EN                 1
+          :TLINE 
+          :POS1               D=2
+          :VAL1               D='SPARE61'
+          :POS2               D=14
+          :VAL2               D='SPARE62'
+          :POS3               D=26
+          :VAL3               D='SPARE63'
+          :POS4               D=38
+          :VAL4               D='SPARE64'
+          :POS5               D=50
+          :VAL5               D='SPARE65'
+          :POS6               D=62
+          :VAL6               D='SPARE66'
+
+PC3.2.1.12 TEXT (A,6,11,72)
+          :FORM1              0
+          :FORM2              0
+          :EN                 1
+          :TLINE 
+          :POS1               D=2
+          :VAL1               D='SPARE67'
+          :POS2               D=14
+          :VAL2               D='SPARE68'
+          :POS3               D=26
+          :VAL3               D='SPARE69'
+          :POS4               D=38
+          :VAL4               D='SPARE70'
+          :POS5               D=50
+          :VAL5               D='SPARE71'
+          :POS6               D=62
+          :VAL6               D='SPARE72'
+
+PCD-PAGE 
+"Tag names for the PMR header"
+
+PC3.2.1.13 TEXT (A,6,11,72)
+          :FORM1              0
+          :FORM2              0
+          :EN                 1
+          :TLINE 
+          :POS1               D=2
+          :VAL1               D='SPARE73'
+          :POS2               D=14
+          :VAL2               D='SPARE74'
+          :POS3               D=26
+          :VAL3               D='SPARE75'
+          :POS4               D=38
+          :VAL4               D='SPARE76'
+          :POS5               D=50
+          :VAL5               D='SPARE77'
+          :POS6               D=62
+          :VAL6               D='SPARE78'
+
+PC3.2.1.14 TEXT (A,6,11,72)
+          :FORM1              0
+          :FORM2              0
+          :EN                 1
+          :TLINE 
+          :POS1               D=2
+          :VAL1               D='SPARE79'
+          :POS2               D=14
+          :VAL2               D='SPARE80'
+          :POS3               D=26
+          :VAL3               D='SPARE81'
+          :POS4               D=38
+          :VAL4               D='SPARE82'
+          :POS5               D=50
+          :VAL5               D='SPARE83'
+          :POS6               D=62
+          :VAL6               D='SPARE84'
+
+PC3.2.1.15 TEXT (A,6,11,72)
+          :FORM1              0
+          :FORM2              0
+          :EN                 1
+          :TLINE 
+          :POS1               D=2
+          :VAL1               D='SPARE85'
+          :POS2               D=14
+          :VAL2               D='SPARE86'
+          :POS3               D=26
+          :VAL3               D='SPARE87'
+          :POS4               D=38
+          :VAL4               D='SPARE88'
+          :POS5               D=50
+          :VAL5               D='SPARE89'
+          :POS6               D=62
+          :VAL6               D='SPARE90'
+
+PCD-PAGE 
+"Tag names for the PMR header"
+
+PC3.2.1.16 TEXT (A,6,11,72)
+          :FORM1              0
+          :FORM2              0
+          :EN                 1
+          :TLINE 
+          :POS1               D=2
+          :VAL1               D='SPARE91'
+          :POS2               D=14
+          :VAL2               D='SPARE92'
+          :POS3               D=26
+          :VAL3               D='SPARE93'
+          :POS4               D=38
+          :VAL4               D='SPARE94'
+          :POS5               D=50
+          :VAL5               D='SPARE95'
+          :POS6               D=62
+          :VAL6               D='SPARE96'
+
+PC3.2.1.17 TEXT (A,6,11,72)
+          :FORM1              0
+          :FORM2              0
+          :EN                 1
+          :TLINE 
+          :POS1               D=2
+          :VAL1               D='SPARE97'
+          :POS2               D=14
+          :VAL2               D='SPARE98'
+          :POS3               D=26
+          :VAL3               D='SPARE99'
+          :POS4               D=38
+          :VAL4               D='SPARE100'
+          :POS5               D=50
+          :VAL5               D='SPARE101'
+          :POS6               D=62
+          :VAL6               D='SPARE102'
+
+PC3.2.1.18 TEXT (A,6,11,72)
+          :FORM1              0
+          :FORM2              0
+          :EN                 1
+          :TLINE 
+          :POS1               D=2
+          :VAL1               D='SPARE103'
+          :POS2               D=14
+          :VAL2               D='SPARE104'
+          :POS3               D=26
+          :VAL3               D='SPARE105'
+          :POS4               D=38
+          :VAL4               D='SPARE106'
+          :POS5               D=50
+          :VAL5               D='SPARE107'
+          :POS6               D=62
+          :VAL6               D='SPARE108'
+
+PCD-PAGE 
+"Tag names for the PMR header"
+
+PC3.2.1.19 TEXT (A,6,11,72)
+          :FORM1              0
+          :FORM2              0
+          :EN                 1
+          :TLINE 
+          :POS1               D=2
+          :VAL1               D='SPARE109'
+          :POS2               D=14
+          :VAL2               D='SPARE110'
+          :POS3               D=26
+          :VAL3               D='SPARE111'
+          :POS4               D=38
+          :VAL4               D='SPARE112'
+          :POS5               D=50
+          :VAL5               D='SPARE113'
+          :POS6               D=62
+          :VAL6               D='SPARE114'
+
+PC3.2.1.20 TEXT (A,6,11,72)
+          :FORM1              0
+          :FORM2              0
+          :EN                 1
+          :TLINE 
+          :POS1               D=2
+          :VAL1               D='SPARE115'
+          :POS2               D=14
+          :VAL2               D='SPARE116'
+          :POS3               D=26
+          :VAL3               D='SPARE117'
+          :POS4               D=38
+          :VAL4               D='SPARE118'
+          :POS5               D=50
+          :VAL5               D='SPARE119'
+          :POS6               D=62
+          :VAL6               D='SPARE120'
+
+PC3.2.1.21 TEXT (A,6,11,72)
+          :FORM1              0
+          :FORM2              0
+          :EN                 1
+          :TLINE 
+          :POS1               D=2
+          :VAL1               D='SPARE121'
+          :POS2               D=14
+          :VAL2               D='SPARE122'
+          :POS3               D=26
+          :VAL3               D='SPARE123'
+          :POS4               D=38
+          :VAL4               D='SPARE124'
+          :POS5               D=50
+          :VAL5               D='SPARE125'
+          :POS6               D=62
+          :VAL6               D='SPARE126'
+
+PCD-PAGE 
+"Tag names for the PMR header"
+
+PC3.2.1.22 TEXT (A,6,11,72)
+          :FORM1              0
+          :FORM2              0
+          :EN                 1
+          :TLINE 
+          :POS1               D=2
+          :VAL1               D='SPARE127'
+          :POS2               D=14
+          :VAL2               D='SPARE128'
+          :POS3               D=26
+          :VAL3               D='SPARE129'
+          :POS4               D=38
+          :VAL4               D='SPARE130'
+          :POS5               D=50
+          :VAL5               D='SPARE131'
+          :POS6               D=62
+          :VAL6               D='SPARE132'
+
+PC3.2.1.23 TEXT (A,6,11,72)
+          :FORM1              0
+          :FORM2              0
+          :EN                 1
+          :TLINE 
+          :POS1               D=2
+          :VAL1               D='SPARE133'
+          :POS2               D=14
+          :VAL2               D='SPARE134'
+          :POS3               D=26
+          :VAL3               D='SPARE135'
+          :POS4               D=38
+          :VAL4               D='SPARE136'
+          :POS5               D=50
+          :VAL5               D='SPARE137'
+          :POS6               D=62
+          :VAL6               D='SPARE138'
+
+PC3.2.1.24 TEXT (A,6,11,72)
+          :FORM1              0
+          :FORM2              0
+          :EN                 1
+          :TLINE 
+          :POS1               D=2
+          :VAL1               D='SPARE139'
+          :POS2               D=14
+          :VAL2               D='SPARE140'
+          :POS3               D=26
+          :VAL3               D='SPARE141'
+          :POS4               D=38
+          :VAL4               D='SPARE142'
+          :POS5               D=50
+          :VAL5               D='SPARE143'
+          :POS6               D=62
+          :VAL6               D='SPARE144'
+
+PCD-PAGE 
+"Tag names for the PMR header"
+
+PC3.2.1.25 TEXT (A,6,11,72)
+          :FORM1              0
+          :FORM2              0
+          :EN                 1
+          :TLINE 
+          :POS1               D=2
+          :VAL1               D='SPARE145'
+          :POS2               D=14
+          :VAL2               D='SPARE146'
+          :POS3               D=26
+          :VAL3               D='SPARE147'
+          :POS4               D=38
+          :VAL4               D='SPARE148'
+          :POS5               D=50
+          :VAL5               D='SPARE149'
+          :POS6               D=62
+          :VAL6               D='SPARE150'
+
+PC3.2.1.26 TEXT (A,6,11,72)
+          :FORM1              0
+          :FORM2              0
+          :EN                 1
+          :TLINE 
+          :POS1               D=2
+          :VAL1               D='SPARE151'
+          :POS2               D=14
+          :VAL2               D='SPARE152'
+          :POS3               D=26
+          :VAL3               D='SPARE153'
+          :POS4               D=38
+          :VAL4               D='SPARE154'
+          :POS5               D=50
+          :VAL5               D='SPARE155'
+          :POS6               D=62
+          :VAL6               D='SPARE156'
+
+PC3.2.1.27 TEXT (A,6,11,72)
+          :FORM1              0
+          :FORM2              0
+          :EN                 1
+          :TLINE 
+          :POS1               D=2
+          :VAL1               D='SPARE157'
+          :POS2               D=14
+          :VAL2               D='SPARE158'
+          :POS3               D=26
+          :VAL3               D='SPARE159'
+          :POS4               D=38
+          :VAL4               D='SPARE160'
+          :POS5               D=50
+          :VAL5               D='SPARE161'
+          :POS6               D=62
+          :VAL6               D='SPARE162'
+
+PCD-PAGE 
+"Tag names for the PMR header"
+
+PC3.2.1.28 TEXT (A,6,11,72)
+          :FORM1              0
+          :FORM2              0
+          :EN                 1
+          :TLINE 
+          :POS1               D=2
+          :VAL1               D='SPARE163'
+          :POS2               D=14
+          :VAL2               D='SPARE164'
+          :POS3               D=26
+          :VAL3               D='SPARE165'
+          :POS4               D=38
+          :VAL4               D='SPARE166'
+          :POS5               D=50
+          :VAL5               D='SPARE167'
+          :POS6               D=62
+          :VAL6               D='SPARE168'
+
+PC3.2.1.29 TEXT (A,6,11,72)
+          :FORM1              0
+          :FORM2              0
+          :EN                 1
+          :TLINE 
+          :POS1               D=2
+          :VAL1               D='SPARE169'
+          :POS2               D=14
+          :VAL2               D='SPARE170'
+          :POS3               D=26
+          :VAL3               D='SPARE171'
+          :POS4               D=38
+          :VAL4               D='SPARE172'
+          :POS5               D=50
+          :VAL5               D='SPARE173'
+          :POS6               D=62
+          :VAL6               D='SPARE174'
+
+PC3.2.1.30 TEXT (A,6,11,72)
+          :FORM1              0
+          :FORM2              0
+          :EN                 1
+          :TLINE 
+          :POS1               D=2
+          :VAL1               D='SPARE175'
+          :POS2               D=14
+          :VAL2               D='SPARE176'
+          :POS3               D=26
+          :VAL3               D='SPARE177'
+          :POS4               D=38
+          :VAL4               D='SPARE178'
+          :POS5               D=50
+          :VAL5               D='SPARE179'
+          :POS6               D=62
+          :VAL6               D='SPARE180'
+
+PCD-PAGE 
+"Print header status and tag names"
+
+PC3.2.1.110 PRINT (7,1,72)
+          :FIRST              1
+          :LAST               0
+          :FF                 0
+          :NODE               =APMR.PNODE1
+          :NETW               =APMR.PNETW1
+          :PRID               =APMR.PPRID1
+          :ACT                PC3.2:RUN
+          :BUSY 
+          :REPNO 
+          :ERR 
+          :TEXT1              D='PMR_BEGIN'
+          :TEXT2              PC3.2.1.101:TLINE
+          :TEXT3              PC3.2.1.102:TLINE
+          :TEXT4              PC3.2.1.121:TLINE
+          :TEXT5              PC3.2.1.124:TLINE
+          :TEXT6              PC3.2.1.125:TLINE
+          :TEXT7              PC3.2.1.128:TLINE
+
+PC3.2.1.111 PRINT (15,1,72)
+          :FIRST              0
+          :LAST               0
+          :FF                 0
+          :NODE               =APMR.PNODE1
+          :NETW               =APMR.PNETW1
+          :PRID               =APMR.PPRID1
+          :ACT                PC3.2:RUN
+          :BUSY 
+          :REPNO 
+          :ERR 
+          :TEXT1              PC3.2.1.1:TLINE
+          :TEXT2              PC3.2.1.2:TLINE
+          :TEXT3              PC3.2.1.3:TLINE
+          :TEXT4              PC3.2.1.4:TLINE
+          :TEXT5              PC3.2.1.5:TLINE
+          :TEXT6              PC3.2.1.6:TLINE
+          :TEXT7              PC3.2.1.7:TLINE
+          :TEXT8              PC3.2.1.8:TLINE
+          :TEXT9              PC3.2.1.9:TLINE
+          :TEXT10             PC3.2.1.10:TLINE
+          :TEXT11             PC3.2.1.11:TLINE
+          :TEXT12             PC3.2.1.12:TLINE
+          :TEXT13             PC3.2.1.13:TLINE
+          :TEXT14             PC3.2.1.14:TLINE
+          :TEXT15             PC3.2.1.15:TLINE
+
+PC3.2.1.112 PRINT (15,1,72)
+          :FIRST              0
+          :LAST               0
+          :FF                 0
+          :NODE               =APMR.PNODE1
+          :NETW               =APMR.PNETW1
+          :PRID               =APMR.PPRID1
+          :ACT                PC3.2:RUN
+          :BUSY 
+          :REPNO 
+          :ERR 
+          :TEXT1              PC3.2.1.16:TLINE
+          :TEXT2              PC3.2.1.17:TLINE
+          :TEXT3              PC3.2.1.18:TLINE
+          :TEXT4              PC3.2.1.19:TLINE
+          :TEXT5              PC3.2.1.20:TLINE
+          :TEXT6              PC3.2.1.21:TLINE
+          :TEXT7              PC3.2.1.22:TLINE
+          :TEXT8              PC3.2.1.23:TLINE
+          :TEXT9              PC3.2.1.24:TLINE
+          :TEXT10             PC3.2.1.25:TLINE
+          :TEXT11             PC3.2.1.26:TLINE
+          :TEXT12             PC3.2.1.27:TLINE
+          :TEXT13             PC3.2.1.28:TLINE
+          :TEXT14             PC3.2.1.29:TLINE
+          :TEXT15             PC3.2.1.30:TLINE
+
+PCD-PAGE 
+"Data logging"
+
+PC3.3 CONTRM (1000,36,0)
+          :ON                 PC3.2.1.129:O
+          :SINGLE             D=0
+          :R                  PC3.5.1.13:O
+          :RUN 
+          :MODP 
+
+PCD-PAGE 
+"Data logging"
+
+PC3.3.1 FUNCM 
+
+PC3.3.1.1 TEXT (R,1,1,12)
+          :FORM1              12
+          :FORM2              -4
+          :EN                 D=1
+          :TLINE 
+          :POS1               D=1
+          :VAL1               PC3.1.1.101:21
+
+PC3.3.1.2 TEXT (R,1,1,12)
+          :FORM1              12
+          :FORM2              -4
+          :EN                 D=1
+          :TLINE 
+          :POS1               D=1
+          :VAL1               PC3.1.1.101:22
+
+PC3.3.1.3 TEXT (R,1,1,12)
+          :FORM1              12
+          :FORM2              -4
+          :EN                 D=1
+          :TLINE 
+          :POS1               D=1
+          :VAL1               PC3.1.1.101:23
+
+PC3.3.1.4 TEXT (R,1,1,12)
+          :FORM1              12
+          :FORM2              -4
+          :EN                 D=1
+          :TLINE 
+          :POS1               D=1
+          :VAL1               PC3.1.1.101:24
+
+PCD-PAGE 
+"Data logging"
+
+PC3.3.1.5 TEXT (R,1,1,12)
+          :FORM1              12
+          :FORM2              -4
+          :EN                 D=1
+          :TLINE 
+          :POS1               D=1
+          :VAL1               PC3.1.1.101:25
+
+PC3.3.1.6 TEXT (R,1,1,12)
+          :FORM1              12
+          :FORM2              -4
+          :EN                 D=1
+          :TLINE 
+          :POS1               D=1
+          :VAL1               PC3.1.1.101:26
+
+PC3.3.1.9 TEXT (A,6,12,72)
+          :FORM1              0
+          :FORM2              0
+          :EN                 1
+          :TLINE 
+          :POS1               D=1
+          :VAL1               PC3.3.1.1:TLINE
+          :POS2               D=13
+          :VAL2               PC3.3.1.2:TLINE
+          :POS3               D=25
+          :VAL3               PC3.3.1.3:TLINE
+          :POS4               D=37
+          :VAL4               PC3.3.1.4:TLINE
+          :POS5               D=49
+          :VAL5               PC3.3.1.5:TLINE
+          :POS6               D=61
+          :VAL6               PC3.3.1.6:TLINE
+
+PCD-PAGE 
+"Data logging"
+
+PC3.3.2 FUNCM 
+
+PC3.3.2.1 TEXT (R,1,1,12)
+          :FORM1              12
+          :FORM2              -4
+          :EN                 D=1
+          :TLINE 
+          :POS1               D=1
+          :VAL1               PC3.1.1.102:21
+
+PC3.3.2.2 TEXT (R,1,1,12)
+          :FORM1              12
+          :FORM2              -4
+          :EN                 D=1
+          :TLINE 
+          :POS1               D=1
+          :VAL1               PC3.1.1.102:22
+
+PC3.3.2.3 TEXT (R,1,1,12)
+          :FORM1              12
+          :FORM2              -4
+          :EN                 D=1
+          :TLINE 
+          :POS1               D=1
+          :VAL1               PC3.1.1.102:23
+
+PC3.3.2.4 TEXT (R,1,1,12)
+          :FORM1              12
+          :FORM2              -4
+          :EN                 D=1
+          :TLINE 
+          :POS1               D=1
+          :VAL1               PC3.1.1.102:24
+
+PCD-PAGE 
+"Data logging"
+
+PC3.3.2.5 TEXT (R,1,1,12)
+          :FORM1              12
+          :FORM2              -4
+          :EN                 D=1
+          :TLINE 
+          :POS1               D=1
+          :VAL1               PC3.1.1.102:25
+
+PC3.3.2.6 TEXT (R,1,1,12)
+          :FORM1              12
+          :FORM2              -4
+          :EN                 D=1
+          :TLINE 
+          :POS1               D=1
+          :VAL1               PC3.1.1.102:26
+
+PC3.3.2.9 TEXT (A,6,12,72)
+          :FORM1              0
+          :FORM2              0
+          :EN                 1
+          :TLINE 
+          :POS1               D=1
+          :VAL1               PC3.3.2.1:TLINE
+          :POS2               D=13
+          :VAL2               PC3.3.2.2:TLINE
+          :POS3               D=25
+          :VAL3               PC3.3.2.3:TLINE
+          :POS4               D=37
+          :VAL4               PC3.3.2.4:TLINE
+          :POS5               D=49
+          :VAL5               PC3.3.2.5:TLINE
+          :POS6               D=61
+          :VAL6               PC3.3.2.6:TLINE
+
+PCD-PAGE 
+"Data logging"
+
+PC3.3.3 FUNCM 
+
+PC3.3.3.1 TEXT (R,1,1,12)
+          :FORM1              12
+          :FORM2              -4
+          :EN                 D=1
+          :TLINE 
+          :POS1               D=1
+          :VAL1               PC3.1.1.103:21
+
+PC3.3.3.2 TEXT (R,1,1,12)
+          :FORM1              12
+          :FORM2              -4
+          :EN                 D=1
+          :TLINE 
+          :POS1               D=1
+          :VAL1               PC3.1.1.103:22
+
+PC3.3.3.3 TEXT (R,1,1,12)
+          :FORM1              12
+          :FORM2              -4
+          :EN                 D=1
+          :TLINE 
+          :POS1               D=1
+          :VAL1               PC3.1.1.103:23
+
+PC3.3.3.4 TEXT (R,1,1,12)
+          :FORM1              12
+          :FORM2              -4
+          :EN                 D=1
+          :TLINE 
+          :POS1               D=1
+          :VAL1               PC3.1.1.103:24
+
+PCD-PAGE 
+"Data logging"
+
+PC3.3.3.5 TEXT (R,1,1,12)
+          :FORM1              12
+          :FORM2              -4
+          :EN                 D=1
+          :TLINE 
+          :POS1               D=1
+          :VAL1               PC3.1.1.103:25
+
+PC3.3.3.6 TEXT (R,1,1,12)
+          :FORM1              12
+          :FORM2              -4
+          :EN                 D=1
+          :TLINE 
+          :POS1               D=1
+          :VAL1               PC3.1.1.103:26
+
+PC3.3.3.9 TEXT (A,6,12,72)
+          :FORM1              0
+          :FORM2              0
+          :EN                 1
+          :TLINE 
+          :POS1               D=1
+          :VAL1               PC3.3.3.1:TLINE
+          :POS2               D=13
+          :VAL2               PC3.3.3.2:TLINE
+          :POS3               D=25
+          :VAL3               PC3.3.3.3:TLINE
+          :POS4               D=37
+          :VAL4               PC3.3.3.4:TLINE
+          :POS5               D=49
+          :VAL5               PC3.3.3.5:TLINE
+          :POS6               D=61
+          :VAL6               PC3.3.3.6:TLINE
+
+PCD-PAGE 
+"Data logging"
+
+PC3.3.4 FUNCM 
+
+PC3.3.4.1 TEXT (R,1,1,12)
+          :FORM1              12
+          :FORM2              -4
+          :EN                 D=1
+          :TLINE 
+          :POS1               D=1
+          :VAL1               PC3.1.1.104:21
+
+PC3.3.4.2 TEXT (R,1,1,12)
+          :FORM1              12
+          :FORM2              -4
+          :EN                 D=1
+          :TLINE 
+          :POS1               D=1
+          :VAL1               PC3.1.1.104:22
+
+PC3.3.4.3 TEXT (R,1,1,12)
+          :FORM1              12
+          :FORM2              -4
+          :EN                 D=1
+          :TLINE 
+          :POS1               D=1
+          :VAL1               PC3.1.1.104:23
+
+PC3.3.4.4 TEXT (R,1,1,12)
+          :FORM1              12
+          :FORM2              -4
+          :EN                 D=1
+          :TLINE 
+          :POS1               D=1
+          :VAL1               PC3.1.1.104:24
+
+PCD-PAGE 
+"Data logging"
+
+PC3.3.4.5 TEXT (R,1,1,12)
+          :FORM1              12
+          :FORM2              -4
+          :EN                 D=1
+          :TLINE 
+          :POS1               D=1
+          :VAL1               PC3.1.1.104:25
+
+PC3.3.4.6 TEXT (R,1,1,12)
+          :FORM1              12
+          :FORM2              -4
+          :EN                 D=1
+          :TLINE 
+          :POS1               D=1
+          :VAL1               PC3.1.1.104:26
+
+PC3.3.4.9 TEXT (A,6,12,72)
+          :FORM1              0
+          :FORM2              0
+          :EN                 1
+          :TLINE 
+          :POS1               D=1
+          :VAL1               PC3.3.4.1:TLINE
+          :POS2               D=13
+          :VAL2               PC3.3.4.2:TLINE
+          :POS3               D=25
+          :VAL3               PC3.3.4.3:TLINE
+          :POS4               D=37
+          :VAL4               PC3.3.4.4:TLINE
+          :POS5               D=49
+          :VAL5               PC3.3.4.5:TLINE
+          :POS6               D=61
+          :VAL6               PC3.3.4.6:TLINE
+
+PCD-PAGE 
+"Data logging"
+
+PC3.3.5 FUNCM 
+
+PC3.3.5.1 TEXT (R,1,1,12)
+          :FORM1              12
+          :FORM2              -4
+          :EN                 D=1
+          :TLINE 
+          :POS1               D=1
+          :VAL1               PC3.1.1.105:21
+
+PC3.3.5.2 TEXT (R,1,1,12)
+          :FORM1              12
+          :FORM2              -4
+          :EN                 D=1
+          :TLINE 
+          :POS1               D=1
+          :VAL1               PC3.1.1.105:22
+
+PC3.3.5.3 TEXT (R,1,1,12)
+          :FORM1              12
+          :FORM2              -4
+          :EN                 D=1
+          :TLINE 
+          :POS1               D=1
+          :VAL1               PC3.1.1.105:23
+
+PC3.3.5.4 TEXT (R,1,1,12)
+          :FORM1              12
+          :FORM2              -4
+          :EN                 D=1
+          :TLINE 
+          :POS1               D=1
+          :VAL1               PC3.1.1.105:24
+
+PCD-PAGE 
+"Data logging"
+
+PC3.3.5.5 TEXT (R,1,1,12)
+          :FORM1              12
+          :FORM2              -4
+          :EN                 D=1
+          :TLINE 
+          :POS1               D=1
+          :VAL1               PC3.1.1.105:25
+
+PC3.3.5.6 TEXT (R,1,1,12)
+          :FORM1              12
+          :FORM2              -4
+          :EN                 D=1
+          :TLINE 
+          :POS1               D=1
+          :VAL1               PC3.1.1.105:26
+
+PC3.3.5.9 TEXT (A,6,12,72)
+          :FORM1              0
+          :FORM2              0
+          :EN                 1
+          :TLINE 
+          :POS1               D=1
+          :VAL1               PC3.3.5.1:TLINE
+          :POS2               D=13
+          :VAL2               PC3.3.5.2:TLINE
+          :POS3               D=25
+          :VAL3               PC3.3.5.3:TLINE
+          :POS4               D=37
+          :VAL4               PC3.3.5.4:TLINE
+          :POS5               D=49
+          :VAL5               PC3.3.5.5:TLINE
+          :POS6               D=61
+          :VAL6               PC3.3.5.6:TLINE
+
+PCD-PAGE 
+"Data logging"
+
+PC3.3.6 FUNCM 
+
+PC3.3.6.1 TEXT (R,1,1,12)
+          :FORM1              12
+          :FORM2              -4
+          :EN                 D=1
+          :TLINE 
+          :POS1               D=1
+          :VAL1               PC3.1.1.106:21
+
+PC3.3.6.2 TEXT (R,1,1,12)
+          :FORM1              12
+          :FORM2              -4
+          :EN                 D=1
+          :TLINE 
+          :POS1               D=1
+          :VAL1               PC3.1.1.106:22
+
+PC3.3.6.3 TEXT (R,1,1,12)
+          :FORM1              12
+          :FORM2              -4
+          :EN                 D=1
+          :TLINE 
+          :POS1               D=1
+          :VAL1               PC3.1.1.106:23
+
+PC3.3.6.4 TEXT (R,1,1,12)
+          :FORM1              12
+          :FORM2              -4
+          :EN                 D=1
+          :TLINE 
+          :POS1               D=1
+          :VAL1               PC3.1.1.106:24
+
+PCD-PAGE 
+"Data logging"
+
+PC3.3.6.5 TEXT (R,1,1,12)
+          :FORM1              12
+          :FORM2              -4
+          :EN                 D=1
+          :TLINE 
+          :POS1               D=1
+          :VAL1               PC3.1.1.106:25
+
+PC3.3.6.6 TEXT (R,1,1,12)
+          :FORM1              12
+          :FORM2              -4
+          :EN                 D=1
+          :TLINE 
+          :POS1               D=1
+          :VAL1               PC3.1.1.106:26
+
+PC3.3.6.9 TEXT (A,6,12,72)
+          :FORM1              0
+          :FORM2              0
+          :EN                 1
+          :TLINE 
+          :POS1               D=1
+          :VAL1               PC3.3.6.1:TLINE
+          :POS2               D=13
+          :VAL2               PC3.3.6.2:TLINE
+          :POS3               D=25
+          :VAL3               PC3.3.6.3:TLINE
+          :POS4               D=37
+          :VAL4               PC3.3.6.4:TLINE
+          :POS5               D=49
+          :VAL5               PC3.3.6.5:TLINE
+          :POS6               D=61
+          :VAL6               PC3.3.6.6:TLINE
+
+PCD-PAGE 
+"Data logging"
+
+PC3.3.7 FUNCM 
+
+PC3.3.7.1 TEXT (R,1,1,12)
+          :FORM1              12
+          :FORM2              -4
+          :EN                 D=1
+          :TLINE 
+          :POS1               D=1
+          :VAL1               PC3.1.1.107:21
+
+PC3.3.7.2 TEXT (R,1,1,12)
+          :FORM1              12
+          :FORM2              -4
+          :EN                 D=1
+          :TLINE 
+          :POS1               D=1
+          :VAL1               PC3.1.1.107:22
+
+PC3.3.7.3 TEXT (R,1,1,12)
+          :FORM1              12
+          :FORM2              -4
+          :EN                 D=1
+          :TLINE 
+          :POS1               D=1
+          :VAL1               PC3.1.1.107:23
+
+PC3.3.7.4 TEXT (R,1,1,12)
+          :FORM1              12
+          :FORM2              -4
+          :EN                 D=1
+          :TLINE 
+          :POS1               D=1
+          :VAL1               PC3.1.1.107:24
+
+PCD-PAGE 
+"Data logging"
+
+PC3.3.7.5 TEXT (R,1,1,12)
+          :FORM1              12
+          :FORM2              -4
+          :EN                 D=1
+          :TLINE 
+          :POS1               D=1
+          :VAL1               PC3.1.1.107:25
+
+PC3.3.7.6 TEXT (R,1,1,12)
+          :FORM1              12
+          :FORM2              -4
+          :EN                 D=1
+          :TLINE 
+          :POS1               D=1
+          :VAL1               PC3.1.1.107:26
+
+PC3.3.7.9 TEXT (A,6,12,72)
+          :FORM1              0
+          :FORM2              0
+          :EN                 1
+          :TLINE 
+          :POS1               D=1
+          :VAL1               PC3.3.7.1:TLINE
+          :POS2               D=13
+          :VAL2               PC3.3.7.2:TLINE
+          :POS3               D=25
+          :VAL3               PC3.3.7.3:TLINE
+          :POS4               D=37
+          :VAL4               PC3.3.7.4:TLINE
+          :POS5               D=49
+          :VAL5               PC3.3.7.5:TLINE
+          :POS6               D=61
+          :VAL6               PC3.3.7.6:TLINE
+
+PCD-PAGE 
+"Data logging"
+
+PC3.3.8 FUNCM 
+
+PC3.3.8.1 TEXT (R,1,1,12)
+          :FORM1              12
+          :FORM2              -4
+          :EN                 D=1
+          :TLINE 
+          :POS1               D=1
+          :VAL1               PC3.1.1.108:21
+
+PC3.3.8.2 TEXT (R,1,1,12)
+          :FORM1              12
+          :FORM2              -4
+          :EN                 D=1
+          :TLINE 
+          :POS1               D=1
+          :VAL1               PC3.1.1.108:22
+
+PC3.3.8.3 TEXT (R,1,1,12)
+          :FORM1              12
+          :FORM2              -4
+          :EN                 D=1
+          :TLINE 
+          :POS1               D=1
+          :VAL1               PC3.1.1.108:23
+
+PC3.3.8.4 TEXT (R,1,1,12)
+          :FORM1              12
+          :FORM2              -4
+          :EN                 D=1
+          :TLINE 
+          :POS1               D=1
+          :VAL1               PC3.1.1.108:24
+
+PCD-PAGE 
+"Data logging"
+
+PC3.3.8.5 TEXT (R,1,1,12)
+          :FORM1              12
+          :FORM2              -4
+          :EN                 D=1
+          :TLINE 
+          :POS1               D=1
+          :VAL1               PC3.1.1.108:25
+
+PC3.3.8.6 TEXT (R,1,1,12)
+          :FORM1              12
+          :FORM2              -4
+          :EN                 D=1
+          :TLINE 
+          :POS1               D=1
+          :VAL1               PC3.1.1.108:26
+
+PC3.3.8.9 TEXT (A,6,12,72)
+          :FORM1              0
+          :FORM2              0
+          :EN                 1
+          :TLINE 
+          :POS1               D=1
+          :VAL1               PC3.3.8.1:TLINE
+          :POS2               D=13
+          :VAL2               PC3.3.8.2:TLINE
+          :POS3               D=25
+          :VAL3               PC3.3.8.3:TLINE
+          :POS4               D=37
+          :VAL4               PC3.3.8.4:TLINE
+          :POS5               D=49
+          :VAL5               PC3.3.8.5:TLINE
+          :POS6               D=61
+          :VAL6               PC3.3.8.6:TLINE
+
+PCD-PAGE 
+"Data logging"
+
+PC3.3.9 FUNCM 
+
+PC3.3.9.1 TEXT (R,1,1,12)
+          :FORM1              12
+          :FORM2              -4
+          :EN                 D=1
+          :TLINE 
+          :POS1               D=1
+          :VAL1               PC3.1.1.109:21
+
+PC3.3.9.2 TEXT (R,1,1,12)
+          :FORM1              12
+          :FORM2              -4
+          :EN                 D=1
+          :TLINE 
+          :POS1               D=1
+          :VAL1               PC3.1.1.109:22
+
+PC3.3.9.3 TEXT (R,1,1,12)
+          :FORM1              12
+          :FORM2              -4
+          :EN                 D=1
+          :TLINE 
+          :POS1               D=1
+          :VAL1               PC3.1.1.109:23
+
+PC3.3.9.4 TEXT (R,1,1,12)
+          :FORM1              12
+          :FORM2              -4
+          :EN                 D=1
+          :TLINE 
+          :POS1               D=1
+          :VAL1               PC3.1.1.109:24
+
+PCD-PAGE 
+"Data logging"
+
+PC3.3.9.5 TEXT (R,1,1,12)
+          :FORM1              12
+          :FORM2              -4
+          :EN                 D=1
+          :TLINE 
+          :POS1               D=1
+          :VAL1               PC3.1.1.109:25
+
+PC3.3.9.6 TEXT (R,1,1,12)
+          :FORM1              12
+          :FORM2              -4
+          :EN                 D=1
+          :TLINE 
+          :POS1               D=1
+          :VAL1               PC3.1.1.109:26
+
+PC3.3.9.9 TEXT (A,6,12,72)
+          :FORM1              0
+          :FORM2              0
+          :EN                 1
+          :TLINE 
+          :POS1               D=1
+          :VAL1               PC3.3.9.1:TLINE
+          :POS2               D=13
+          :VAL2               PC3.3.9.2:TLINE
+          :POS3               D=25
+          :VAL3               PC3.3.9.3:TLINE
+          :POS4               D=37
+          :VAL4               PC3.3.9.4:TLINE
+          :POS5               D=49
+          :VAL5               PC3.3.9.5:TLINE
+          :POS6               D=61
+          :VAL6               PC3.3.9.6:TLINE
+
+PCD-PAGE 
+"Data logging"
+
+PC3.3.10 FUNCM 
+
+PC3.3.10.1 TEXT (R,1,1,12)
+          :FORM1              12
+          :FORM2              -4
+          :EN                 D=1
+          :TLINE 
+          :POS1               D=1
+          :VAL1               PC3.1.1.110:21
+
+PC3.3.10.2 TEXT (R,1,1,12)
+          :FORM1              12
+          :FORM2              -4
+          :EN                 D=1
+          :TLINE 
+          :POS1               D=1
+          :VAL1               PC3.1.1.110:22
+
+PC3.3.10.3 TEXT (R,1,1,12)
+          :FORM1              12
+          :FORM2              -4
+          :EN                 D=1
+          :TLINE 
+          :POS1               D=1
+          :VAL1               PC3.1.1.110:23
+
+PC3.3.10.4 TEXT (R,1,1,12)
+          :FORM1              12
+          :FORM2              -4
+          :EN                 D=1
+          :TLINE 
+          :POS1               D=1
+          :VAL1               PC3.1.1.110:24
+
+PCD-PAGE 
+"Data logging"
+
+PC3.3.10.5 TEXT (R,1,1,12)
+          :FORM1              12
+          :FORM2              -4
+          :EN                 D=1
+          :TLINE 
+          :POS1               D=1
+          :VAL1               PC3.1.1.110:25
+
+PC3.3.10.6 TEXT (R,1,1,12)
+          :FORM1              12
+          :FORM2              -4
+          :EN                 D=1
+          :TLINE 
+          :POS1               D=1
+          :VAL1               PC3.1.1.110:26
+
+PC3.3.10.9 TEXT (A,6,12,72)
+          :FORM1              0
+          :FORM2              0
+          :EN                 1
+          :TLINE 
+          :POS1               D=1
+          :VAL1               PC3.3.10.1:TLINE
+          :POS2               D=13
+          :VAL2               PC3.3.10.2:TLINE
+          :POS3               D=25
+          :VAL3               PC3.3.10.3:TLINE
+          :POS4               D=37
+          :VAL4               PC3.3.10.4:TLINE
+          :POS5               D=49
+          :VAL5               PC3.3.10.5:TLINE
+          :POS6               D=61
+          :VAL6               PC3.3.10.6:TLINE
+
+PCD-PAGE 
+"Data logging"
+
+PC3.3.11 FUNCM 
+
+PC3.3.11.1 TEXT (R,1,1,12)
+          :FORM1              12
+          :FORM2              -4
+          :EN                 D=1
+          :TLINE 
+          :POS1               D=1
+          :VAL1               PC3.1.1.111:21
+
+PC3.3.11.2 TEXT (R,1,1,12)
+          :FORM1              12
+          :FORM2              -4
+          :EN                 D=1
+          :TLINE 
+          :POS1               D=1
+          :VAL1               PC3.1.1.111:22
+
+PC3.3.11.3 TEXT (R,1,1,12)
+          :FORM1              12
+          :FORM2              -4
+          :EN                 D=1
+          :TLINE 
+          :POS1               D=1
+          :VAL1               PC3.1.1.111:23
+
+PC3.3.11.4 TEXT (R,1,1,12)
+          :FORM1              12
+          :FORM2              -4
+          :EN                 D=1
+          :TLINE 
+          :POS1               D=1
+          :VAL1               PC3.1.1.111:24
+
+PCD-PAGE 
+"Data logging"
+
+PC3.3.11.5 TEXT (R,1,1,12)
+          :FORM1              12
+          :FORM2              -4
+          :EN                 D=1
+          :TLINE 
+          :POS1               D=1
+          :VAL1               PC3.1.1.111:25
+
+PC3.3.11.6 TEXT (R,1,1,12)
+          :FORM1              12
+          :FORM2              -4
+          :EN                 D=1
+          :TLINE 
+          :POS1               D=1
+          :VAL1               PC3.1.1.111:26
+
+PC3.3.11.9 TEXT (A,6,12,72)
+          :FORM1              0
+          :FORM2              0
+          :EN                 1
+          :TLINE 
+          :POS1               D=1
+          :VAL1               PC3.3.11.1:TLINE
+          :POS2               D=13
+          :VAL2               PC3.3.11.2:TLINE
+          :POS3               D=25
+          :VAL3               PC3.3.11.3:TLINE
+          :POS4               D=37
+          :VAL4               PC3.3.11.4:TLINE
+          :POS5               D=49
+          :VAL5               PC3.3.11.5:TLINE
+          :POS6               D=61
+          :VAL6               PC3.3.11.6:TLINE
+
+PCD-PAGE 
+"Data logging"
+
+PC3.3.12 FUNCM 
+
+PC3.3.12.1 TEXT (R,1,1,12)
+          :FORM1              12
+          :FORM2              -4
+          :EN                 D=1
+          :TLINE 
+          :POS1               D=1
+          :VAL1               PC3.1.1.112:21
+
+PC3.3.12.2 TEXT (R,1,1,12)
+          :FORM1              12
+          :FORM2              -4
+          :EN                 D=1
+          :TLINE 
+          :POS1               D=1
+          :VAL1               PC3.1.1.112:22
+
+PC3.3.12.3 TEXT (R,1,1,12)
+          :FORM1              12
+          :FORM2              -4
+          :EN                 D=1
+          :TLINE 
+          :POS1               D=1
+          :VAL1               PC3.1.1.112:23
+
+PC3.3.12.4 TEXT (R,1,1,12)
+          :FORM1              12
+          :FORM2              -4
+          :EN                 D=1
+          :TLINE 
+          :POS1               D=1
+          :VAL1               PC3.1.1.112:24
+
+PCD-PAGE 
+"Data logging"
+
+PC3.3.12.5 TEXT (R,1,1,12)
+          :FORM1              12
+          :FORM2              -4
+          :EN                 D=1
+          :TLINE 
+          :POS1               D=1
+          :VAL1               PC3.1.1.112:25
+
+PC3.3.12.6 TEXT (R,1,1,12)
+          :FORM1              12
+          :FORM2              -4
+          :EN                 D=1
+          :TLINE 
+          :POS1               D=1
+          :VAL1               PC3.1.1.112:26
+
+PC3.3.12.9 TEXT (A,6,12,72)
+          :FORM1              0
+          :FORM2              0
+          :EN                 1
+          :TLINE 
+          :POS1               D=1
+          :VAL1               PC3.3.12.1:TLINE
+          :POS2               D=13
+          :VAL2               PC3.3.12.2:TLINE
+          :POS3               D=25
+          :VAL3               PC3.3.12.3:TLINE
+          :POS4               D=37
+          :VAL4               PC3.3.12.4:TLINE
+          :POS5               D=49
+          :VAL5               PC3.3.12.5:TLINE
+          :POS6               D=61
+          :VAL6               PC3.3.12.6:TLINE
+
+PCD-PAGE 
+"Data logging"
+
+PC3.3.13 FUNCM 
+
+PC3.3.13.1 TEXT (R,1,1,12)
+          :FORM1              12
+          :FORM2              -4
+          :EN                 D=1
+          :TLINE 
+          :POS1               D=1
+          :VAL1               PC3.1.1.113:21
+
+PC3.3.13.2 TEXT (R,1,1,12)
+          :FORM1              12
+          :FORM2              -4
+          :EN                 D=1
+          :TLINE 
+          :POS1               D=1
+          :VAL1               PC3.1.1.113:22
+
+PC3.3.13.3 TEXT (R,1,1,12)
+          :FORM1              12
+          :FORM2              -4
+          :EN                 D=1
+          :TLINE 
+          :POS1               D=1
+          :VAL1               PC3.1.1.113:23
+
+PC3.3.13.4 TEXT (R,1,1,12)
+          :FORM1              12
+          :FORM2              -4
+          :EN                 D=1
+          :TLINE 
+          :POS1               D=1
+          :VAL1               PC3.1.1.113:24
+
+PCD-PAGE 
+"Data logging"
+
+PC3.3.13.5 TEXT (R,1,1,12)
+          :FORM1              12
+          :FORM2              -4
+          :EN                 D=1
+          :TLINE 
+          :POS1               D=1
+          :VAL1               PC3.1.1.113:25
+
+PC3.3.13.6 TEXT (R,1,1,12)
+          :FORM1              12
+          :FORM2              -4
+          :EN                 D=1
+          :TLINE 
+          :POS1               D=1
+          :VAL1               PC3.1.1.113:26
+
+PC3.3.13.9 TEXT (A,6,12,72)
+          :FORM1              0
+          :FORM2              0
+          :EN                 1
+          :TLINE 
+          :POS1               D=1
+          :VAL1               PC3.3.13.1:TLINE
+          :POS2               D=13
+          :VAL2               PC3.3.13.2:TLINE
+          :POS3               D=25
+          :VAL3               PC3.3.13.3:TLINE
+          :POS4               D=37
+          :VAL4               PC3.3.13.4:TLINE
+          :POS5               D=49
+          :VAL5               PC3.3.13.5:TLINE
+          :POS6               D=61
+          :VAL6               PC3.3.13.6:TLINE
+
+PCD-PAGE 
+"Data logging"
+
+PC3.3.14 FUNCM 
+
+PC3.3.14.1 TEXT (R,1,1,12)
+          :FORM1              12
+          :FORM2              -4
+          :EN                 D=1
+          :TLINE 
+          :POS1               D=1
+          :VAL1               PC3.1.1.114:21
+
+PC3.3.14.2 TEXT (R,1,1,12)
+          :FORM1              12
+          :FORM2              -4
+          :EN                 D=1
+          :TLINE 
+          :POS1               D=1
+          :VAL1               PC3.1.1.114:22
+
+PC3.3.14.3 TEXT (R,1,1,12)
+          :FORM1              12
+          :FORM2              -4
+          :EN                 D=1
+          :TLINE 
+          :POS1               D=1
+          :VAL1               PC3.1.1.114:23
+
+PC3.3.14.4 TEXT (R,1,1,12)
+          :FORM1              12
+          :FORM2              -4
+          :EN                 D=1
+          :TLINE 
+          :POS1               D=1
+          :VAL1               PC3.1.1.114:24
+
+PCD-PAGE 
+"Data logging"
+
+PC3.3.14.5 TEXT (R,1,1,12)
+          :FORM1              12
+          :FORM2              -4
+          :EN                 D=1
+          :TLINE 
+          :POS1               D=1
+          :VAL1               PC3.1.1.114:25
+
+PC3.3.14.6 TEXT (R,1,1,12)
+          :FORM1              12
+          :FORM2              -4
+          :EN                 D=1
+          :TLINE 
+          :POS1               D=1
+          :VAL1               PC3.1.1.114:26
+
+PC3.3.14.9 TEXT (A,6,12,72)
+          :FORM1              0
+          :FORM2              0
+          :EN                 1
+          :TLINE 
+          :POS1               D=1
+          :VAL1               PC3.3.14.1:TLINE
+          :POS2               D=13
+          :VAL2               PC3.3.14.2:TLINE
+          :POS3               D=25
+          :VAL3               PC3.3.14.3:TLINE
+          :POS4               D=37
+          :VAL4               PC3.3.14.4:TLINE
+          :POS5               D=49
+          :VAL5               PC3.3.14.5:TLINE
+          :POS6               D=61
+          :VAL6               PC3.3.14.6:TLINE
+
+PCD-PAGE 
+"Data logging"
+
+PC3.3.15 FUNCM 
+
+PC3.3.15.1 TEXT (R,1,1,12)
+          :FORM1              12
+          :FORM2              -4
+          :EN                 D=1
+          :TLINE 
+          :POS1               D=1
+          :VAL1               PC3.1.1.115:21
+
+PC3.3.15.2 TEXT (R,1,1,12)
+          :FORM1              12
+          :FORM2              -4
+          :EN                 D=1
+          :TLINE 
+          :POS1               D=1
+          :VAL1               PC3.1.1.115:22
+
+PC3.3.15.3 TEXT (R,1,1,12)
+          :FORM1              12
+          :FORM2              -4
+          :EN                 D=1
+          :TLINE 
+          :POS1               D=1
+          :VAL1               PC3.1.1.115:23
+
+PC3.3.15.4 TEXT (R,1,1,12)
+          :FORM1              12
+          :FORM2              -4
+          :EN                 D=1
+          :TLINE 
+          :POS1               D=1
+          :VAL1               PC3.1.1.115:24
+
+PCD-PAGE 
+"Data logging"
+
+PC3.3.15.5 TEXT (R,1,1,12)
+          :FORM1              12
+          :FORM2              -4
+          :EN                 D=1
+          :TLINE 
+          :POS1               D=1
+          :VAL1               PC3.1.1.115:25
+
+PC3.3.15.6 TEXT (R,1,1,12)
+          :FORM1              12
+          :FORM2              -4
+          :EN                 D=1
+          :TLINE 
+          :POS1               D=1
+          :VAL1               PC3.1.1.115:26
+
+PC3.3.15.9 TEXT (A,6,12,72)
+          :FORM1              0
+          :FORM2              0
+          :EN                 1
+          :TLINE 
+          :POS1               D=1
+          :VAL1               PC3.3.15.1:TLINE
+          :POS2               D=13
+          :VAL2               PC3.3.15.2:TLINE
+          :POS3               D=25
+          :VAL3               PC3.3.15.3:TLINE
+          :POS4               D=37
+          :VAL4               PC3.3.15.4:TLINE
+          :POS5               D=49
+          :VAL5               PC3.3.15.5:TLINE
+          :POS6               D=61
+          :VAL6               PC3.3.15.6:TLINE
+
+PCD-PAGE 
+"Data logging"
+
+PC3.3.16 FUNCM 
+
+PC3.3.16.1 TEXT (R,1,1,12)
+          :FORM1              12
+          :FORM2              -4
+          :EN                 D=1
+          :TLINE 
+          :POS1               D=1
+          :VAL1               PC3.1.1.116:21
+
+PC3.3.16.2 TEXT (R,1,1,12)
+          :FORM1              12
+          :FORM2              -4
+          :EN                 D=1
+          :TLINE 
+          :POS1               D=1
+          :VAL1               PC3.1.1.116:22
+
+PC3.3.16.3 TEXT (R,1,1,12)
+          :FORM1              12
+          :FORM2              -4
+          :EN                 D=1
+          :TLINE 
+          :POS1               D=1
+          :VAL1               PC3.1.1.116:23
+
+PC3.3.16.4 TEXT (R,1,1,12)
+          :FORM1              12
+          :FORM2              -4
+          :EN                 D=1
+          :TLINE 
+          :POS1               D=1
+          :VAL1               PC3.1.1.116:24
+
+PCD-PAGE 
+"Data logging"
+
+PC3.3.16.5 TEXT (R,1,1,12)
+          :FORM1              12
+          :FORM2              -4
+          :EN                 D=1
+          :TLINE 
+          :POS1               D=1
+          :VAL1               PC3.1.1.116:25
+
+PC3.3.16.6 TEXT (R,1,1,12)
+          :FORM1              12
+          :FORM2              -4
+          :EN                 D=1
+          :TLINE 
+          :POS1               D=1
+          :VAL1               PC3.1.1.116:26
+
+PC3.3.16.9 TEXT (A,6,12,72)
+          :FORM1              0
+          :FORM2              0
+          :EN                 1
+          :TLINE 
+          :POS1               D=1
+          :VAL1               PC3.3.16.1:TLINE
+          :POS2               D=13
+          :VAL2               PC3.3.16.2:TLINE
+          :POS3               D=25
+          :VAL3               PC3.3.16.3:TLINE
+          :POS4               D=37
+          :VAL4               PC3.3.16.4:TLINE
+          :POS5               D=49
+          :VAL5               PC3.3.16.5:TLINE
+          :POS6               D=61
+          :VAL6               PC3.3.16.6:TLINE
+
+PCD-PAGE 
+"Data logging"
+
+PC3.3.17 FUNCM 
+
+PC3.3.17.1 TEXT (R,1,1,12)
+          :FORM1              12
+          :FORM2              -4
+          :EN                 D=1
+          :TLINE 
+          :POS1               D=1
+          :VAL1               PC3.1.1.117:21
+
+PC3.3.17.2 TEXT (R,1,1,12)
+          :FORM1              12
+          :FORM2              -4
+          :EN                 D=1
+          :TLINE 
+          :POS1               D=1
+          :VAL1               PC3.1.1.117:22
+
+PC3.3.17.3 TEXT (R,1,1,12)
+          :FORM1              12
+          :FORM2              -4
+          :EN                 D=1
+          :TLINE 
+          :POS1               D=1
+          :VAL1               PC3.1.1.117:23
+
+PC3.3.17.4 TEXT (R,1,1,12)
+          :FORM1              12
+          :FORM2              -4
+          :EN                 D=1
+          :TLINE 
+          :POS1               D=1
+          :VAL1               PC3.1.1.117:24
+
+PCD-PAGE 
+"Data logging"
+
+PC3.3.17.5 TEXT (R,1,1,12)
+          :FORM1              12
+          :FORM2              -4
+          :EN                 D=1
+          :TLINE 
+          :POS1               D=1
+          :VAL1               PC3.1.1.117:25
+
+PC3.3.17.6 TEXT (R,1,1,12)
+          :FORM1              12
+          :FORM2              -4
+          :EN                 D=1
+          :TLINE 
+          :POS1               D=1
+          :VAL1               PC3.1.1.117:26
+
+PC3.3.17.9 TEXT (A,6,12,72)
+          :FORM1              0
+          :FORM2              0
+          :EN                 1
+          :TLINE 
+          :POS1               D=1
+          :VAL1               PC3.3.17.1:TLINE
+          :POS2               D=13
+          :VAL2               PC3.3.17.2:TLINE
+          :POS3               D=25
+          :VAL3               PC3.3.17.3:TLINE
+          :POS4               D=37
+          :VAL4               PC3.3.17.4:TLINE
+          :POS5               D=49
+          :VAL5               PC3.3.17.5:TLINE
+          :POS6               D=61
+          :VAL6               PC3.3.17.6:TLINE
+
+PCD-PAGE 
+"Data logging"
+
+PC3.3.18 FUNCM 
+
+PC3.3.18.1 TEXT (R,1,1,12)
+          :FORM1              12
+          :FORM2              -4
+          :EN                 D=1
+          :TLINE 
+          :POS1               D=1
+          :VAL1               PC3.1.1.118:21
+
+PC3.3.18.2 TEXT (R,1,1,12)
+          :FORM1              12
+          :FORM2              -4
+          :EN                 D=1
+          :TLINE 
+          :POS1               D=1
+          :VAL1               PC3.1.1.118:22
+
+PC3.3.18.3 TEXT (R,1,1,12)
+          :FORM1              12
+          :FORM2              -4
+          :EN                 D=1
+          :TLINE 
+          :POS1               D=1
+          :VAL1               PC3.1.1.118:23
+
+PC3.3.18.4 TEXT (R,1,1,12)
+          :FORM1              12
+          :FORM2              -4
+          :EN                 D=1
+          :TLINE 
+          :POS1               D=1
+          :VAL1               PC3.1.1.118:24
+
+PCD-PAGE 
+"Data logging"
+
+PC3.3.18.5 TEXT (R,1,1,12)
+          :FORM1              12
+          :FORM2              -4
+          :EN                 D=1
+          :TLINE 
+          :POS1               D=1
+          :VAL1               PC3.1.1.118:25
+
+PC3.3.18.6 TEXT (R,1,1,12)
+          :FORM1              12
+          :FORM2              -4
+          :EN                 D=1
+          :TLINE 
+          :POS1               D=1
+          :VAL1               PC3.1.1.118:26
+
+PC3.3.18.9 TEXT (A,6,12,72)
+          :FORM1              0
+          :FORM2              0
+          :EN                 1
+          :TLINE 
+          :POS1               D=1
+          :VAL1               PC3.3.18.1:TLINE
+          :POS2               D=13
+          :VAL2               PC3.3.18.2:TLINE
+          :POS3               D=25
+          :VAL3               PC3.3.18.3:TLINE
+          :POS4               D=37
+          :VAL4               PC3.3.18.4:TLINE
+          :POS5               D=49
+          :VAL5               PC3.3.18.5:TLINE
+          :POS6               D=61
+          :VAL6               PC3.3.18.6:TLINE
+
+PCD-PAGE 
+"Data logging"
+
+PC3.3.19 FUNCM 
+
+PC3.3.19.1 TEXT (R,1,1,12)
+          :FORM1              12
+          :FORM2              -4
+          :EN                 D=1
+          :TLINE 
+          :POS1               D=1
+          :VAL1               PC3.1.1.119:21
+
+PC3.3.19.2 TEXT (R,1,1,12)
+          :FORM1              12
+          :FORM2              -4
+          :EN                 D=1
+          :TLINE 
+          :POS1               D=1
+          :VAL1               PC3.1.1.119:22
+
+PC3.3.19.3 TEXT (R,1,1,12)
+          :FORM1              12
+          :FORM2              -4
+          :EN                 D=1
+          :TLINE 
+          :POS1               D=1
+          :VAL1               PC3.1.1.119:23
+
+PC3.3.19.4 TEXT (R,1,1,12)
+          :FORM1              12
+          :FORM2              -4
+          :EN                 D=1
+          :TLINE 
+          :POS1               D=1
+          :VAL1               PC3.1.1.119:24
+
+PCD-PAGE 
+"Data logging"
+
+PC3.3.19.5 TEXT (R,1,1,12)
+          :FORM1              12
+          :FORM2              -4
+          :EN                 D=1
+          :TLINE 
+          :POS1               D=1
+          :VAL1               PC3.1.1.119:25
+
+PC3.3.19.6 TEXT (R,1,1,12)
+          :FORM1              12
+          :FORM2              -4
+          :EN                 D=1
+          :TLINE 
+          :POS1               D=1
+          :VAL1               PC3.1.1.119:26
+
+PC3.3.19.9 TEXT (A,6,12,72)
+          :FORM1              0
+          :FORM2              0
+          :EN                 1
+          :TLINE 
+          :POS1               D=1
+          :VAL1               PC3.3.19.1:TLINE
+          :POS2               D=13
+          :VAL2               PC3.3.19.2:TLINE
+          :POS3               D=25
+          :VAL3               PC3.3.19.3:TLINE
+          :POS4               D=37
+          :VAL4               PC3.3.19.4:TLINE
+          :POS5               D=49
+          :VAL5               PC3.3.19.5:TLINE
+          :POS6               D=61
+          :VAL6               PC3.3.19.6:TLINE
+
+PCD-PAGE 
+"Data logging"
+
+PC3.3.20 FUNCM 
+
+PC3.3.20.1 TEXT (R,1,1,12)
+          :FORM1              12
+          :FORM2              -4
+          :EN                 D=1
+          :TLINE 
+          :POS1               D=1
+          :VAL1               PC3.1.1.120:21
+
+PC3.3.20.2 TEXT (R,1,1,12)
+          :FORM1              12
+          :FORM2              -4
+          :EN                 D=1
+          :TLINE 
+          :POS1               D=1
+          :VAL1               PC3.1.1.120:22
+
+PC3.3.20.3 TEXT (R,1,1,12)
+          :FORM1              12
+          :FORM2              -4
+          :EN                 D=1
+          :TLINE 
+          :POS1               D=1
+          :VAL1               PC3.1.1.120:23
+
+PC3.3.20.4 TEXT (R,1,1,12)
+          :FORM1              12
+          :FORM2              -4
+          :EN                 D=1
+          :TLINE 
+          :POS1               D=1
+          :VAL1               PC3.1.1.120:24
+
+PCD-PAGE 
+"Data logging"
+
+PC3.3.20.5 TEXT (R,1,1,12)
+          :FORM1              12
+          :FORM2              -4
+          :EN                 D=1
+          :TLINE 
+          :POS1               D=1
+          :VAL1               PC3.1.1.120:25
+
+PC3.3.20.6 TEXT (R,1,1,12)
+          :FORM1              12
+          :FORM2              -4
+          :EN                 D=1
+          :TLINE 
+          :POS1               D=1
+          :VAL1               PC3.1.1.120:26
+
+PC3.3.20.9 TEXT (A,6,12,72)
+          :FORM1              0
+          :FORM2              0
+          :EN                 1
+          :TLINE 
+          :POS1               D=1
+          :VAL1               PC3.3.20.1:TLINE
+          :POS2               D=13
+          :VAL2               PC3.3.20.2:TLINE
+          :POS3               D=25
+          :VAL3               PC3.3.20.3:TLINE
+          :POS4               D=37
+          :VAL4               PC3.3.20.4:TLINE
+          :POS5               D=49
+          :VAL5               PC3.3.20.5:TLINE
+          :POS6               D=61
+          :VAL6               PC3.3.20.6:TLINE
+
+PCD-PAGE 
+"Data logging"
+
+PC3.3.21 FUNCM 
+
+PC3.3.21.1 TEXT (R,1,1,12)
+          :FORM1              12
+          :FORM2              -4
+          :EN                 D=1
+          :TLINE 
+          :POS1               D=1
+          :VAL1               PC3.1.1.121:21
+
+PC3.3.21.2 TEXT (R,1,1,12)
+          :FORM1              12
+          :FORM2              -4
+          :EN                 D=1
+          :TLINE 
+          :POS1               D=1
+          :VAL1               PC3.1.1.121:22
+
+PC3.3.21.3 TEXT (R,1,1,12)
+          :FORM1              12
+          :FORM2              -4
+          :EN                 D=1
+          :TLINE 
+          :POS1               D=1
+          :VAL1               PC3.1.1.121:23
+
+PC3.3.21.4 TEXT (R,1,1,12)
+          :FORM1              12
+          :FORM2              -4
+          :EN                 D=1
+          :TLINE 
+          :POS1               D=1
+          :VAL1               PC3.1.1.121:24
+
+PCD-PAGE 
+"Data logging"
+
+PC3.3.21.5 TEXT (R,1,1,12)
+          :FORM1              12
+          :FORM2              -4
+          :EN                 D=1
+          :TLINE 
+          :POS1               D=1
+          :VAL1               PC3.1.1.121:25
+
+PC3.3.21.6 TEXT (R,1,1,12)
+          :FORM1              12
+          :FORM2              -4
+          :EN                 D=1
+          :TLINE 
+          :POS1               D=1
+          :VAL1               PC3.1.1.121:26
+
+PC3.3.21.9 TEXT (A,6,12,72)
+          :FORM1              0
+          :FORM2              0
+          :EN                 1
+          :TLINE 
+          :POS1               D=1
+          :VAL1               PC3.3.21.1:TLINE
+          :POS2               D=13
+          :VAL2               PC3.3.21.2:TLINE
+          :POS3               D=25
+          :VAL3               PC3.3.21.3:TLINE
+          :POS4               D=37
+          :VAL4               PC3.3.21.4:TLINE
+          :POS5               D=49
+          :VAL5               PC3.3.21.5:TLINE
+          :POS6               D=61
+          :VAL6               PC3.3.21.6:TLINE
+
+PCD-PAGE 
+"Data logging"
+
+PC3.3.22 FUNCM 
+
+PC3.3.22.1 TEXT (R,1,1,12)
+          :FORM1              12
+          :FORM2              -4
+          :EN                 D=1
+          :TLINE 
+          :POS1               D=1
+          :VAL1               PC3.1.1.122:21
+
+PC3.3.22.2 TEXT (R,1,1,12)
+          :FORM1              12
+          :FORM2              -4
+          :EN                 D=1
+          :TLINE 
+          :POS1               D=1
+          :VAL1               PC3.1.1.122:22
+
+PC3.3.22.3 TEXT (R,1,1,12)
+          :FORM1              12
+          :FORM2              -4
+          :EN                 D=1
+          :TLINE 
+          :POS1               D=1
+          :VAL1               PC3.1.1.122:23
+
+PC3.3.22.4 TEXT (R,1,1,12)
+          :FORM1              12
+          :FORM2              -4
+          :EN                 D=1
+          :TLINE 
+          :POS1               D=1
+          :VAL1               PC3.1.1.122:24
+
+PCD-PAGE 
+"Data logging"
+
+PC3.3.22.5 TEXT (R,1,1,12)
+          :FORM1              12
+          :FORM2              -4
+          :EN                 D=1
+          :TLINE 
+          :POS1               D=1
+          :VAL1               PC3.1.1.122:25
+
+PC3.3.22.6 TEXT (R,1,1,12)
+          :FORM1              12
+          :FORM2              -4
+          :EN                 D=1
+          :TLINE 
+          :POS1               D=1
+          :VAL1               PC3.1.1.122:26
+
+PC3.3.22.9 TEXT (A,6,12,72)
+          :FORM1              0
+          :FORM2              0
+          :EN                 1
+          :TLINE 
+          :POS1               D=1
+          :VAL1               PC3.3.22.1:TLINE
+          :POS2               D=13
+          :VAL2               PC3.3.22.2:TLINE
+          :POS3               D=25
+          :VAL3               PC3.3.22.3:TLINE
+          :POS4               D=37
+          :VAL4               PC3.3.22.4:TLINE
+          :POS5               D=49
+          :VAL5               PC3.3.22.5:TLINE
+          :POS6               D=61
+          :VAL6               PC3.3.22.6:TLINE
+
+PCD-PAGE 
+"Data logging"
+
+PC3.3.23 FUNCM 
+
+PC3.3.23.1 TEXT (R,1,1,12)
+          :FORM1              12
+          :FORM2              -4
+          :EN                 D=1
+          :TLINE 
+          :POS1               D=1
+          :VAL1               PC3.1.1.123:21
+
+PC3.3.23.2 TEXT (R,1,1,12)
+          :FORM1              12
+          :FORM2              -4
+          :EN                 D=1
+          :TLINE 
+          :POS1               D=1
+          :VAL1               PC3.1.1.123:22
+
+PC3.3.23.3 TEXT (R,1,1,12)
+          :FORM1              12
+          :FORM2              -4
+          :EN                 D=1
+          :TLINE 
+          :POS1               D=1
+          :VAL1               PC3.1.1.123:23
+
+PC3.3.23.4 TEXT (R,1,1,12)
+          :FORM1              12
+          :FORM2              -4
+          :EN                 D=1
+          :TLINE 
+          :POS1               D=1
+          :VAL1               PC3.1.1.123:24
+
+PCD-PAGE 
+"Data logging"
+
+PC3.3.23.5 TEXT (R,1,1,12)
+          :FORM1              12
+          :FORM2              -4
+          :EN                 D=1
+          :TLINE 
+          :POS1               D=1
+          :VAL1               PC3.1.1.123:25
+
+PC3.3.23.6 TEXT (R,1,1,12)
+          :FORM1              12
+          :FORM2              -4
+          :EN                 D=1
+          :TLINE 
+          :POS1               D=1
+          :VAL1               PC3.1.1.123:26
+
+PC3.3.23.9 TEXT (A,6,12,72)
+          :FORM1              0
+          :FORM2              0
+          :EN                 1
+          :TLINE 
+          :POS1               D=1
+          :VAL1               PC3.3.23.1:TLINE
+          :POS2               D=13
+          :VAL2               PC3.3.23.2:TLINE
+          :POS3               D=25
+          :VAL3               PC3.3.23.3:TLINE
+          :POS4               D=37
+          :VAL4               PC3.3.23.4:TLINE
+          :POS5               D=49
+          :VAL5               PC3.3.23.5:TLINE
+          :POS6               D=61
+          :VAL6               PC3.3.23.6:TLINE
+
+PCD-PAGE 
+"Data logging"
+
+PC3.3.24 FUNCM 
+
+PC3.3.24.1 TEXT (R,1,1,12)
+          :FORM1              12
+          :FORM2              -4
+          :EN                 D=1
+          :TLINE 
+          :POS1               D=1
+          :VAL1               PC3.1.1.124:21
+
+PC3.3.24.2 TEXT (R,1,1,12)
+          :FORM1              12
+          :FORM2              -4
+          :EN                 D=1
+          :TLINE 
+          :POS1               D=1
+          :VAL1               PC3.1.1.124:22
+
+PC3.3.24.3 TEXT (R,1,1,12)
+          :FORM1              12
+          :FORM2              -4
+          :EN                 D=1
+          :TLINE 
+          :POS1               D=1
+          :VAL1               PC3.1.1.124:23
+
+PC3.3.24.4 TEXT (R,1,1,12)
+          :FORM1              12
+          :FORM2              -4
+          :EN                 D=1
+          :TLINE 
+          :POS1               D=1
+          :VAL1               PC3.1.1.124:24
+
+PCD-PAGE 
+"Data logging"
+
+PC3.3.24.5 TEXT (R,1,1,12)
+          :FORM1              12
+          :FORM2              -4
+          :EN                 D=1
+          :TLINE 
+          :POS1               D=1
+          :VAL1               PC3.1.1.124:25
+
+PC3.3.24.6 TEXT (R,1,1,12)
+          :FORM1              12
+          :FORM2              -4
+          :EN                 D=1
+          :TLINE 
+          :POS1               D=1
+          :VAL1               PC3.1.1.124:26
+
+PC3.3.24.9 TEXT (A,6,12,72)
+          :FORM1              0
+          :FORM2              0
+          :EN                 1
+          :TLINE 
+          :POS1               D=1
+          :VAL1               PC3.3.24.1:TLINE
+          :POS2               D=13
+          :VAL2               PC3.3.24.2:TLINE
+          :POS3               D=25
+          :VAL3               PC3.3.24.3:TLINE
+          :POS4               D=37
+          :VAL4               PC3.3.24.4:TLINE
+          :POS5               D=49
+          :VAL5               PC3.3.24.5:TLINE
+          :POS6               D=61
+          :VAL6               PC3.3.24.6:TLINE
+
+PCD-PAGE 
+"Data logging"
+
+PC3.3.25 FUNCM 
+
+PC3.3.25.1 TEXT (R,1,1,12)
+          :FORM1              12
+          :FORM2              -4
+          :EN                 D=1
+          :TLINE 
+          :POS1               D=1
+          :VAL1               PC3.1.1.125:21
+
+PC3.3.25.2 TEXT (R,1,1,12)
+          :FORM1              12
+          :FORM2              -4
+          :EN                 D=1
+          :TLINE 
+          :POS1               D=1
+          :VAL1               PC3.1.1.125:22
+
+PC3.3.25.3 TEXT (R,1,1,12)
+          :FORM1              12
+          :FORM2              -4
+          :EN                 D=1
+          :TLINE 
+          :POS1               D=1
+          :VAL1               PC3.1.1.125:23
+
+PC3.3.25.4 TEXT (R,1,1,12)
+          :FORM1              12
+          :FORM2              -4
+          :EN                 D=1
+          :TLINE 
+          :POS1               D=1
+          :VAL1               PC3.1.1.125:24
+
+PCD-PAGE 
+"Data logging"
+
+PC3.3.25.5 TEXT (R,1,1,12)
+          :FORM1              12
+          :FORM2              -4
+          :EN                 D=1
+          :TLINE 
+          :POS1               D=1
+          :VAL1               PC3.1.1.125:25
+
+PC3.3.25.6 TEXT (R,1,1,12)
+          :FORM1              12
+          :FORM2              -4
+          :EN                 D=1
+          :TLINE 
+          :POS1               D=1
+          :VAL1               PC3.1.1.125:26
+
+PC3.3.25.9 TEXT (A,6,12,72)
+          :FORM1              0
+          :FORM2              0
+          :EN                 1
+          :TLINE 
+          :POS1               D=1
+          :VAL1               PC3.3.25.1:TLINE
+          :POS2               D=13
+          :VAL2               PC3.3.25.2:TLINE
+          :POS3               D=25
+          :VAL3               PC3.3.25.3:TLINE
+          :POS4               D=37
+          :VAL4               PC3.3.25.4:TLINE
+          :POS5               D=49
+          :VAL5               PC3.3.25.5:TLINE
+          :POS6               D=61
+          :VAL6               PC3.3.25.6:TLINE
+
+PCD-PAGE 
+"Data logging"
+
+PC3.3.26 FUNCM 
+
+PC3.3.26.1 TEXT (R,1,1,12)
+          :FORM1              12
+          :FORM2              -4
+          :EN                 D=1
+          :TLINE 
+          :POS1               D=1
+          :VAL1               PC3.1.1.126:21
+
+PC3.3.26.2 TEXT (R,1,1,12)
+          :FORM1              12
+          :FORM2              -4
+          :EN                 D=1
+          :TLINE 
+          :POS1               D=1
+          :VAL1               PC3.1.1.126:22
+
+PC3.3.26.3 TEXT (R,1,1,12)
+          :FORM1              12
+          :FORM2              -4
+          :EN                 D=1
+          :TLINE 
+          :POS1               D=1
+          :VAL1               PC3.1.1.126:23
+
+PC3.3.26.4 TEXT (R,1,1,12)
+          :FORM1              12
+          :FORM2              -4
+          :EN                 D=1
+          :TLINE 
+          :POS1               D=1
+          :VAL1               PC3.1.1.126:24
+
+PCD-PAGE 
+"Data logging"
+
+PC3.3.26.5 TEXT (R,1,1,12)
+          :FORM1              12
+          :FORM2              -4
+          :EN                 D=1
+          :TLINE 
+          :POS1               D=1
+          :VAL1               PC3.1.1.126:25
+
+PC3.3.26.6 TEXT (R,1,1,12)
+          :FORM1              12
+          :FORM2              -4
+          :EN                 D=1
+          :TLINE 
+          :POS1               D=1
+          :VAL1               PC3.1.1.126:26
+
+PC3.3.26.9 TEXT (A,6,12,72)
+          :FORM1              0
+          :FORM2              0
+          :EN                 1
+          :TLINE 
+          :POS1               D=1
+          :VAL1               PC3.3.26.1:TLINE
+          :POS2               D=13
+          :VAL2               PC3.3.26.2:TLINE
+          :POS3               D=25
+          :VAL3               PC3.3.26.3:TLINE
+          :POS4               D=37
+          :VAL4               PC3.3.26.4:TLINE
+          :POS5               D=49
+          :VAL5               PC3.3.26.5:TLINE
+          :POS6               D=61
+          :VAL6               PC3.3.26.6:TLINE
+
+PCD-PAGE 
+"Data logging"
+
+PC3.3.27 FUNCM 
+
+PC3.3.27.1 TEXT (R,1,1,12)
+          :FORM1              12
+          :FORM2              -4
+          :EN                 D=1
+          :TLINE 
+          :POS1               D=1
+          :VAL1               PC3.1.1.127:21
+
+PC3.3.27.2 TEXT (R,1,1,12)
+          :FORM1              12
+          :FORM2              -4
+          :EN                 D=1
+          :TLINE 
+          :POS1               D=1
+          :VAL1               PC3.1.1.127:22
+
+PC3.3.27.3 TEXT (R,1,1,12)
+          :FORM1              12
+          :FORM2              -4
+          :EN                 D=1
+          :TLINE 
+          :POS1               D=1
+          :VAL1               PC3.1.1.127:23
+
+PC3.3.27.4 TEXT (R,1,1,12)
+          :FORM1              12
+          :FORM2              -4
+          :EN                 D=1
+          :TLINE 
+          :POS1               D=1
+          :VAL1               PC3.1.1.127:24
+
+PCD-PAGE 
+"Data logging"
+
+PC3.3.27.5 TEXT (R,1,1,12)
+          :FORM1              12
+          :FORM2              -4
+          :EN                 D=1
+          :TLINE 
+          :POS1               D=1
+          :VAL1               PC3.1.1.127:25
+
+PC3.3.27.6 TEXT (R,1,1,12)
+          :FORM1              12
+          :FORM2              -4
+          :EN                 D=1
+          :TLINE 
+          :POS1               D=1
+          :VAL1               PC3.1.1.127:26
+
+PC3.3.27.9 TEXT (A,6,12,72)
+          :FORM1              0
+          :FORM2              0
+          :EN                 1
+          :TLINE 
+          :POS1               D=1
+          :VAL1               PC3.3.27.1:TLINE
+          :POS2               D=13
+          :VAL2               PC3.3.27.2:TLINE
+          :POS3               D=25
+          :VAL3               PC3.3.27.3:TLINE
+          :POS4               D=37
+          :VAL4               PC3.3.27.4:TLINE
+          :POS5               D=49
+          :VAL5               PC3.3.27.5:TLINE
+          :POS6               D=61
+          :VAL6               PC3.3.27.6:TLINE
+
+PCD-PAGE 
+"Data logging"
+
+PC3.3.28 FUNCM 
+
+PC3.3.28.1 TEXT (R,1,1,12)
+          :FORM1              12
+          :FORM2              -4
+          :EN                 D=1
+          :TLINE 
+          :POS1               D=1
+          :VAL1               PC3.1.1.128:21
+
+PC3.3.28.2 TEXT (R,1,1,12)
+          :FORM1              12
+          :FORM2              -4
+          :EN                 D=1
+          :TLINE 
+          :POS1               D=1
+          :VAL1               PC3.1.1.128:22
+
+PC3.3.28.3 TEXT (R,1,1,12)
+          :FORM1              12
+          :FORM2              -4
+          :EN                 D=1
+          :TLINE 
+          :POS1               D=1
+          :VAL1               PC3.1.1.128:23
+
+PC3.3.28.4 TEXT (R,1,1,12)
+          :FORM1              12
+          :FORM2              -4
+          :EN                 D=1
+          :TLINE 
+          :POS1               D=1
+          :VAL1               PC3.1.1.128:24
+
+PCD-PAGE 
+"Data logging"
+
+PC3.3.28.5 TEXT (R,1,1,12)
+          :FORM1              12
+          :FORM2              -4
+          :EN                 D=1
+          :TLINE 
+          :POS1               D=1
+          :VAL1               PC3.1.1.128:25
+
+PC3.3.28.6 TEXT (R,1,1,12)
+          :FORM1              12
+          :FORM2              -4
+          :EN                 D=1
+          :TLINE 
+          :POS1               D=1
+          :VAL1               PC3.1.1.128:26
+
+PC3.3.28.9 TEXT (A,6,12,72)
+          :FORM1              0
+          :FORM2              0
+          :EN                 1
+          :TLINE 
+          :POS1               D=1
+          :VAL1               PC3.3.28.1:TLINE
+          :POS2               D=13
+          :VAL2               PC3.3.28.2:TLINE
+          :POS3               D=25
+          :VAL3               PC3.3.28.3:TLINE
+          :POS4               D=37
+          :VAL4               PC3.3.28.4:TLINE
+          :POS5               D=49
+          :VAL5               PC3.3.28.5:TLINE
+          :POS6               D=61
+          :VAL6               PC3.3.28.6:TLINE
+
+PCD-PAGE 
+"Data logging"
+
+PC3.3.29 FUNCM 
+
+PC3.3.29.1 TEXT (R,1,1,12)
+          :FORM1              12
+          :FORM2              -4
+          :EN                 D=1
+          :TLINE 
+          :POS1               D=1
+          :VAL1               PC3.1.1.129:21
+
+PC3.3.29.2 TEXT (R,1,1,12)
+          :FORM1              12
+          :FORM2              -4
+          :EN                 D=1
+          :TLINE 
+          :POS1               D=1
+          :VAL1               PC3.1.1.129:22
+
+PC3.3.29.3 TEXT (R,1,1,12)
+          :FORM1              12
+          :FORM2              -4
+          :EN                 D=1
+          :TLINE 
+          :POS1               D=1
+          :VAL1               PC3.1.1.129:23
+
+PC3.3.29.4 TEXT (R,1,1,12)
+          :FORM1              12
+          :FORM2              -4
+          :EN                 D=1
+          :TLINE 
+          :POS1               D=1
+          :VAL1               PC3.1.1.129:24
+
+PCD-PAGE 
+"Data logging"
+
+PC3.3.29.5 TEXT (R,1,1,12)
+          :FORM1              12
+          :FORM2              -4
+          :EN                 D=1
+          :TLINE 
+          :POS1               D=1
+          :VAL1               PC3.1.1.129:25
+
+PC3.3.29.6 TEXT (R,1,1,12)
+          :FORM1              12
+          :FORM2              -4
+          :EN                 D=1
+          :TLINE 
+          :POS1               D=1
+          :VAL1               PC3.1.1.129:26
+
+PC3.3.29.9 TEXT (A,6,12,72)
+          :FORM1              0
+          :FORM2              0
+          :EN                 1
+          :TLINE 
+          :POS1               D=1
+          :VAL1               PC3.3.29.1:TLINE
+          :POS2               D=13
+          :VAL2               PC3.3.29.2:TLINE
+          :POS3               D=25
+          :VAL3               PC3.3.29.3:TLINE
+          :POS4               D=37
+          :VAL4               PC3.3.29.4:TLINE
+          :POS5               D=49
+          :VAL5               PC3.3.29.5:TLINE
+          :POS6               D=61
+          :VAL6               PC3.3.29.6:TLINE
+
+PCD-PAGE 
+"Data logging"
+
+PC3.3.30 FUNCM 
+
+PC3.3.30.1 TEXT (R,1,1,12)
+          :FORM1              12
+          :FORM2              -4
+          :EN                 D=1
+          :TLINE 
+          :POS1               D=1
+          :VAL1               PC3.1.1.130:21
+
+PC3.3.30.2 TEXT (R,1,1,12)
+          :FORM1              12
+          :FORM2              -4
+          :EN                 D=1
+          :TLINE 
+          :POS1               D=1
+          :VAL1               PC3.1.1.130:22
+
+PC3.3.30.3 TEXT (R,1,1,12)
+          :FORM1              12
+          :FORM2              -4
+          :EN                 D=1
+          :TLINE 
+          :POS1               D=1
+          :VAL1               PC3.1.1.130:23
+
+PC3.3.30.4 TEXT (R,1,1,12)
+          :FORM1              12
+          :FORM2              -4
+          :EN                 D=1
+          :TLINE 
+          :POS1               D=1
+          :VAL1               PC3.1.1.130:24
+
+PCD-PAGE 
+"Data logging"
+
+PC3.3.30.5 TEXT (R,1,1,12)
+          :FORM1              12
+          :FORM2              -4
+          :EN                 D=1
+          :TLINE 
+          :POS1               D=1
+          :VAL1               PC3.1.1.130:25
+
+PC3.3.30.6 TEXT (R,1,1,12)
+          :FORM1              12
+          :FORM2              -4
+          :EN                 D=1
+          :TLINE 
+          :POS1               D=1
+          :VAL1               PC3.1.1.130:26
+
+PC3.3.30.9 TEXT (A,6,12,72)
+          :FORM1              0
+          :FORM2              0
+          :EN                 1
+          :TLINE 
+          :POS1               D=1
+          :VAL1               PC3.3.30.1:TLINE
+          :POS2               D=13
+          :VAL2               PC3.3.30.2:TLINE
+          :POS3               D=25
+          :VAL3               PC3.3.30.3:TLINE
+          :POS4               D=37
+          :VAL4               PC3.3.30.4:TLINE
+          :POS5               D=49
+          :VAL5               PC3.3.30.5:TLINE
+          :POS6               D=61
+          :VAL6               PC3.3.30.6:TLINE
+
+PCD-PAGE 
+"Setup data sampling flag"
+
+PC3.3.95 FUNCM 
+
+PC3.3.95.10 OSC-B 
+          :EN                 PC3.5.1.5:20
+          :TP                 D=1
+          :TC                 PC3.1.1.2:O
+          :O 
+
+PC3.3.95.12 AND (2)
+          :1                  D=1
+          :2       -          D=0
+          :20 
+
+PC3.3.95.13 OR (2)
+          :1                  PC3.3.95.12:20
+          :2                  =APMR.RPT-BLK1
+          :20 
+
+PC3.3.95.11 AND (2)
+          :1                  PC3.3.95.13:20
+          :2                  PC3.3.95.10:O
+          :20                                     N=LOG_DATA_REQUEST
+
+PC3.3.95.18 MUL (R,2)
+          :1                  =APMR.CONFIG1:REAL
+          :2                  D=1.800000E+02
+          :20 
+
+PC3.3.95.19 MAX (R,2)
+          :DEADB              CD=0.000000
+          :IA1                PC3.3.95.18:20
+          :IA2                D=1.000000E+00
+          :A 
+          :O 
+
+PC3.3.95.26 DIV-MR (3,2)
+          :1                  D=1.000000E+00
+          :2                  D=6.500000E+03
+          :3                  D=6.000000E+01
+          :21                 D=1.000000E+00
+          :22                 PC3.3.95.19:O
+          :40 
+
+PC3.3.95.27 MIN (R,2)
+          :DEADB              CD=0.000000
+          :IA1                PC3.3.95.26:40
+          :IA2                D=3.600000E+03
+          :A 
+          :O 
+
+PC3.3.95.20 CONV (R,T)
+          :I                  PC3.3.95.27:O
+          :O 
+          :ERR 
+
+PC3.3.95.21 OSC-B 
+          :EN                 PC3.5.1.5:20
+          :TP                 D=1
+          :TC                 PC3.3.95.20:O
+          :O 
+
+PC3.3.95.24 AND (2)
+          :1                  PC3.3.95.21:O
+          :2                  PC3.3.95.25:21
+          :20 
+
+PC3.3.95.28 MONO 
+          :RTG                1
+          :I                  PC3.3.95.24:20
+          :TP                 PC3.3.95.20:O
+          :O 
+          :TE 
+
+PC3.3.95.22 TRIGG 
+          :1                  PC3.3.95.24:20
+          :5 
+
+PC3.3.95.23 SR-AO (2,2)
+          :1                  PC3.3.95.22:5
+          :2                  1
+          :11                 PC3.5.1.20:O
+          :12                 0
+          :20 
+
+PC3.3.95.25 MOVE (B,1)
+          :1                  PC3.5.1.5:20
+          :21 
+
+PCD-PAGE 
+"Print data block"
+
+PC3.4 SEQ (500,5,0,0,0)
+          :START              0
+          :STARTC             PC3.3.95.11:20
+          :R                  PC3.5.1.17:20
+          :RUN 
+          :MODP 
+          :POS 
+          :END                                    N=SEQ_END
+
+PCD-PAGE 
+"Print data block"
+
+PC3.4.1 STEP (1,0,0,0,0,0,0,0)
+          :COND               1
+          :RUN 
+          :ALEN               1
+          :ALTD               D=1:0
+          :AL 
+          :ALTE 
+
+PC3.4.1.1 PRINT (15,1,72)
+          :FIRST              1
+          :LAST               0
+          :FF                 0
+          :NODE               =APMR.PNODE1
+          :NETW               =APMR.PNETW1
+          :PRID               =APMR.PPRID1
+          :ACT                1
+          :BUSY 
+          :REPNO 
+          :ERR 
+          :TEXT1              PC3.3.1.9:TLINE
+          :TEXT2              PC3.3.2.9:TLINE
+          :TEXT3              PC3.3.3.9:TLINE
+          :TEXT4              PC3.3.4.9:TLINE
+          :TEXT5              PC3.3.5.9:TLINE
+          :TEXT6              PC3.3.6.9:TLINE
+          :TEXT7              PC3.3.7.9:TLINE
+          :TEXT8              PC3.3.8.9:TLINE
+          :TEXT9              PC3.3.9.9:TLINE
+          :TEXT10             PC3.3.10.9:TLINE
+          :TEXT11             PC3.3.11.9:TLINE
+          :TEXT12             PC3.3.12.9:TLINE
+          :TEXT13             PC3.3.13.9:TLINE
+          :TEXT14             PC3.3.14.9:TLINE
+          :TEXT15             PC3.3.15.9:TLINE
+
+PCD-PAGE 
+"Print data block"
+
+PC3.4.2 STEP (1,1,0,0,0,0,0,0)
+          :COND    -          PC3.4.1.1:BUSY
+          :RUN 
+          :ALEN               1
+          :ALTD               D=1:0
+          :AL 
+          :ALTE 
+          :JCOND1  -          PC3.3.95.23:20
+          :JPOS1              D=0
+
+PC3.4.2.1 PRINT (15,1,72)
+          :FIRST              0
+          :LAST               0
+          :FF                 0
+          :NODE               =APMR.PNODE1
+          :NETW               =APMR.PNETW1
+          :PRID               =APMR.PPRID1
+          :ACT                1
+          :BUSY 
+          :REPNO 
+          :ERR 
+          :TEXT1              PC3.3.16.9:TLINE
+          :TEXT2              PC3.3.17.9:TLINE
+          :TEXT3              PC3.3.18.9:TLINE
+          :TEXT4              PC3.3.19.9:TLINE
+          :TEXT5              PC3.3.20.9:TLINE
+          :TEXT6              PC3.3.21.9:TLINE
+          :TEXT7              PC3.3.22.9:TLINE
+          :TEXT8              PC3.3.23.9:TLINE
+          :TEXT9              PC3.3.24.9:TLINE
+          :TEXT10             PC3.3.25.9:TLINE
+          :TEXT11             PC3.3.26.9:TLINE
+          :TEXT12             PC3.3.27.9:TLINE
+          :TEXT13             PC3.3.28.9:TLINE
+          :TEXT14             PC3.3.29.9:TLINE
+          :TEXT15             PC3.3.30.9:TLINE
+
+PC3.4.2.2 AND (2)
+          :1       -          PC3.3.95.23:20
+          :2                  1
+          :20                                     N=SEQ_RESET_1
+
+PCD-PAGE 
+"File break step run to prevent SIGNAL BREAK"
+
+PC3.4.10 STEP (1,1,0,0,0,0,0,0)
+          :COND               1
+          :RUN                                    N=BREAK_RUN
+          :ALEN               1
+          :ALTD               D=1:0
+          :AL 
+          :ALTE 
+          :JCOND1             0
+          :JPOS1              D=0
+
+PC3.4.10.1 PRINT (1,1,72)
+          :FIRST              0
+          :LAST               1
+          :FF                 0
+          :NODE               =APMR.PNODE1
+          :NETW               =APMR.PNETW1
+          :PRID               =APMR.PPRID1
+          :ACT                1
+          :BUSY 
+          :REPNO 
+          :ERR 
+          :TEXT1              D='PMR_BREAK'
+
+PC3.4.10.2 AND (2)
+          :1                  PC3.4.10:RUN
+          :2                  1
+          :20                                     N=SEQ_RESET_2
+
+PCD-PAGE 
+"Event-based logging and time-based logging"
+
+PC3.5 CONTRM (500,6,0)
+          :ON                 D=1
+          :SINGLE             D=0
+          :R                  D=0
+          :RUN 
+          :MODP 
+
+PC3.5.1 FUNCM 
+
+PC3.5.1.21 OR (2)
+          :1                  D=0
+          :2                  D=0
+          :20 
+
+PC3.5.1.22 TOFF 
+          :I                  PC3.5.1.21:20
+          :TD                 D=15:0
+          :O 
+          :TE 
+
+PC3.5.1.23 MONO 
+          :RTG                0
+          :I                  PC3.5.1.21:20
+          :TP                 D=1:0:0
+          :O 
+          :TE 
+
+PC3.5.1.24 AND (4)
+          :1                  PC3.5.1.22:O
+          :2                  PC3.5.1.23:O
+          :3       -          =APMR.CONFIG1:BOOLEAN
+          :4                  =APMR.ED-ENBL1
+          :20 
+
+PC3.5.1.32 CONV (R,T)
+          :I                  =APMR.TD-STR1
+          :O 
+          :ERR 
+
+PC3.5.1.31 ADD (R,2)
+          :1                  =APMR.TD-STR1
+          :2                  D=8.000000E+00
+          :20 
+
+PC3.5.1.33 CONV (R,T)
+          :I                  PC3.5.1.31:20
+          :O 
+          :ERR 
+
+PC3.5.1.15 TIMER (1)
+          :ERR 
+          :YEAR1              D=0
+          :WEEK1              D=0
+          :DAY1               D=0
+          :TON1               PC3.5.1.32:O
+          :TOFF1              PC3.5.1.33:O
+          :O1 
+
+PC3.5.1.34 CONV (R,T)
+          :I                  =APMR.TD-LEN1
+          :O 
+          :ERR 
+
+PC3.5.1.35 TOFF 
+          :I                  PC3.5.1.15:O1
+          :TD                 PC3.5.1.34:O
+          :O 
+          :TE 
+
+PC3.5.1.14 AND (3)
+          :1                  PC3.5.1.35:O
+          :2       -          =APMR.CONFIG1:BOOLEAN
+          :3                  =APMR.TD-ENBL1
+          :20 
+
+PCD-PAGE 
+"Grade change-based logging"
+
+PC3.5.1.1 OR (2)
+          :1                  D=0
+          :2                  D=0
+          :20 
+
+PC3.5.1.2 TOFF 
+          :I                  PC3.5.1.1:20
+          :TD                 D=45:0
+          :O 
+          :TE 
+
+PC3.5.1.3 MONO 
+          :RTG                0
+          :I                  PC3.5.1.1:20
+          :TP                 D=1:30:0
+          :O 
+          :TE 
+
+PC3.5.1.4 AND (4)
+          :1                  PC3.5.1.2:O
+          :2                  PC3.5.1.3:O
+          :3       -          =APMR.CONFIG1:BOOLEAN
+          :4                  =APMR.GD-ENBL1
+          :20 
+
+PC3.5.1.6 MONO 
+          :RTG                0
+          :I       -          PC3.5.1.4:20
+          :TP                 D=10
+          :O 
+          :TE 
+
+PC3.5.1.7 INV 
+          :1                  PC3.5.1.6:O
+          :5                  =APMR.GD-LOG1:MAN
+
+PC3.5.1.8 SW-C (B,1)
+          :ACT                PC3.5.1.6:O
+          :11                 0
+          :12                 =APMR.GD-LOG1
+          :13                 =APMR.GD-LOG1
+
+PC3.5.1.5 OR (7)
+          :1                  PC3.5.1.24:20
+          :2                  =APMR.CONFIG1:BOOLEAN
+          :3                  =APMR.GD-LOG1
+          :4                  PC3.5.1.4:20
+          :5                  PC3.5.1.14:20
+          :6                  0
+          :7                  0
+          :20                                     N=LOGGING_ACTIVE
+
+PCD-PAGE 
+"PMR activation and printing of last data line"
+
+PC3.5.1.13 MONO 
+          :RTG                0
+          :I       -          PC3.5.1.12:O
+          :TP                 D=1
+          :O                                      N=PMR_RESET
+          :TE 
+
+PC3.5.1.12 TOFF 
+          :I                  PC3.5.1.5:20
+          :TD                 D=8
+          :O                  =APMR.STATUS1:CALC_VAL,
+                                                  N=PMR_ACTIVE
+          :TE 
+
+PC3.5.1.9 TOFF 
+          :I                  PC3.5.1.5:20
+          :TD                 D=16
+          :O 
+          :TE 
+
+PC3.5.1.10 TRIGG 
+          :1       -          PC3.5.1.9:O
+          :5 
+
+PC3.5.1.18 TRIGG 
+          :1                  PC3.5:RUN
+          :5 
+
+PC3.5.1.19 AND (2)
+          :1                  PC3.5.1.10:5
+          :2       -          PC3.5.1.18:5
+          :20 
+
+PC3.5.1.11 PRINT (1,1,72)
+          :FIRST              1
+          :LAST               1
+          :FF                 0
+          :NODE               =APMR.PNODE1
+          :NETW               =APMR.PNETW1
+          :PRID               =APMR.PPRID1
+          :ACT                PC3.5.1.19:20
+          :BUSY 
+          :REPNO 
+          :ERR 
+          :TEXT1              D='PMR_END'
+
+PC3.5.1.17 OR (3)
+          :1                  PC3.4.2.2:20
+          :2                  PC3.4.10.2:20
+          :3                  PC3.5.1.13:O
+          :20                                     N=RESET_SEQ
+
+PC3.5.1.20 MONO 
+          :RTG                0
+          :I                  PC3.4.10:RUN
+          :TP                 D=1
+          :O                                      N=BREAK_RUN_MONO
+          :TE 
+
+END PC3

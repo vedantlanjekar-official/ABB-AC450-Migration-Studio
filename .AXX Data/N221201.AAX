@@ -1,0 +1,519 @@
+BEGIN PC12
+
+HEADER
+     IEC_BasedOn    PM2
+     IEC_Prepared   MKinsler
+     IEC_Approved   MKinsler
+     IEC_Title2     PM2\Node22
+     IEC_Title3     Basis Weight Control
+     IEC_Project1   Carter Holt Harvey Tissue
+     IEC_Project2   Kawerau Mill
+     IEC_Project3   PM2\Control System Upgrade
+     IEC_RespDept   NZABB\IAD
+     IEC_RevInd     1
+     IEC_DocNo      PM2-N22-PC12
+     IEC_Language   E
+
+PCD-PAGE    1
+"Thinstock System: Input Processing"
+
+PC12 PCPGM (40,2)
+          :ON                 1
+          :R                  0
+          :RUN 
+
+PC12.1 CONTRM (250,1,0)
+          :ON                 1
+          :SINGLE             0
+          :R                  0
+          :RUN 
+          :MODP 
+
+PC12.1.1 FUNCM 
+
+PC12.1.1.1 MOVE (B,10)
+          :1                  =122T124A.B1:VALUE3
+          :2                  =122T124A.B1:VALUE4
+          :3                  =122F124A.B1:VALUE13
+          :4                  =122F124A.B1:VALUE14
+          :5                  =122F124A.B1:VALUE15
+          :6                  =122T124A.B2
+          :7                  =122T124A.B1:VALUE5
+          :8                  =122T124A.B1:VALUE6
+          :9                  =122T124A.B1:VALUE7
+          :10                 0
+          :21                                     N=(82M130_RUN)
+          :22                                     N=(82M131_RUN)
+          :23                                     N=(82M051_RUN)
+          :24                                     N=(82M068_RUN)
+          :25                                     N=(82M070_RUN)
+          :26                                     N=Fire_ESD
+          :27                                     N=(82M130_RDY)
+          :28                                     N=(82M131_RDY)
+          :29                                     N=(82M130_ZS)
+          :30 
+
+PC12.1.1.2 MOVE (B,10)
+          :1                  =122F124A.B1:VALUE9
+          :2                  =122F124A.B1:VALUE10
+          :3                  D=0
+          :4                  D=0
+          :5                  D=0
+          :6                  D=0
+          :7                  D=0
+          :8                  D=0
+          :9                  D=0
+          :10                 D=0
+          :21                                     N=(82M064_RUN)
+          :22                                     N=(82M065_RUN)
+          :23 
+          :24 
+          :25 
+          :26 
+          :27 
+          :28 
+          :29 
+          :30 
+
+PC12.1.1.9 TRIGG 
+          :1                  =82FIC480.STF
+          :5 
+
+PC12.1.1.10 TRIGG 
+          :1       -          =82FIC480.STF
+          :5 
+
+PC12.1.1.11 TRIGG 
+          :1                  =82FIC480.FWD
+          :5 
+
+PC12.1.1.13 AND (3)
+          :1                  PC12.1.1.11:5
+          :2                  PC12.1.2.4:20
+          :3                  1
+          :20 
+
+PC12.1.1.15 AND (3)
+          :1                  PC12.1.1.13:20
+          :2                  PC12.1.2.10:13
+          :3                  1
+          :20 
+
+PC12.1.1.17 SR-OO (3,3)
+          :1                  PC12.1.1.13:20
+          :2                  0
+          :3                  PC12.1.1.9:5
+          :11                 PC12.1.1.15:20
+          :12      -          PC12.1.2.4:20
+          :13                 PC12.1.1.10:5
+          :20                                     N=(82FIC480_FWD)
+
+PCD-PAGE    2
+"Stock Preparation : Stock Forward"
+
+PC12.1.2 FUNCM 
+
+PC12.1.2.1 OR-A (0,3,3,3,0,0)
+          :11                 PC12.1.1.1:29
+          :12                 PC12.1.1.1:21
+          :13                 PC12.1.1.1:22
+          :21      -          PC12.1.1.1:29
+          :22                 PC12.1.1.1:21
+          :23      -          PC12.1.1.1:28
+          :31      -          PC12.1.1.1:29
+          :32      -          PC12.1.1.1:27
+          :33                 PC12.1.1.1:22
+          :60 
+
+PC12.1.2.2 AND-O (6,3,3,0,0,0)
+          :1                  1
+          :2                  PC12.1.1.2:21
+          :3                  PC12.1.1.2:22
+          :4                  PC12.1.1.1:23
+          :5                  =82M135.TANDM
+          :6                  =82M135.RUN
+          :11                 =82PIC750.OK
+          :12                 0
+          :13                 0
+          :21                 0
+          :22                 PC12.1.1.1:24
+          :23                 PC12.1.1.1:25
+          :60 
+
+PC12.1.2.3 OR (2)
+          :1                  PC12.1.2.2:60
+          :2                  0
+          :20 
+
+PC12.1.2.4 AND (5)
+          :1                  PC12.1.2.1:60
+          :2                  PC12.1.2.3:20
+          :3                  PC12.1.1.1:26
+          :4                  1
+          :5                  1
+          :20                                     N=(82FIC480_SFHealthy)
+
+PC12.1.2.5 OR-A (0,3,3,0,0,0)
+          :11                 PC12.1.2.4:20
+          :12                 =82FIC480.STF:SELECTED
+          :13                 1
+          :21                 PC12.1.2.10:13
+          :22                 =82FIC480.STF:SELECTED
+          :23                 1
+          :60                 =82FIC480.STF:BLOCKED
+
+PCD-PAGE    3
+"Stock Preparation : Stock Forward"
+
+PC12.1.2.6 TRIGG 
+          :1                  1
+          :5 
+
+PC12.1.2.7 TRIGG 
+          :1       -          PC12.1.2.4:20
+          :5 
+
+PC12.1.2.8 OR (3)
+          :1                  PC12.1.2.6:5
+          :2                  PC12.1.2.7:5
+          :3                  0
+          :20 
+
+PC12.1.2.9 SW-C (B,1)
+          :ACT                PC12.1.2.8:20
+          :11                 0
+          :12                 PC12.1.1.17:20
+          :13 
+
+PC12.1.2.10 SW-C (B,1)
+          :ACT                0
+          :11                 1
+          :12                 PC12.1.2.9:13
+          :13                 =82FIC480.SFWD,
+                              =822F480.B1S:VALUE5,
+                              =82FIC480.STF:CALC_VAL,
+                              =122T124A.B2:VALUE10,
+                              =122T141A.B5,
+                                                  N=(82FIC480_StockFwd)
+
+PC12.1.2.11 OR-A (0,2,2,0,0,0)
+          :11                 PC12.1.2.10:13
+          :12                 PC12.1.2.4:20
+          :21      -          PC12.1.2.10:13
+          :22      -          PC12.1.2.4:20
+          :60                 =82FIC480.STF:NORM_POS
+
+PC12.1.2.12 XOR 
+          :1                  PC12.1.2.11:60
+          :2                  PC12.1.2.13:21
+          :5                  =82FIC480.STF:AL_P_BLK
+
+PC12.1.2.13 MOVE (B,1)
+          :1                  PC12.1.2.11:60
+          :21 
+
+PC12.1.2.20 OSC-B 
+          :EN                 1
+          :TP                 D=1
+          :TC                 D=3
+          :O 
+
+PC12.1.2.22 AND (3)
+          :1                  PC12.1.2.4:20
+          :2                  PC12.1.2.20:O
+          :3                  0
+          :20 
+
+PC12.1.2.24 OR (3)
+          :1                  PC12.1.2.10:13
+          :2                  PC12.1.2.22:20
+          :3                  0
+          :20                 =82FIC480.VIL1,
+                              =82FIC480.VIL2
+
+PCD-PAGE    4
+"Basis Weight: Input Processing"
+
+PC12.31 CONTRM (1000,5,0)
+          :ON                 1
+          :SINGLE             0
+          :R                  0
+          :RUN 
+          :MODP 
+
+PC12.31.1 FUNCM 
+
+PC12.31.1.1 MOVE (B,6)
+          :1                  =821F480.B1R
+          :2                  0
+          :3                  0
+          :4                  0
+          :5                  0
+          :6                  0
+          :21                                     N=(82FIC480_1190SeqE1)
+          :22 
+          :23 
+          :24 
+          :25 
+          :26 
+
+PC12.31.1.2 MOVE (R,8)
+          :1                  =821F480.R1R
+          :2                  =82KIA478
+          :3                  =82KIA478:RANGEMAX
+          :4                  =82KIA478:RANGEMIN
+          :5                  D=0.000000
+          :6                  D=0.000000
+          :7                  D=0.000000
+          :8                  D=0.000000
+          :21                                     N=(82FIC480_1190E1Ref)
+          :22                 =822K478.R5S
+          :23                 =822K478.R6S
+          :24                 =822K478.R7S
+          :25 
+          :26 
+          :27 
+          :28 
+
+PCD-PAGE    5
+"82FIC480: Input Processing/B34"
+
+PC12.31.11 FUNCM 
+
+PC12.31.11.1 SUB (R)
+          :1                  =82FIC480.MV:RANGEMAX
+          :2                  =82FIC480.MV:RANGEMIN
+          :20 
+
+PC12.31.11.2 MUL (R,2)
+          :1                  PC12.31.11.1:20
+          :2                  D=1.000000E-02
+          :20 
+
+PC12.31.11.3 COMP-R (2,2)
+          :I                  =82FIC480.MV
+          :HHYS               PC12.31.11.2:20
+          :H1                 D=2.400000E+03
+          :H2                 D=2.700000E+03
+          :I<H1 
+          :I>=H1              =122T124A.B2:VALUE5,
+                                                  N=(82FIC480_H1)
+          :I>=H2              =122T124A.B2:VALUE4,
+                                                  N=(82FIC480_H2)
+          :LHYS               PC12.31.11.2:20
+          :L1                 D=6.000000E+02
+          :L2                 D=3.000000E+02
+          :I>L1 
+          :I<=L1              =122T124A.B2:VALUE6,
+                                                  N=(82FIC480_L1)
+          :I<=L2              =122T124A.B2:VALUE7,
+                                                  N=(82FIC480_L2)
+
+PC12.31.11.4 MONO 
+          :RTG                0
+          :I                  PC12.1.2.10:13
+          :TP                 D=15
+          :O 
+          :TE 
+
+PC12.31.11.6 AND-O (2,3,3,0,0,0)
+          :1                  1
+          :2                  1
+          :11                 PC12.31.11.4:O
+          :12                 0
+          :13      -          PC12.1.2.10:13
+          :21                 PC12.31.12.1.110:AUTO
+          :22                 PC12.31.12.1.110:E1
+          :23                 PC12.31.12.1.110:E2
+          :60                                     N=(82FIC480_Eolim)
+
+PC12.31.11.7 TON 
+          :I                  PC12.1.2.10:13
+          :TD                 D=15:0
+          :O 
+          :TE 
+
+PC12.31.11.8 REG (R,1)
+          :S                  0
+          :L                  PC12.31.11.7:O
+          :R                  0
+          :I1                 PC12.31.12.1.111:22
+          :O1 
+
+PC12.31.11.9 MUX-N (R,3)
+          :AERR 
+          :A1                 PC12.31.11.4:O
+          :A2      -          PC12.1.2.10:13
+          :A3                 1
+          :IA1                PC12.31.11.8:O1
+          :IA2                D=0.000000
+          :IA3                D=0.000000
+          :O                                      N=(82FIC480_Eoref)
+
+PCD-PAGE    6
+"82FIC480: Thick Stock"
+
+PC12.31.12 FUNCM 
+
+PC12.31.12.1 BLOCK 
+          :ON                 1
+          :RUN 
+
+PC12.31.12.1.100 MOVE (R,1)
+          :1                  PC12.31.11.9:O
+          :21 
+
+PC12.31.12.1.110 PIDCON (1,1,1,1,1,0)
+          :TRACKA             2
+          :TRACKB             2
+          :TRACKC             2
+          :REVACT             1
+          :DERIV              0
+          :HOTINIT            0
+          :PARAM1             =82FIC480:PARAM1
+          :PARAM2             =82FIC480:PARAM2
+          :PARAM3A            =82FIC480:PARAM3
+          :MV                 =82FIC480.MV
+          :SPEED1             D=6.000000E+02
+          :SPEED4             D=2.000000E+01
+          :MANENBL            1
+          :AUTOENBL           1
+          :DBINST             =82FIC480
+          :PARAM4             =82FIC480:PARAM4
+          :PARAM5             =82FIC480:PARAM5
+          :PARAM6             =82FIC480:PARAM6
+          :AUTOSP 
+          :WSP                                    N=(82FIC480_WSP)
+          :DEV 
+          :OUTP 
+          :BAL 
+          :MAN 
+          :AUTO                                   N=(82FIC480_AUT)
+          :OUT=LL                                 N=(82FIC480_OutLL)
+          :OUT=HL                                 N=(82FIC480_OutHL)
+          :PARAM3B            =82FIC480:PARAM3
+          :E1ENBL             1
+          :E2ENBL             1
+          :E3ENBL             0
+          :EXTREF1            PC12.31.1.2:21
+          :EXTREF2            D=0.000000
+          :EXTREF3            D=0.000000
+          :SPEED2             D=3.000000E+03
+          :SPEED3             D=3.000000E+03
+          :E1                                     N=(82FIC480_E1)
+          :E2                                     N=(82FIC480_E2)
+          :E3 
+          :BALOUT 
+          :E1FL               0
+          :E2FL               0
+          :E3FL               0
+          :SEQE1              PC12.31.1.1:21
+          :SEQE2              0
+          :SEQE3              0
+          :LOCALFL            0
+          :LOCAL              0
+          :BALIN              0
+          :MANFL              0
+          :AUTOFL             0
+          :SEQMAN             0
+          :SEQAUTO            0
+          :BALREF             D=0.000000
+          :PARAM7             =82FIC480:PARAM7
+          :ALCBLK             =82FIC480.MV:ERR
+          :SP=LL                                  N=(82FIC480_SPLL)
+          :SP=HL                                  N=(82FIC480_SPHL)
+          :MV_LT_L2 
+          :MV_LT_L1 
+          :MV_GT_H1 
+          :MV_GT_H2 
+          :DEV_LT_L 
+          :DEV_GT_H 
+          :CLAMP              0
+          :CLAMPREF           D=0.000000
+          :EOLIM              PC12.31.11.6:60
+          :EOLL               PC12.31.12.1.100:21
+          :EOHL               PC12.31.12.1.100:21
+          :PARAM8             =82FIC480:PARAM8
+          :OLIMERR                                N=(82FIC480_INT)
+
+PC12.31.12.1.111 MOVE (R,2)
+          :1                  PC12.31.12.1.110:OUTP
+          :2                  PC12.31.12.1.110:OUTP
+          :21                 =82FIC480:POUT
+          :22                 =82FIC480.OUT,
+                                                  N=(82FIC480_OUT)
+
+PCD-PAGE    7
+"82FIC480: Output Processing"
+
+PC12.31.13 FUNCM 
+
+PC12.31.13.1 OR (4)
+          :1                  PC12.31.12.1.110:AUTO
+          :2                  PC12.31.12.1.110:E1
+          :3                  PC12.31.12.1.110:E2
+          :4                  0
+          :20 
+
+PC12.31.13.2 AND-O (2,3,3,0,0,0)
+          :1                  1
+          :2                  1
+          :11                 0
+          :12                 PC12.31.12.1.110:SP=HL
+          :13                 PC12.31.12.1.110:OUT=HL
+          :21                 0
+          :22                 PC12.31.12.1.110:SP=HL
+          :23                 PC12.31.12.1.110:OUT=LL
+          :60 
+
+PC12.31.13.3 AND-O (2,3,3,0,0,0)
+          :1                  1
+          :2                  1
+          :11                 0
+          :12                 PC12.31.12.1.110:SP=LL
+          :13                 PC12.31.12.1.110:OUT=LL
+          :21                 0
+          :22                 PC12.31.12.1.110:SP=LL
+          :23                 PC12.31.12.1.110:OUT=HL
+          :60 
+
+PC12.31.13.4 MOVE (B,4)
+          :1                  PC12.31.13.1:20
+          :2                  PC12.31.12.1.110:E1
+          :3                  PC12.31.13.2:60
+          :4                  PC12.31.13.3:60
+          :21                 =822F480.B1S
+          :22                 =822F480.B1S:VALUE2
+          :23                 =822F480.B1S:VALUE3
+          :24                 =822F480.B1S:VALUE4
+
+PC12.31.13.5 MOVE (R,4)
+          :1                  =82FIC480.MV
+          :2                  PC12.31.12.1.110:WSP
+          :3                  =82FIC480:SETPH
+          :4                  =82FIC480:SETPL
+          :21                 =822F480.R1S,
+                              =122T124B.R1
+          :22                 =822F480.R2S,
+                              =122T124B.R2
+          :23                 =822F480.R3S,
+                              =122T124B.R3
+          :24                 =822F480.R4S,
+                              =122T124B.R4
+
+PC12.31.13.6 MOVE (R,6)
+          :1                  =82FIC480.MV
+          :2                  PC12.31.12.1.110:WSP
+          :3                  =82FIC480.MV:RANGEMAX
+          :4                  =82FIC480.MV:RANGEMIN
+          :5                  =82FIC480.MV
+          :6                  =82KIA478
+          :21 
+          :22 
+          :23 
+          :24 
+          :25                 =822F480.R10S
+          :26                 =122T124B.R14,
+                              =822K478.R11S
+
+END PC12

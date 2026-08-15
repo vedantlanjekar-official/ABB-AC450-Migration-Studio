@@ -1,1686 +1,1134 @@
 <p align="center">
-  <img src="frontend/public/valmet-logo.webp" alt="Valmet Logo" width="220"/>
+  <img src="frontend/public/valmet-logo.webp" alt="Valmet" width="240"/>
 </p>
 
 <p align="center">
-  <img src="frontend/public/hero-page.png" alt="ABB AC450 Migration Studio" width="720"/>
+  <img src="frontend/public/hero-page.png" alt="ABB AC450 Migration Studio" width="760"/>
 </p>
 
 <h1 align="center">ABB AC450 Migration Studio</h1>
 
-<p align="center"><strong>Enterprise Engineering Migration Platform</strong></p>
+<h3 align="center">Enterprise Engineering Migration Platform</h3>
 
 <p align="center">
-  ABB AC450 Migration Studio is an enterprise-grade engineering conversion platform developed to automate the migration of ABB Advant Controller 450 engineering data into Valmet-compatible engineering deliverables.
+  <em>From ABB Advant Controller 450 source truth to Valmet-ready engineering deliverables — parsed, validated, clubbed, and exported with auditability.</em>
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/version-1.0.0-blue.svg" alt="Version"/>
-  <img src="https://img.shields.io/badge/status-production--ready-brightgreen.svg" alt="Status"/>
+  <img src="https://img.shields.io/badge/version-1.0.0-0B5FFF.svg" alt="Version"/>
+  <img src="https://img.shields.io/badge/status-production-brightgreen.svg" alt="Project Status"/>
+  <img src="https://img.shields.io/badge/production-live-success.svg" alt="Production Status"/>
   <img src="https://img.shields.io/badge/license-proprietary-lightgrey.svg" alt="License"/>
   <img src="https://img.shields.io/badge/author-vedantlanjekar--official-informational.svg" alt="Author"/>
+  <img src="https://img.shields.io/badge/updated-15%20Aug%202026-blue.svg" alt="Last Updated"/>
+  <img src="https://img.shields.io/badge/repo-ABB--AC450--Migration--Studio-24292f.svg" alt="Repository"/>
   <img src="https://img.shields.io/badge/frontend-Next.js%2015-black.svg" alt="Frontend"/>
   <img src="https://img.shields.io/badge/backend-FastAPI-009688.svg" alt="Backend"/>
-  <img src="https://img.shields.io/badge/deploy-Vercel%20%2B%20Render-blueviolet.svg" alt="Deployment"/>
+  <img src="https://img.shields.io/badge/deploy-Vercel%20%2B%20Render-7C3AED.svg" alt="Deployment"/>
 </p>
 
 | Attribute | Value |
 |-----------|-------|
-| **Project** | ABB AC450 Migration Studio |
-| **Version** | 1.0.0 |
-| **Status** | Production-ready (v1) |
-| **License** | Proprietary / project-defined (no public LICENSE file shipped) |
+| **Current Version** | `1.0.0` (`backend/core/config.py` → `VERSION`) |
+| **Project Status** | Production-ready engineering workstation (v1) |
+| **Production Status** | Live — Vercel frontend connected to Render API |
+| **License** | Proprietary / project-defined (no public `LICENSE` file is shipped) |
 | **Author / Maintainer** | [vedantlanjekar-official](https://github.com/vedantlanjekar-official) |
-| **Repository** | [ABB-AC450-Migration-Studio](https://github.com/vedantlanjekar-official/ABB-AC450-Migration-Studio) |
-| **Frontend Deployment** | Vercel (Next.js App Router) |
-| **Backend Deployment** | Render (`abb-ac450-migration-studio-backend`) |
-| **Local Frontend** | http://localhost:5173 |
-| **Local Backend** | http://127.0.0.1:8000 |
-| **API Docs** | http://127.0.0.1:8000/docs |
+| **Last Updated** | 15 August 2026 |
+| **Repository Name** | [ABB-AC450-Migration-Studio](https://github.com/vedantlanjekar-official/ABB-AC450-Migration-Studio) |
+
+---
+
+## Technology Configuration
+
+This section is the single inventory of technologies that actually ship in the repository. The product UI is a **custom Valmet-branded Tailwind design**. The frontend framework is **Next.js 15 (App Router)**, not Vite. There is **no ShadCN** dependency; icons come from Lucide and motion from Framer Motion.
+
+### Frontend
+
+| Technology | Role in this project |
+|------------|----------------------|
+| **React 18** | Component model for the landing page, module picker, dropzone, processing view, and results grid |
+| **TypeScript** | Compile-time contracts for `ConversionType`, job status payloads, and API clients |
+| **Next.js 15** | App Router hosting, production build on Vercel, optional `/api/*` rewrites in development |
+| **Tailwind CSS 3** | Valmet green / slate industrial styling, responsive layout, results table chrome |
+| **Custom Valmet UI** | Project-owned components (`header`, `dropzone`, `results_view`, `workflow_cards`) instead of a generic component kit |
+| **React Hooks** | Local UI state (search, sheet tabs, log modal loading) |
+| **TanStack React Query** | Installed for future/async query patterns; **job lifecycle state is owned by Zustand** |
+| **Zustand** | Pipeline stage (`upload` / `processing` / `results`), selected module, files, `job_id`, status payload |
+| **Axios** | Multipart upload, process trigger, status polling, log fetch (300 s timeout) |
+| **Framer Motion** | Landing-page motion on `framer_landing.tsx` |
+| **Lucide React** | Engineering icons (download, sheets, warnings, CPU, shield) |
+| **clsx / tailwind-merge** | Conditional class composition |
+
+### Backend
+
+| Technology | Role in this project |
+|------------|----------------------|
+| **Python 3.11** | Runtime on Render (`PYTHON_VERSION=3.11.0`) and local `.tools/python` |
+| **FastAPI** | REST surface under `/api` plus `/health` |
+| **Uvicorn** | ASGI server — one worker in production (`--workers 1`) |
+| **Pydantic v2** | Request/response models (`ProcessRequest`, `ProcessStatusResponse`, `EngineeringIO`) |
+| **pydantic-settings** | `Settings` for temp dirs, upload limits, light-PDF flags |
+| **python-multipart** | Multipart file uploads |
+| **Thread-pool executor** | Long conversions run off the event loop so health checks stay responsive |
+
+### File Processing
+
+| Technology | Role in this project |
+|------------|----------------------|
+| **pdfplumber** | Layout-aware PDF text for DB printouts |
+| **PyMuPDF (`fitz`)** | Primary/light PDF path for PC diagrams; fallback fusion with pdfplumber |
+| **ABB AAX parser** | `backend/pc_element/parser/aax_reader.py` — multi-stage PC export reader (pages, blocks, hardwired I/O, PCU `:IOADDR`/`:CHANNEL`, MOVE/PIDCON joins) |
+| **ABB BAX parser** | `backend/parser/bax_reader.py` — DB element native export companion to PDF |
+| **openpyxl** | Workbook write/read for I/O lists, comparison reports, address sheets, templates |
+| **XlsxWriter** | Alternate Excel writer used where high-volume sheet generation benefits |
+| **pandas** | Tabular shaping in selected Excel workflows |
+| **OCR (optional)** | Pillow / Tesseract path exists behind `ENABLE_PC_OCR`; **disabled in production** (`0`) to avoid Render OOM |
+
+### Deployment
+
+| Technology | Role in this project |
+|------------|----------------------|
+| **GitHub** | Source of truth; `main` auto-deploys Render and Vercel |
+| **Vercel** | Next.js production frontend |
+| **Render** | FastAPI production backend (free/web service, Oregon, health `/health`) |
+
+### Development Tools
+
+| Technology | Role in this project |
+|------------|----------------------|
+| **Cursor IDE** | Primary engineering workstation for this repository |
+| **Git** | Version control (`main` tracks `origin`) |
+| **npm** | Frontend install / `next dev` / `next build` |
+| **pip** | `pip install -r requirements.txt` (root file is what Render uses) |
+| **pytest** | Backend regression (`backend/tests`) |
+| **Docker** | **Not used in v1.** Deploy is Git → Vercel + Render, not a container image |
 
 ---
 
 ## Table of Contents
 
-1. [Project Overview](#1-project-overview)
-2. [Features](#2-features)
-3. [Complete System Workflow](#3-complete-system-workflow)
-4. [Complete System Architecture](#4-complete-system-architecture)
-5. [Technology Stack](#5-technology-stack)
-6. [Project Structure](#6-project-structure)
-7. [User Guide](#7-user-guide)
-8. [Developer Guide](#8-developer-guide)
-9. [Engineering Modules](#9-engineering-modules)
-10. [Data Processing Pipeline](#10-data-processing-pipeline)
-11. [API Documentation](#11-api-documentation)
-12. [Frontend Architecture](#12-frontend-architecture)
-13. [Backend Architecture](#13-backend-architecture)
-14. [Deployment Guide](#14-deployment-guide)
-15. [Performance](#15-performance)
-16. [Security](#16-security)
-17. [Engineering Design Decisions](#17-engineering-design-decisions)
-18. [Future Scope](#18-future-scope)
-19. [System Ratings](#19-system-ratings)
-20. [Contributors](#20-contributors)
-21. [Troubleshooting](#21-troubleshooting)
-22. [Related Documentation](#22-related-documentation)
-- [Appendix A — Engineering Glossary](#appendix-a--engineering-glossary)
-- [Appendix B — Detailed API Examples](#appendix-b--detailed-api-examples)
-- [Appendix C — PC Element Engineering Deep Dive](#appendix-c--pc-element-engineering-deep-dive)
-- [Appendix D — DB Element Engineering Deep Dive](#appendix-d--db-element-engineering-deep-dive)
-- [Appendix E — Comparator, Address, and Template Notes](#appendix-e--comparator-address-and-template-notes)
-- [Appendix F — Frontend / Backend Contract Checklist](#appendix-f--frontend--backend-contract-checklist)
-- [Appendix G — Local Smoke Test Script (Manual)](#appendix-g--local-smoke-test-script-manual)
-- [Appendix H — Repository Hygiene](#appendix-h--repository-hygiene)
-- [Appendix I — Frequently Asked Questions](#appendix-i--frequently-asked-questions)
-- [Appendix J — Onboarding Guide for New Engineers](#appendix-j--onboarding-guide-for-new-engineers)
-- [Appendix K — Non-Goals (Explicit)](#appendix-k--non-goals-explicit)
-- [Appendix L — Change Impact Matrix](#appendix-l--change-impact-matrix)
+1. [What is ABB AC450 Migration Studio?](#what-is-abb-ac450-migration-studio)
+2. [Live Production Links](#live-production-links)
+3. [Key Features](#key-features)
+4. [System Architecture](#system-architecture)
+5. [Complete Workflow](#complete-workflow)
+6. [Engineering Modules](#engineering-modules)
+   - [Module 1 — DB Element Converter](#module-1--db-element-converter)
+   - [Module 2 — PC Element Converter](#module-2--pc-element-converter)
+   - [Module 3 — Engineering Tag Comparator](#module-3--engineering-tag-comparator)
+   - [Module 4 — I/O Address Generator](#module-4--io-address-generator)
+   - [Module 5 — ABB Engineering Template Generator](#module-5--abb-engineering-template-generator)
+7. [User Guide](#user-guide)
+8. [Developer Guide](#developer-guide)
+   - [Project Architecture](#project-architecture)
+   - [Folder Structure](#folder-structure)
+   - [Backend](#backend)
+   - [Frontend](#frontend)
+   - [APIs](#apis)
+   - [Processing Engines](#processing-engines)
+   - [Deployment](#deployment)
+   - [Performance](#performance)
+   - [Security](#security)
+   - [Future Scope](#future-scope)
+9. [System Ratings](#system-ratings)
+10. [A Message to Developers](#a-message-to-developers)
+11. [Contributors](#contributors)
+12. [Related Documentation](#related-documentation)
+13. [Appendix — Glossary, Contracts, and Onboarding](#appendix--glossary-contracts-and-onboarding)
+14. [Environment Variable Catalog](#environment-variable-catalog)
+15. [Excel Column Contracts](#excel-column-contracts)
 
 ---
 
-## 1. Project Overview
+## What is ABB AC450 Migration Studio?
 
-### 1.1 What is ABB AC450 Migration Studio?
-
-**ABB AC450 Migration Studio** is a full-stack industrial engineering application that converts legacy ABB Advant Controller 450 (AC450) / MasterPiece-style engineering dumps into structured Valmet DNA–ready Excel workbooks.
-
-Control engineers historically receive AC450 configuration as multi-page PDF printouts (DB element listings and PC diagram sheets) or as intermediate Excel extracts. Manually re-keying tags, I/O addresses, descriptions, and card/channel allocations into Valmet engineering tools is slow, error-prone, and expensive on brownfield migration projects.
-
-This platform automates that path end-to-end:
-
-1. Upload PDF or Excel inputs through a guided web UI.
-2. Select one of five engineering modules.
-3. Run a backend conversion pipeline with live progress and logs.
-4. Preview structured results in-browser.
-5. Download Valmet-compatible `.xlsx` deliverables.
-
-### 1.2 Why it was developed
-
-ABB AC450 systems remain widely installed across pulp & paper, process industries, and discrete manufacturing sites. Migration programs to Valmet DNA require consistent translation of:
-
-- Hardwired and 800-series I/O families (`AI`, `AO`, `DI`, `DO`, `AI800`, `AO800`, `DI800`, `DO800`)
-- Loop Tags and Device Tags
-- Card / channel addressing
-- Clubbed input–output pairs for engineering import templates
-- Cross-checks between source and target tag lists
-
-The Studio was built to encode those engineering rules in software so project teams can scale migrations without depending solely on manual spreadsheet craftsmanship.
-
-### 1.3 Engineering problem it solves
-
-| Manual pain point | Platform response |
-|-------------------|-------------------|
-| Hundreds of PDF pages of DB dumps | Automated multi-layer PDF text extraction + grammar parsing |
-| Inconsistent Device Tag transcription | Normalized tag parsing and attribute stripping |
-| Missing default parameter values | `.DEFAULT` inheritance resolution (DB module) |
-| AI/AO and DO/DI pairing mistakes | Deterministic Loop Tag clubbing engines |
-| Unclear coverage of PC diagrams | Completeness audit + Function Block Summary sheet |
-| Tag list reconciliation | Set-based Engineering Tag Comparator |
-| Manual card channel packing | I/O Address Generator with hardware channel limits |
-| Valmet import formatting | ABB Engineering Template Generator |
-
-### 1.4 Target users
-
-- **ABB / brownfield migration engineers** preparing Valmet cutovers
-- **Valmet engineering teams** validating incoming tag structures
-- **System integrators** delivering multi-site migration packages
-- **Software developers** extending parsers and exporters
-- **Project managers** needing auditable, repeatable conversion outputs
-
-### 1.5 Business value
-
-- Dramatic reduction in engineering hours for PDF-to-Excel conversion
-- Consistent application of ABB addressing and Valmet column conventions
-- Live validation metrics (counts, unmatched tags, completeness)
-- Traceable job logs for project quality records
-- Modular architecture allowing new converters without rewriting the UI shell
-
-### 1.6 Industrial applications
-
-Typical use cases include pulp & paper mill DCS upgrades, paper machine section migrations, water treatment brownfield replacements, and any AC450-to-Valmet DNA engineering data handover where PDF/Excel is the available source of truth.
-
-### 1.7 Product positioning
-
-ABB AC450 Migration Studio is intentionally positioned as an **engineering conversion workstation**, not as a replacement for ABB Control Builder, Valmet DNA engineering tools, or site DCS runtime systems. It sits in the **data preparation** layer of a migration program:
-
-1. Source engineering artifacts are collected (PDF dumps, intermediate Excel extracts).
-2. The Studio normalizes and reshapes those artifacts into Valmet-oriented workbooks.
-3. Engineers review, adjust, and import the results into Valmet DNA engineering workflows.
-4. Site acceptance testing remains a human-led process with the generated files as accelerators.
-
-This positioning keeps responsibility boundaries clear: the software accelerates transcription and structuring; engineers remain accountable for process safety and final configuration correctness.
-
-### 1.8 Typical project timeline impact
-
-On a mid-size paper machine migration, teams often spend multiple engineer-weeks copying I/O references, verifying Loop Tag consistency, and rebuilding address sheets. With the Studio:
-
-- Initial extract of DB/PC sources can be produced in a single working session.
-- Comparator runs highlight tag gaps before FAT/SAT.
-- Address and template generators reduce repetitive spreadsheet formatting.
-- Function Block Summary gives project managers a fast view of control-block density in PC programs.
-
-The net effect is earlier visibility of data quality issues and fewer late-stage spreadsheet reworks.
-
-### 1.9 Quality philosophy
-
-The parsers prioritize **deterministic engineering rules** over probabilistic guessing. Where text is ambiguous, the system prefers:
-
-- Skipping unsupported object types rather than inventing Valmet rows
-- Emitting warnings and completeness metrics rather than silent drops without audit
-- Preserving source Device Tags (after normalization) instead of inventing new tag schemas
-
-This philosophy makes outputs reviewable by ABB and Valmet engineers who already understand the underlying addressing conventions.
+**ABB AC450 Migration Studio** is an enterprise web platform that converts ABB Advant Controller 450 engineering dumps into Valmet-compatible Excel workbooks. It was built because brownfield pulp-and-paper and process sites still run AC450, while migration programs need structured Loop Tags, Device Tags, I/O families, and card/channel addresses without weeks of manual re-keying. The Studio automates PDF, BAX, and AAX parsing, default inheritance, clubbing, comparison, address packing, and template population so engineering hours move from transcription to review. Business value is repeatable, auditable deliverables that import into Valmet DNA workflows. Typical use cases are mill area cutovers, twin-node PM2/PM3 extracts, and tag-list reconciliation. The audience is control engineers, migration leads, and software maintainers handing the tool to the next project team.
 
 ---
 
-## 2. Features
+## Live Production Links
 
-### 2.1 Multi-module conversion suite
+Production URLs only. Local workstation ports belong in the [Developer Guide](#developer-guide).
 
-The application ships **five production modules**, selectable from the upload workspace:
+| Surface | URL |
+|---------|-----|
+| **Production Website** | [https://abb-ac450-migration-studio.vercel.app](https://abb-ac450-migration-studio.vercel.app) |
+| **Frontend (Vercel)** | [https://abb-ac450-migration-studio.vercel.app](https://abb-ac450-migration-studio.vercel.app) |
+| **Backend API (Render)** | [https://abb-ac450-migration-studio-backend.onrender.com](https://abb-ac450-migration-studio-backend.onrender.com) |
+| **Health Probe** | [https://abb-ac450-migration-studio-backend.onrender.com/health](https://abb-ac450-migration-studio-backend.onrender.com/health) |
+| **OpenAPI (Render)** | [https://abb-ac450-migration-studio-backend.onrender.com/docs](https://abb-ac450-migration-studio-backend.onrender.com/docs) |
+| **GitHub Repository** | [https://github.com/vedantlanjekar-official/ABB-AC450-Migration-Studio](https://github.com/vedantlanjekar-official/ABB-AC450-Migration-Studio) |
+| **Release Page** | [https://github.com/vedantlanjekar-official/ABB-AC450-Migration-Studio/releases](https://github.com/vedantlanjekar-official/ABB-AC450-Migration-Studio/releases) |
 
-| Module | Conversion type | Primary input | Primary output |
-|--------|-----------------|---------------|----------------|
-| DB Element Converter | `DB` | AC450 DB Element PDF | `Clubbed_IO` Excel |
-| PC Element Converter | `PC` | AC450 PC Diagram PDF | `I_O_List` + `Function Block Summary` |
-| Engineering Tag Comparator | `COMPARE` | Two Excel workbooks | `Summary` + `Unmatched Records` |
-| I/O Address Generator | `IO_ARRANGE` | Clubbed/I_O Excel | Category sheets with packed addresses |
-| ABB Engineering Template Generator | `ENG_TEMPLATE` | Clubbed/I_O Excel | `Engineering_Template` sheet |
-
-### 2.2 Guided web workflow
-
-- Module picker with clear engineering descriptions
-- Drag-and-drop / multi-file upload
-- Live progress phases with percentage and messages
-- In-browser data-grid preview of generated sheets
-- One-click Excel download
-- Job log viewer for diagnostics
-
-### 2.3 Hardwired I/O family focus
-
-Across DB and PC parsers, the Studio focuses on the eight Valmet-critical families:
-
-`AI`, `AO`, `DI`, `DO`, `AI800`, `AO800`, `DI800`, `DO800`
-
-Unsupported object types such as `PIDCON`, `MOTCON`, `MANSTN`, `DAT`, `TEXT`, `AIC`, `AOC` are intentionally skipped by the I/O extractors (except PC Function Block Summary, which *counts* selected control-block declarations separately).
-
-### 2.4 Loop Tag clubbing
-
-Both DB and PC pipelines club records by Loop Tag with engineering section order:
-
-- Analog clubs: **AI → AO**, **AI800 → AO800**
-- Digital clubs: **DO → DI**, **DO800 → DI800**
-- Valve-oriented ordering where applicable (for example `.SV1` / `.GSO` / `.GSC` patterns in DB mapping)
-
-### 2.5 PC Function Block Summary
-
-Independent of I/O extraction, PC Diagram text is scanned for ABB functional block **declarations** only:
-
-- `PIDCON(...)`
-- `MOTCON(...)`
-- `VALVECON(...)`
-- `MANSTN(...)`
-
-Parameter references such as `=PIDCON1:94/940LC391:PARAM1` are ignored. Results are written to a dedicated **Function Block Summary** worksheet.
-
-### 2.6 Completeness & comparison tooling
-
-- PC completeness auditor for inventory vs extraction accuracy
-- Excel tag comparator using case-insensitive Device Tag set logic
-- Validation reports and job warnings surfaced in status payloads
-
-### 2.7 Cloud-ready split deployment
-
-- Frontend on **Vercel**
-- Backend on **Render** with health checks and free-tier-friendly light PDF modes
-- Local dual-process development via `start_dev.bat` or manual uvicorn / Next.js
-
-### 2.8 Operational observability
-
-Every conversion job exposes progress percentage, human-readable phase messages, category counts, generated sheet names, bounded preview rows, warning/error arrays, and downloadable plain-text logs. This observability is essential when engineering leads must explain why a Device Tag was included, excluded, or remapped.
-
-### 2.9 Shared Excel design language
-
-All generators reuse a common visual system in `backend/excel/design.py`: dark slate headers, Calibri typography, thin borders, zebra striping, centered indicator columns, and optional Valmet header post-processing (`$(TAG)`, `$(DEVICETAG)`, `$(NAME_40)`). Consistency across modules reduces training time for engineers consuming multiple deliverables.
-
-### 2.10 Extensible function-block catalog
-
-PC Function Block detection is catalog-driven. Adding a future block type is primarily an append to `SUPPORTED_FUNCTION_BLOCKS` plus regression tests, without touching I/O grammar. Control-block inventory and hardwired I/O extraction intentionally answer different engineering questions.
-
-### 2.11 Windows-first local DX with cloud parity
-
-`start_dev.bat` launches backend and frontend for Windows engineering laptops, while `vercel.json` and `render.yaml` preserve the same API contracts in cloud environments. Developers can reproduce production behavior locally by pointing `NEXT_PUBLIC_API_URL` at either local Uvicorn or the Render service.
+The browser calls `https://abb-ac450-migration-studio-backend.onrender.com/api` (see `frontend/services/api_client.ts`). CORS allows the Vercel origin. Render free-tier instances may cold-start; the first request after idle can take about thirty seconds.
 
 ---
 
-## 3. Complete System Workflow
+## Key Features
 
-### 3.1 End-to-end flow (all modules)
+| | Capability | What it does |
+|---|------------|--------------|
+| ① | **DB Element Conversion** | Parses AC450 database printouts (PDF or BAX), resolves `.DEFAULT` inheritance, clubs AI/AO and DO/DI families, writes a Valmet `Clubbed_IO` workbook |
+| ② | **PC Element Conversion** | Parses PC diagrams (PDF) and native **AAX** exports; extracts eight I/O families, Device/Loop Tags, Slot/Card, Channel, Function Block Summary |
+| ③ | **Engineering Tag Comparison** | Set-based `$(DEVICETAG)` match across two workbooks — not row-by-row — with matched/unmatched reports |
+| ④ | **I/O Address Generation** | Packs clubbed records onto cards using family channel limits (AI/AO 16, DI/DO 32, 800-series AI/AO 8, DI/DO 32) |
+| ⑤ | **ABB Engineering Template** | Maps clubbed pairs into `$(TAG)`, `$(DEVICETAG1/2)`, ranges, units, and package placeholders |
+| ⑥ | **PDF Processing** | Dual-engine extraction (pdfplumber + PyMuPDF) with light-mode flags for constrained hosts |
+| ⑦ | **AXX Processing** | Block-graph reader: hardwired `=AIcard.ch`, PCU `:IOADDR`/`:CHANNEL`, MOVE/PIDCON/MOTCON/VALVECON joins |
+| ⑧ | **BAX Processing** | Native DB export path parallel to PDF so the same clubbing/Excel contract applies |
+| ⑨ | **Excel Generation** | Shared industrial design (slate headers, zebra rows, formula-safe cells, Valmet header aliases) |
+| ⑩ | **Intelligent Clubbing** | Loop-Tag pairing: AI→AO, DO→DI, AI800_→AO800_, DO800_→DI800_; valve SV1→GSO→GSC |
+| ⑪ | **Function Block Detection** | Counts PIDCON, MOTCON, VALVECON, MANSTN (and catalog peers) independently of I/O rows |
+| ⑫ | **High-Accuracy Extraction** | Grammar parser, duplicate keys `(family, card, channel, device_tag)`, completeness audit, warnings — no invented hardware addresses |
 
-```text
-Select Engineering Module
-        │
-        ▼
-Upload Source Files (PDF / Excel)
-        │
-        ▼
-POST /api/upload  →  job_id
-        │
-        ▼
-POST /api/process { job_id, conversion_type }
-        │
-        ▼
-ConversionService routes to module pipeline
-        │
-        ▼
-Extract / Parse / Validate / Club / Format
-        │
-        ▼
-Generate Excel workbook (openpyxl)
-        │
-        ▼
-Poll GET /api/status/{job_id}
-        │
-        ▼
-Preview results in UI
-        │
-        ▼
-GET /api/download/{job_id}  →  .xlsx deliverable
-```
-
-### 3.2 DB Element workflow stages
-
-```text
-PDF Upload
-  → Multi-layer PDF text extraction
-  → Document cleaning / header-footer filtering
-  → Object & family detection (AI/AO/DI/DO + 800)
-  → Parameter extraction (:KEY VALUE)
-  → DEFAULT profile detection & inheritance merge
-  → Loop Tag derivation & record clubbing
-  → Category indicator mapping
-  → Clubbed_IO Excel export
-```
-
-### 3.3 PC Element workflow stages
-
-```text
-PC Diagram PDF Upload
-  → Multi-layer PDF read (PyMuPDF / pdfplumber)
-  → Page cleaning
-  → I/O candidate detection
-  → Grammar parse (Category, Card, Channel, Device/Loop Tag)
-  → Description mapping
-  → Metadata extraction
-  → Deduplicate & validate
-  → Completeness audit
-  → Club & format
-  → Function Block declaration counting (parallel concern)
-  → Excel: I_O_List + Function Block Summary
-```
-
-### 3.4 Stage explanations
-
-| Stage | Responsibility |
-|-------|----------------|
-| **Upload** | Persist files under job-scoped temp directories; return `job_id` |
-| **Process** | Start background worker; set conversion type |
-| **Extract** | Recover selectable text from PDF/Excel with maximum recall |
-| **Parse** | Apply ABB grammar / Excel column mapping |
-| **Clean** | Strip noise, normalize tags, remove duplicates |
-| **Club** | Pair related I/O by Loop Tag in engineering order |
-| **Validate** | Accept supported families; emit warnings for gaps |
-| **Generate** | Style workbook with shared Excel design system |
-| **Download** | Stream completed `.xlsx` to the client |
-
-### 3.5 Cross-module sequencing on real projects
-
-A recommended project sequence used by migration teams:
-
-1. **DB Element Converter** on database dumps → establish Loop Tag / Device Tag baseline.
-2. **PC Element Converter** on logic drawings → capture hardwired references + function-block density.
-3. **Engineering Tag Comparator** between DB-derived and PC-derived (or site) Excel lists → find gaps.
-4. **I/O Address Generator** on cleaned clubbed lists → produce card packing sheets for hardware planning.
-5. **ABB Engineering Template Generator** → create import-oriented paired templates for Valmet engineering.
-
-This sequence is not enforced by the software (modules are independently selectable), but it mirrors how engineering work packages usually unfold.
-
-### 3.6 Failure and retry workflow
-
-If a job fails:
-
-1. Open the log modal / `GET /api/logs/{job_id}`.
-2. Identify the failing stage (PDF read, grammar, Excel write, etc.).
-3. Correct the source artifact or environment (for example, textless scanned PDF).
-4. Re-upload and re-process (new job id). Jobs are not mutated in place after terminal failure in the normal UI flow.
+Multi-file DB or PC uploads concatenate into **one** workbook (`DB_Element.xlsx` / `PC_Element_IO_List.xlsx` when more than one source is present).
 
 ---
 
-## 4. Complete System Architecture
-
-### 4.1 High-level architecture
+## System Architecture
 
 ```mermaid
 flowchart TB
-  User[Engineer / Integrator]
-  UI[Next.js Frontend<br/>Vercel]
-  API[FastAPI API Layer<br/>Render]
-  CS[ConversionService]
-  JM[JobManager]
-  Engines[Module Engines]
-  XLSX[Excel Output Engine]
-  FS[(Temp Uploads / Outputs / Logs)]
-
-  User --> UI
-  UI -->|REST /api/*| API
-  API --> JM
-  API --> CS
-  CS --> Engines
-  Engines --> XLSX
-  CS --> FS
-  XLSX --> FS
-  UI -->|download| API
+  User([Control Engineer / Migration Lead]) --> FE[Next.js 15 Frontend<br/>Vercel]
+  FE -->|HTTPS REST Axios<br/>NEXT_PUBLIC_API_URL/api| API[FastAPI API Layer<br/>/upload /process /status /download /logs]
+  API --> JM[JobManager<br/>RAM + JSON on disk]
+  API --> CS[ConversionService]
+  CS --> DB[DB Engine<br/>PDF + BAX]
+  CS --> PC[PC Engine<br/>PDF + AAX]
+  CS --> CMP[Tag Comparator]
+  CS --> IO[I/O Address Arranger]
+  CS --> TPL[Engineering Template]
+  DB & PC & CMP & IO & TPL --> XLS[Excel Generator<br/>openpyxl / shared design]
+  XLS --> DL[GET /api/download]
+  FE --> DL
 ```
 
-### 4.2 Layered component model
+### Layer responsibilities
 
-```text
-Frontend (Next.js + Zustand + React Query)
-        │
-        ▼
-API Layer (upload / process / status / download / logs / health)
-        │
-        ▼
-Backend Services (ConversionService + JobManager)
-        │
-        ▼
-Extraction Engines (PDF / Excel readers)
-        │
-        ▼
-Conversion Engines (DB / PC / Compare / Arrange / Template)
-        │
-        ▼
-Output Engine (openpyxl workbook builders + shared design)
-        │
-        ▼
-Download Service (authenticated-by-job-id file response)
-```
+| Layer | Responsibility |
+|-------|----------------|
+| **User** | Selects a module, uploads source files, reviews preview, downloads Excel, reads execution logs |
+| **Frontend** | Valmet-branded SPA workflow; never parses PDF/AAX itself |
+| **API Layer** | Validates uploads, queues jobs, returns typed status, streams workbooks and logs |
+| **Backend services** | `ConversionService` routes `conversion_type`; `JobManager` persists progress; worker thread runs the engine |
+| **Processing engines** | Domain rules for DB, PC, compare, address, template — isolated packages |
+| **Excel generator** | Presentation only: headers, indicators, Slot/Card, Channel, sanitization — does not re-parse engineering |
+| **Download service** | `FileResponse` of the completed workbook; filename follows module convention |
 
-### 4.3 Component responsibilities
-
-| Component | Responsibility |
-|-----------|----------------|
-| **Frontend** | Module selection, upload UX, polling, preview, download |
-| **API Layer** | HTTP contracts, validation, CORS, job orchestration triggers |
-| **JobManager** | In-memory job state, progress, metrics, preview payloads |
-| **ConversionService** | Routes `conversion_type` to the correct pipeline |
-| **Extraction Engine** | PDF text layers, Excel sheet readers |
-| **Conversion Engine** | Domain rules per module |
-| **Output Engine** | Sheet creation, styling, header post-processing |
-| **Download Service** | Serves generated workbook for a completed job |
-
-### 4.4 Runtime topology
-
-| Environment | Frontend | Backend |
-|-------------|----------|---------|
-| Local | Next.js `:5173` | Uvicorn `:8000` |
-| Production | Vercel | Render web service |
-
-Communication uses `NEXT_PUBLIC_API_URL` (production Render URL or local `http://127.0.0.1:8000/api`).
+There is **no application database**. Jobs live in memory plus JSON under the host temp directory. That is correct for a conversion workstation and important on Render’s ephemeral disk: a dyno sleep after download requires a re-run.
 
 ---
 
-## 5. Technology Stack
+## Complete Workflow
 
-| Layer | Technology | Role |
-|-------|------------|------|
-| **Frontend framework** | Next.js 15 (App Router) | UI shell, SSR/static delivery |
-| **UI library** | React 18 | Component model |
-| **Styling** | Tailwind CSS 3 | Utility styling |
-| **Motion** | Framer Motion | Landing / workflow transitions |
-| **Icons** | Lucide React | UI iconography |
-| **Client state** | Zustand | Pipeline stage + job store |
-| **Server state / polling** | TanStack React Query | Status query patterns |
-| **HTTP client** | Axios | API calls |
-| **Language (FE)** | TypeScript | Typed frontend |
-| **Backend framework** | FastAPI | REST API |
-| **ASGI server** | Uvicorn | Process hosting |
-| **Validation** | Pydantic v2 / pydantic-settings | Schemas & config |
-| **PDF processing** | pdfplumber, PyMuPDF (fitz) | Text & spatial extraction |
-| **Excel processing** | openpyxl, XlsxWriter, pandas | Workbook I/O |
-| **Multipart uploads** | python-multipart | File intake |
-| **HTTP utils** | requests | Auxiliary HTTP |
-| **Language (BE)** | Python 3.11+ (local 3.12 supported) | Backend runtime |
-| **Frontend hosting** | Vercel | CDN + Next.js deployment |
-| **Backend hosting** | Render | Persistent Python web service |
-| **SCM** | GitHub | Source of truth |
-| **Local launcher** | `start_dev.bat` | Windows dual-service start |
+```mermaid
+flowchart LR
+  A[Upload File] --> B[Parser Selection]
+  B --> C[Extraction Engine]
+  C --> D[Validation]
+  D --> E[Processing]
+  E --> F[Mapping]
+  F --> G[Generation]
+  G --> H[Download]
+```
 
-> Note: The UI is **Next.js**, not Vite. Older documentation mentioning Vite should be treated as outdated.
+| Stage | What happens |
+|-------|----------------|
+| **Upload File** | `POST /api/upload` accepts PDF, BAX, AAX, XLSX/XLSM/XLS up to 100 MB each. Names are sanitized. A `job_id` (UUID) is created. |
+| **Parser Selection** | UI sends `conversion_type`: `DB`, `PC`, `COMPARE`, `IO_ARRANGE`, `ENG_TEMPLATE`. The backend does not guess the module from the file alone. |
+| **Extraction Engine** | DB: PDF/BAX object + `:param` stream. PC: PDF layers or AAX block graph → synthesized `=CATcard.ch/DeviceTag`. Compare/Arrange/Template read Excel headers. |
+| **Validation** | Families limited to the eight supported I/O types. Tags must contain letters. Card/channel ≥ 0. Invalid refs are counted, not silently invented. |
+| **Processing** | Defaults merge (DB), completeness audit (PC), set difference (compare), card packing (arrange), pair assembly (template). Heartbeats keep the job alive. |
+| **Mapping** | Category → eight indicator columns. Loop Tag / Device Tag / Description renamed to `$(TAG)`, `$(DEVICETAG)`, `$(NAME_40)` on export. |
+| **Generation** | Styled `.xlsx` written under `OUTPUT_DIR`. Preview rows (PC: Slot/Card and Channel immediately after Device Tag) stored on the job. |
+| **Download** | `GET /api/download/{job_id}` after `status=completed`. Preview remains in the results grid. |
+
+Engineers should treat the Excel as a **reviewed deliverable**, not an automatic write-back into Valmet or ABB runtimes.
 
 ---
 
-## 6. Project Structure
+## Engineering Modules
+
+All five engines share one job API. They do **not** share parsers. Changing clubbing in PC must not rewrite DB inheritance, and vice versa.
+
+### Module 1 — DB Element Converter
+
+**Purpose.** Turn AC450 database listings into a single clubbed I/O workbook with inherited defaults, descriptions, ranges, and category indicators.
+
+**Input.** One or more `.pdf` DB printouts and/or `.bax` native exports. Multiple files are parsed separately (within-file tag dedup) and concatenated into one Excel.
+
+**Supported formats.** PDF (selectable text), BAX. Scanned-only PDFs without OCR will under-extract.
+
+**Parsing logic.** Header lines such as `AI 1.1` / `AI800 2` identify objects. Colon parameters (`:NAME`, `:DESCR`, `:ADDR`, ranges, units) are tokenized. Unsupported types (AIC, AOC, DAT, TEXT, …) are skipped. Hardware vs software `.DEFAULT` blocks are detected and merged onto instances.
+
+**Default value logic.** Family defaults fill missing parameters. Object-level values always win (`object_overrides`). Metrics exposed: `default_sections_found`, `parameters_filled_from_defaults`, `object_overrides`.
+
+**Validation.** Eight I/O families only. Header/footer noise stripped (`ignored_header_footer_lines`).
+
+**Clubbing.** Same Loop Tag: AI then AO; DO then DI; 800-series equivalents; valves SV1 → GSO → GSC. Unpaired rows remain — no fake mate is invented.
+
+**Excel output.** Primary sheet `Clubbed_IO` (or the project’s DB sheet contract) with Valmet aliases. Multi-file name: `DB_Element.xlsx`.
+
+**Processing pipeline.**
+
+1. Read PDF/BAX pages  
+2. Clean headers/footers  
+3. Detect objects and defaults  
+4. Extract parameters  
+5. Inherit defaults  
+6. Map Loop Tag / Device Tag  
+7. Club + format  
+8. Write Excel + preview  
+
+---
+
+### Module 2 — PC Element Converter
+
+**Purpose.** Extract hardwired and soft I/O references from PC diagrams and AAX function-block exports, with Slot/Card and Channel when the source stores them.
+
+**PDF parsing.** `PDFReader` fuses PyMuPDF (light mode default) with pdfplumber. `IOReferenceDetector` uses ReDoS-safe patterns, line-pair stitching, and spatial token assembly. `GrammarParser` accepts `=AI1.1/TAG`, `=AI800_22.5:22/TAG:ERR`, port and no-channel forms.
+
+**AXX parsing.** `AaxReader` is a seven-stage engine:
+
+| Stage | Work |
+|-------|------|
+| 0 | Encoding (utf-8-sig, utf-8, cp1252, latin-1) |
+| 1 | Header metadata |
+| 2 | `PCD-PAGE` split |
+| 3 | Block segment + continuation join |
+| 4A–4E | Hardwired `=AIcard.ch`, soft dotted/colon tags, DBINST, broken lines |
+| 4F | PCU-I / PCU-O → Slot = `:IOADDR`, Channel = `:CHANNEL` |
+| 4G | Same-block join (PIDCON `:MV` + `:DBINST`, MOVE `:21`/`:22`, MOTCON/VALVECON ports) |
+| 5–6 | Global rescan + warnings |
+
+Soft tags without hardware remain `CAT0.0`. The reader **does not invent** card numbers from the DB. Most mill AAX files are application wiring; physical `:ADDR` lives in the DB.
+
+**I/O detection.** Families: AI, AO, DI, DO, AI800_, AO800_, DI800_, DO800_. Synthesized lines `=CAT{card}.{ch}/DeviceTag` feed the same grammar as PDF.
+
+**Device Tag logic.** Full printed tag including suffixes (`.MV`, `.POUT`, `.SPEEDMV`, `:SELECTED` stripped as attributes). Trailing underscores (`.ST_`) are preserved.
+
+**Loop Tag logic.** Derived from Device Tag (suffix stripped) for clubbing parity with DB.
+
+**Function Block Summary.** Independent sheet: PIDCON, MOTCON, VALVECON, MANSTN, … declaration counts — not I/O row counts.
+
+**Engineering rules.** Duplicate key = `(io_family, card_number, channel_number, device_tag)`. Completeness auditor compares inventory vs extraction.
+
+**Validation.** `card_number` / `channel_number` ≥ 0. Channel `0` means “no channel in source,” shown blank in Excel/preview.
+
+**Output.** `I_O_List` columns:
+
+`Sr. No. | $(TAG) | $(NAME_40) | $(DEVICETAG) | Slot/Card | Channel | AI | AO | DI | DO | AI800_ | AO800_ | DI800_ | DO800_`
+
+Freeze panes keep identity + address visible. Soft rows leave Slot/Card and Channel empty. Multi-file name: `PC_Element_IO_List.xlsx`.
+
+**Spot checks (`.AXX Data` corpus).** `82PIC972.MV` → 7.10; `82PIC972.POUT` → 3.9; `82M140.SPEEDMV` → 192.1. Technical write-up: [`docs/aax_slot_channel_report.md`](docs/aax_slot_channel_report.md).
+
+---
+
+### Module 3 — Engineering Tag Comparator
+
+**Purpose.** Reconcile two engineering workbooks by Device Tag set, not by row alignment.
+
+**Input files.** Exactly two Excel files (`.xlsx` / `.xlsm` / `.xls`).
+
+**Matching algorithm.** Extract `$(DEVICETAG)` (or `DEVICE TAG` / `NAME`) from each workbook. Compare case-insensitive trimmed sets. Duplicates inside a file are counted separately.
+
+**Device Tag matching.** Order is irrelevant. A tag present in both sets is matched once.
+
+**Reporting.** Sheets for matched tags, unmatched-in-file-1, unmatched-in-file-2, plus a numeric summary (`worksheet1_records`, `matched_records`, `unmatched_records`).
+
+**Summary.** Download name: `Comparison_Report.xlsx`.
+
+**Accuracy.** Deterministic set math. False “unmatched” usually means header alias mismatch or a suffix difference (`.MV` vs bare loop). Confirm both files use the same Valmet header contract.
+
+---
+
+### Module 4 — I/O Address Generator
+
+**Purpose.** Allocate sequential ABB-style addresses from an already-generated DB or PC workbook.
+
+**Address allocation.** Records grouped by category indicator columns. Each family has a channel capacity:
+
+| Family | Channels per card |
+|--------|-------------------|
+| AI, AO | 16 |
+| AI800_, AO800_ | 8 |
+| DI, DO, DI800_, DO800_ | 32 |
+
+**Card logic.** Card index grows with dataset size. Excel’s 16,384-column limit is the practical ceiling, not a fictional AC450 card cap.
+
+**Channel logic.** Channels fill 1..N then roll to the next card. Preview columns `$(TAG) {n}` / `$(DEVICETAG) {n}`.
+
+**ABB hardware limits.** Encoded as `CHANNELS_PER_CARD` in `backend/io_address_arrangement/arranger.py`. Changing a limit is a one-map edit plus tests.
+
+**Address sequencing.** Categories emit as separate worksheets so analog and digital packing never interleave.
+
+**Output.** `IO_Address_Arrangement.xlsx`.
+
+---
+
+### Module 5 — ABB Engineering Template Generator
+
+**Purpose.** Populate a Valmet/ABB import template from clubbed DB or PC Excel.
+
+**Template population.** Adjacent compatible pairs (AI+AO, DI+DO, 800-series) with the same Loop Tag become one template row. Input occupies slot 1; output occupies slot 2.
+
+**Mapping rules.** Headers resolved by alias lists (`$(DEVICETAG)`, `DEVICE TAG`, `NAME`, …).
+
+**Device Tag mapping.** `$(DEVICETAG1)` / `$(DEVICETAG2)` from the pair. Unpaired clubs still emit with the second device blank.
+
+**Placeholder population.**
+
+| Placeholder | Source |
+|-------------|--------|
+| `$(TAG)` | Loop Tag |
+| `$(NAME40_1)` | Description / `$(NAME_40)` |
+| `$(CARDTYPE1/2)` | Category of each member |
+| `$(DEVICETAG1/2:MIN/MAX/UNIT)` | Range and unit columns when present |
+| `$(PACKAGE)`, `$(EXE)`, `$(CTRLROOM)`, `$(ALGROUP)`, Process Area ID | Optional source headers |
+
+**Engineering variables.** Defined in `TEMPLATE_COLUMNS` inside `backend/engineering_template/generator.py`.
+
+**Export.** Sheet `Engineering_Template`. Download name: `ABB_Engineering_Template.xlsx`.
+
+---
+
+## User Guide
+
+The UI is a three-stage pipeline: **Upload → Processing → Results**. Pick a module on the landing page, then follow the dropzone for that module.
+
+> **Screenshot placeholder:** `docs/screenshots/01-landing-modules.png` — five service cards (DB, PC, Compare, I/O Address, Template).
+
+### DB Element Converter
+
+| | |
+|--|--|
+| **Purpose** | Convert AC450 DB listings to clubbed Valmet Excel |
+| **When to use** | You have DB printouts or BAX dumps for an area/node |
+| **Formats** | PDF, BAX (multi-file allowed) |
+| **Expected output** | One workbook, clubbed I/O, inherited defaults |
+
+**Steps**
+
+1. Open the [production website](https://abb-ac450-migration-studio.vercel.app).  
+2. Select **DB Element Converter**.  
+3. Drag PDF/BAX files (≤ 100 MB each).  
+4. Start conversion. Watch phase text and percent.  
+5. On success, preview sheets and **Download Excel**.  
+6. Optional: **View Execution Log**.
+
+**Tips.** Prefer text-based PDFs. Combine area files in one job when you want a single workbook. Review override vs default metrics.
+
+**Common mistakes.** Uploading a PC diagram as DB. Expecting Slot/Card from a DB file that never printed `:ADDR`. Re-downloading after a Render sleep (temp files are gone — re-run).
+
+> **Screenshot placeholder:** `docs/screenshots/02-db-dropzone.png`
+
+### PC Element Converter
+
+| | |
+|--|--|
+| **Purpose** | Extract PC I/O, tags, Slot/Card, Channel, function blocks |
+| **When to use** | PC diagram PDFs or AAX exports |
+| **Formats** | PDF, AAX (multi-file → one `PC_Element_IO_List.xlsx`) |
+| **Expected output** | `I_O_List` + `Function Block Summary` |
+
+**Steps**
+
+1. Select **PC Element Converter**.  
+2. Upload PDF and/or AAX.  
+3. Process and wait for “PC Element IO Extraction Complete”.  
+4. In the grid, Slot/Card and Channel sit **beside Device Tag** (highlighted).  
+5. Search a known tag (example: `82PIC972.MV`) to confirm 7 / 10 when that hardware exists in the AAX.  
+6. Download Excel. Columns stay frozen while you scroll indicators.
+
+**Tips.** Empty Slot/Card means the AAX/PDF has no board for that signal (DAT, comms, internals). Do not invent numbers. Use the matching DB job for `:ADDR`.
+
+**Common mistakes.** Looking only at Function Block Summary (no addresses there). Assuming every row must have a card. Uploading BAX as PC.
+
+> **Screenshot placeholder:** `docs/screenshots/03-pc-results-slot-channel.png`
+
+### Engineering Tag Comparator
+
+| | |
+|--|--|
+| **Purpose** | Diff two tag lists |
+| **When to use** | After two conversions, or vendor vs site list |
+| **Formats** | Two Excel workbooks |
+| **Expected output** | `Comparison_Report.xlsx` |
+
+**Steps:** choose Comparator → upload Worksheet 1 and Worksheet 2 → process → review matched/unmatched counts → download.
+
+**Tips.** Both files should expose `$(DEVICETAG)` or a recognized alias.
+
+**Common mistakes.** Comparing a Loop Tag column to a Device Tag column. Expecting row-order matching.
+
+### I/O Address Generator
+
+| | |
+|--|--|
+| **Purpose** | Pack tags onto cards/channels |
+| **When to use** | After a successful DB or PC Excel exists |
+| **Formats** | One generated `.xlsx` |
+| **Expected output** | `IO_Address_Arrangement.xlsx` |
+
+**Steps:** select I/O Address Generator → upload the generated workbook → process → inspect per-family sheets → download.
+
+**Tips.** Fix category indicators on the source workbook first; the arranger reads those columns.
+
+**Common mistakes.** Uploading a raw ABB PDF. Editing addresses by hand then re-running without saving a new source.
+
+### ABB Engineering Template Generator
+
+| | |
+|--|--|
+| **Purpose** | Build import-shaped rows from clubbed pairs |
+| **When to use** | Last step before Valmet template import |
+| **Formats** | One generated DB/PC Excel |
+| **Expected output** | `ABB_Engineering_Template.xlsx` |
+
+**Steps:** select Template → upload clubbed workbook → process → verify `$(TAG)` / `$(DEVICETAG1)` / `$(DEVICETAG2)` → download.
+
+**Tips.** Compatible pairs must share a Loop Tag and sit in clubbing order.
+
+**Common mistakes.** Feeding a comparison report. Expecting every analog to have a paired output if the source never had one.
+
+### Cross-module sequence (recommended)
+
+1. DB conversion (area listing)  
+2. PC conversion (diagrams / AAX)  
+3. Comparator (DB Device Tags vs PC Device Tags)  
+4. I/O Address Generator on the accepted workbook  
+5. Engineering Template for import  
+
+Archive the Excel **and** the execution log with the job date. Render will not keep them.
+
+---
+
+## Developer Guide
+
+### Project Architecture
+
+**Frontend architecture.** Next.js App Router (`frontend/app/page.tsx`) renders a single conversion workstation. Zustand holds the session. `use_file_upload` / `use_status_polling` drive Axios. Results read `preview_data` and `generated_sheets`. No parser code runs in the browser.
+
+**Backend architecture.** `backend/main.py` mounts routers, CORS `allow_origins=["*"]`, dual health paths. `ConversionService.run_conversion_pipeline` switches on type. Engines return objects + preview + `excel_file_path`.
+
+**API architecture.** Prefix `/api`. Upload is multipart; process/status are JSON; download is a file; logs are plain text.
+
+**Service architecture.** `JobManager` (create, heartbeat, persist JSON, stale-fail). `pipeline_executor` (thread pool, `is_job_running`). Conversion service (five pipelines, combined multi-file Excel).
+
+**Processing engine architecture.** Each engine is a package with reader → detect/parse → validate → club/format → Excel. Shared pieces: `backend/excel/design.py`, `header_postprocessor.py`, `mapper/category_mapper.py`.
+
+### Folder Structure
 
 ```text
-ABB-AC450-Migration-Studio/
-├── frontend/                      # Next.js application
-│   ├── app/                       # App Router pages & layout
-│   ├── components/                # Dropzone, results, processing, header
-│   ├── hooks/                     # Upload, polling, job orchestration
-│   ├── services/                  # Axios API client
-│   ├── store/                     # Zustand converter store
-│   ├── types/                     # ConversionType & status types
-│   ├── utils/                     # Formatters
-│   ├── public/                    # Logos & hero assets
-│   └── package.json
+ABB AC450 Migration Studio/
+├── frontend/                    # Next.js 15 UI (Vercel)
+│   ├── app/                     # App Router pages, layout, providers
+│   ├── components/              # Dropzone, results, processing, landing
+│   ├── hooks/                   # Upload + status polling
+│   ├── services/api_client.ts   # Production Render URL + local 8002
+│   ├── store/                   # Zustand session
+│   ├── types/                   # ConversionType, status DTO
+│   └── public/                  # Brand assets
 ├── backend/
-│   ├── main.py                    # FastAPI entrypoint
-│   ├── api/                       # upload, process, status, download, logs
-│   ├── services/                  # ConversionService, JobManager
-│   ├── core/                      # Settings & logging
-│   ├── schemas/                   # Pydantic API models
-│   ├── constants/                 # AC450 constants / families
-│   ├── parser/                    # DB Element PDF parser stack
-│   ├── extractor/                 # Parameter extractor
-│   ├── mapper/                    # Clubbing, category mapping, formatting
-│   ├── excel/                     # Shared workbook design & generators
-│   ├── pc_element/parser/         # Production PC Element engine
-│   ├── pc_parser/                 # Legacy PC stack (not primary path)
-│   ├── excel_compare/             # Tag comparator
-│   ├── io_address_arrangement/    # Address packing module
-│   ├── engineering_template/      # Valmet template generator
-│   ├── models/                    # Domain models
-│   ├── utils/                     # Filename helpers
-│   └── tests/                     # pytest suite
-├── api/                           # Deprecated Vercel serverless stub
-├── docs/                          # Architecture & module docs
-├── examples/                      # Sample generators
-├── requirements.txt               # Python dependencies
-├── package.json                   # Root build helper for Vercel
-├── vercel.json                    # Frontend deploy config
-├── render.yaml                    # Backend deploy config
-├── start_dev.bat                  # Local dual-service launcher
-└── README.md                      # This document
+│   ├── api/                     # upload, process, status, download, logs
+│   ├── core/                    # settings, logging
+│   ├── schemas/                 # Pydantic API models
+│   ├── services/                # ConversionService, JobManager, executor
+│   ├── parser/                  # DB PDF + BAX
+│   ├── extractor/               # :param extraction
+│   ├── mapper/                  # Clubbing, category indicators, formatter
+│   ├── excel/                   # Shared workbook design
+│   ├── pc_element/parser/       # Production PC + AAX pipeline
+│   ├── pc_parser/               # Legacy PC helpers (do not fork blindly)
+│   ├── excel_compare/           # Tag comparator
+│   ├── io_address_arrangement/  # Card/channel packer
+│   ├── engineering_template/    # Template rows
+│   ├── models/                  # Legacy PC element model
+│   ├── utils/                   # Filenames, combined export names
+│   └── tests/                   # pytest suite + fixtures
+├── docs/                        # Architecture, PC module, AAX reports, deploy analysis
+├── scripts/                     # Corpus analysis / diagnostics (not production)
+├── examples/                    # Tiny sample PDF generator
+├── requirements.txt             # Render install
+├── render.yaml                  # Backend blueprint
+├── vercel.json                  # Monorepo Next build
+├── start_dev.bat                # Windows: API :8002 + UI :5180
+└── README.md                    # This document
 ```
 
-### Folder responsibilities
+Temp uploads/outputs/logs are **not** in git. They are created under the OS temp dir (`/tmp/abb_ac450/...` on Render).
 
-| Path | Responsibility |
-|------|----------------|
-| `frontend/` | All user-facing UI and client orchestration |
-| `backend/api/` | Thin HTTP adapters around services |
-| `backend/services/` | Business orchestration and job lifecycle |
-| `backend/parser/` | DB PDF grammar, inheritance, object detection |
-| `backend/pc_element/` | Current PC Diagram hardwired I/O + FB summary |
-| `backend/excel_compare/` | Device Tag set comparison |
-| `backend/io_address_arrangement/` | Hardware-aware address sheet layout |
-| `backend/engineering_template/` | Import template mapping |
-| `backend/excel/` | Shared styling / header post-processing |
-| `docs/` | Deep-dive design notes beyond this README |
-| Temp dirs (`UPLOAD_DIR`, `OUTPUT_DIR`, `LOG_DIR`) | Runtime job artifacts under system temp |
+### Backend
 
----
+**FastAPI.** `app` in `backend/main.py`. Routers mounted at `settings.API_PREFIX` (`/api`).
 
-## 7. User Guide
+**Routes.** See [APIs](#apis).
 
-### 7.1 Prerequisites for end users
+**Services.** `ConversionService` is the only place that chooses an engine. Do not call Excel generators from routers.
 
-- Modern browser (Google Chrome recommended)
-- Access to the deployed site **or** a locally running stack
-- Source files:
-  - DB/PC modules → PDF
-  - Comparator / Address / Template modules → Excel (`.xlsx` / `.xlsm` / `.xls` as accepted by upload API)
+**Engines.** DB (`parser` + `mapper` + `excel`). PC (`pc_element.parser`). Compare, arrange, template as named packages.
 
-### 7.2 How to use the application
+**Utilities.** `sanitize_filename`, `pdf_to_excel_filename`, `combined_export_filename`, `unique_output_path`.
 
-1. Open the Migration Studio landing page.
-2. Review the feature cards / workflow strip to confirm you are on the correct tool.
-3. In the upload workspace, select the engineering module:
-   - **DB Element Converter**
-   - **PC Element Converter**
-   - **Engineering Tag Comparator**
-   - **I/O Address Generator**
-   - **ABB Engineering Template Generator**
-4. Upload the required file(s). Comparator typically expects two workbooks.
-5. Start processing and wait for the progress view to complete.
-6. Inspect preview grids and metrics on the results screen.
-7. Download the generated Excel package.
-8. Optionally open job logs if warnings/errors appear.
+**Validation.** Upload extension + size. Process 404 on unknown job. Download 400 if not completed. PC `Validator` rejects negative addresses and empty tags.
 
-### 7.3 Module-specific user notes
+**Logging.** Per-job `{job_id}.log` plus structured logger `pc_element_parser` / conversion stages. Heartbeats refresh `updated_at` so stale jobs can be failed after 300 s without a heartbeat.
 
-**DB Element Converter**  
-Upload an AC450 DB Element PDF. Output is a Valmet-style clubbed I/O sheet with category indicators.
+### Frontend
 
-**PC Element Converter**  
-Upload a PC Diagram PDF. Output includes hardwired I/O list plus Function Block Summary counts for `PIDCON` / `MOTCON` / `VALVECON` / `MANSTN` declarations.
+**Components.** `framer_landing`, `workflow_cards`, `dropzone`, `processing_view`, `results_view`, `data_grid_preview`, `log_modal`, `header`, `feature_cards`.
 
-**Engineering Tag Comparator**  
-Upload two Excel files representing tag inventories. Review matched vs unmatched Device Tags.
+**Pages.** Single page application at `/`. No extra Next routes for modules.
 
-**I/O Address Generator**  
-Upload a previously generated Clubbed/I_O workbook. Receive packed address sheets by category with ABB channel limits applied.
+**Routing.** Module choice is Zustand `conversionType`, not a URL path.
 
-**ABB Engineering Template Generator**  
-Upload Clubbed/I_O Excel. Receive a Valmet engineering import template with paired card types and device tags.
+**State.** `converter_store.ts` — files per module, `jobId`, `statusResponse`, log modal.
 
-### 7.4 Screenshots
+**API integration.** `api_client.ts` — localhost → `http://127.0.0.1:8002/api`; production → Render `/api` unless `NEXT_PUBLIC_API_URL` is a non-local https URL.
 
-> Placeholders for project screenshots (replace with captured UI images when publishing):
+**Upload.** Dropzone builds `File[]` (or two files for compare). `uploadFiles` posts field name `files`.
 
-| Screen | Placeholder |
-|--------|-------------|
-| Landing / hero | `![Landing](docs/screenshots/01-landing.png)` |
-| Module selection & upload | `![Upload](docs/screenshots/02-upload.png)` |
-| Processing progress | `![Processing](docs/screenshots/03-processing.png)` |
-| Results & preview grid | `![Results](docs/screenshots/04-results.png)` |
-| Downloaded Excel (PC) | `![Excel](docs/screenshots/05-pc-excel.png)` |
+**Download.** Anchor to `getDownloadUrl(jobId)` after completion.
 
-Existing brand assets available in-repo:
+### APIs
 
-- `frontend/public/valmet-logo.webp`
-- `frontend/public/valmet-logo-bg.png`
-- `frontend/public/hero-page.png`
+Base path: `{host}/api`. Host in production: `https://abb-ac450-migration-studio-backend.onrender.com`.
 
----
+#### `GET /health` and `GET /api/health`
 
-## 8. Developer Guide
+| | |
+|--|--|
+| **Purpose** | Liveness + writable temp dirs |
+| **Status** | `200` |
+| **Response** | `{ "status": "online" \| "degraded", "project": "...", "version": "1.0.0", "filesystem": { "writable": true, ... } }` |
 
-### 8.1 Local development quick start
+#### `POST /api/upload`
 
-```bash
-# From repository root
-python -m venv venv
-# Windows
-.\venv\Scripts\Activate.ps1
-# macOS/Linux
-source venv/bin/activate
+| | |
+|--|--|
+| **Request** | `multipart/form-data`, repeated field `files` |
+| **Success** | `200` `FileUploadResponse` |
+| **Errors** | `400` no files / bad extension / over 100 MB |
 
-pip install -r requirements.txt
-
-# Terminal A — backend
-python -m uvicorn backend.main:app --reload --host 127.0.0.1 --port 8000
-
-# Terminal B — frontend
-cd frontend
-cp .env.example .env.local
-# set NEXT_PUBLIC_API_URL=http://127.0.0.1:8000/api
-npm install
-npm run dev
+```json
+{
+  "job_id": "5e2d00bb-f09c-4067-a312-f58b12157bba",
+  "uploaded_files": ["sample_pc.aax"],
+  "total_files": 1,
+  "message": "Uploaded 1 file(s) successfully. Job ID: 5e2d00bb-f09c-4067-a312-f58b12157bba"
+}
 ```
 
-Windows convenience launcher:
+#### `POST /api/process`
+
+| | |
+|--|--|
+| **Body** | `{ "job_id": "<uuid>", "conversion_type": "DB" \| "PC" \| "COMPARE" \| "IO_ARRANGE" \| "ENG_TEMPLATE" }` |
+| **Success** | `200` `{ job_id, conversion_type, status: "queued", message }` |
+| **Errors** | `404` unknown job |
+| **Idempotency** | If already running and not stale, returns “already processing.” Stale jobs are re-queued. |
+
+#### `GET /api/status/{job_id}`
+
+| | |
+|--|--|
+| **Success** | `200` `ProcessStatusResponse` |
+| **Errors** | `404` unknown job |
+
+Important fields: `status`, `progress_percentage`, `current_phase`, `message`, `conversion_type`, `total_objects`, family counts, comparator counts, `generated_sheets`, `preview_data`, `warnings`, `errors`, `updated_at`.
+
+Statuses include `queued`, `reading_pdf`, `extracting_text`, `detecting_elements`, `parsing_parameters`, `grouping_elements`, `generating_excel`, `completed`, `failed`.
+
+#### `GET /api/download/{job_id}`
+
+| | |
+|--|--|
+| **Success** | `200` `application/vnd.openxmlformats-officedocument.spreadsheetml.sheet` |
+| **Errors** | `400` not completed; `404` job or file missing (typical after Render restart) |
+
+Filenames: source basename `.xlsx` (DB/PC), `Comparison_Report.xlsx`, `IO_Address_Arrangement.xlsx`, `ABB_Engineering_Template.xlsx`.
+
+#### `GET /api/logs/{job_id}`
+
+Plain text. If the log file does not exist yet, a placeholder sentence is returned (not 404).
+
+#### Error handling
+
+Routers raise `HTTPException`. Engine failures set job `status=failed`, append `errors`, and keep the UI on the results banner. Clients should poll until `completed` or `failed` (frontend polls up to a long window; Axios timeout is 300 s per call).
+
+#### Example PC job (production)
+
+```http
+POST /api/upload
+POST /api/process
+{"job_id":"<id>","conversion_type":"PC"}
+GET  /api/status/<id>
+GET  /api/download/<id>
+```
+
+Verified 15 August 2026 against Render with `sample_pc.aax`: 11 I/O rows; `82PIC972.MV` Slot 7 Channel 10; preview key order Device Tag → Slot/Card → Channel.
+
+### Processing Engines
+
+| Engine | Parser | Validation | Mapping | Clubbing | Generation | Export |
+|--------|--------|------------|---------|----------|------------|--------|
+| DB | PDF/BAX AST + defaults | Family + params | Loop/Device/DESCR | RecordClubber | Clubbed_IO | `.xlsx` |
+| PC | PDF detector + AaxReader | Grammar + Validator + auditor | Indicators + address cells | PC RecordClubber + OutputFormatter | I_O_List + FB Summary | `.xlsx` |
+| Compare | Header scan | Two files required | Device Tag sets | N/A | Report sheets | Comparison_Report |
+| Arrange | Header + indicators | Known categories | Card/channel math | N/A | Per-family sheets | IO_Address_Arrangement |
+| Template | Header aliases | Compatible pairs | Placeholders | Adjacent clubs | Engineering_Template | ABB_Engineering_Template |
+
+**Never** put new regex in `excel_generator.py`. Address resolution belongs in `aax_reader` / grammar; Excel only prints `EngineeringIO`.
+
+### Deployment
+
+```text
+GitHub main
+   ├─ Vercel  → Next.js UI
+   └─ Render  → uvicorn backend.main:app --host 0.0.0.0 --port $PORT --workers 1
+         UI ──HTTPS──► Render /api
+```
+
+**GitHub.** Canonical remote: `https://github.com/vedantlanjekar-official/ABB-AC450-Migration-Studio.git`. `render.yaml` `autoDeploy: true` on `main`.
+
+**Vercel.** Project `abb-ac450-migration-studio`. Root `vercel.json` installs/builds `frontend`. Set **production** env:
+
+| Variable | Value |
+|----------|--------|
+| `NEXT_PUBLIC_API_URL` | `https://abb-ac450-migration-studio-backend.onrender.com/api` |
+
+Must include `/api`. This is inlined at **build** time.
+
+**Render.** Service `abb-ac450-migration-studio-backend`.
+
+| Item | Value |
+|------|--------|
+| Build | `pip install -r requirements.txt` |
+| Start | `uvicorn backend.main:app --host 0.0.0.0 --port $PORT --workers 1` |
+| Health | `/health` |
+| `PYTHON_VERSION` | `3.11.0` |
+| `PC_LIGHT_PDF_READ` | `1` |
+| `DB_LIGHT_PDF_READ` | `1` |
+| `ENABLE_PC_OCR` | `0` |
+
+**Common issues**
+
+| Symptom | Cause | Fix |
+|---------|--------|-----|
+| UI loads, process fails | Wrong/missing `NEXT_PUBLIC_API_URL` or cold start | Confirm `/health`; retry; rebuild Vercel after env change |
+| Download 404 | Ephemeral disk after sleep | Re-run conversion |
+| CLI deploy `fetch failed` ~78 MB | Uploading `.AXX Data` / `.tools` | Use GitHub auto-deploy; keep `.vercelignore` |
+| AAX rows all blank Slot/Card | File has no hardware tokens | Expected; use DB for `:ADDR` |
+| Stuck `reading_pdf` | Worker OOM / stale | Status endpoint marks stale failed; re-queue |
+
+**Local development (not production links)**
 
 ```bat
 start_dev.bat
 ```
 
-Open http://localhost:5173 and confirm http://127.0.0.1:8000/api/health returns `status: online`.
+Frontend `http://localhost:5180`, API `http://127.0.0.1:8002`.  
+`pip install -r requirements.txt` then `uvicorn backend.main:app --reload --host 127.0.0.1 --port 8002`.  
+`cd frontend && npm install && npm run dev`.  
+`pytest backend/tests -q`.
 
-### 8.2 Environment variables
+### Performance
 
-| Variable | Side | Purpose | Example |
-|----------|------|---------|---------|
-| `NEXT_PUBLIC_API_URL` | Frontend | API base URL | `http://127.0.0.1:8000/api` |
-| `PROJECT_NAME` | Backend | Service title | `ABB AC450 Migration Studio` |
-| `VERSION` | Backend | Version string | `1.0.0` |
-| `API_PREFIX` | Backend | Router prefix | `/api` |
-| `PORT` | Backend | Bind port (Render injects) | `8000` |
-| `PC_LIGHT_PDF_READ` | Backend | Prefer lightweight PC PDF path | `1` |
-| `DB_LIGHT_PDF_READ` | Backend | Prefer lightweight DB PDF path | `1` |
-| `ENABLE_PC_OCR` | Backend | Optional OCR enrichment | `0` |
-| `MAX_UPLOAD_SIZE_MB` | Backend | Upload ceiling | `100` |
-| `PYTHON_VERSION` | Render | Runtime pin | `3.11.0` |
-
-### 8.3 Development workflow
-
-1. Create a feature branch from `main`.
-2. Implement parser/service changes under the relevant backend package.
-3. Add or update pytest coverage in `backend/tests/`.
-4. Keep UI changes typed (`frontend/types`, store, API client).
-5. Run local dual-service smoke test (upload → process → download).
-6. Open PR with engineering rationale and sample outputs when possible.
-
-### 8.4 How to add a new module
-
-1. Define a new `conversion_type` string and frontend `ConversionType` union member.
-2. Add a dropzone option label/description.
-3. Implement an engine package under `backend/<module>/`.
-4. Wire a branch in `ConversionService.run_conversion_pipeline`.
-5. Emit `generated_sheets`, `preview_data`, and an Excel path consistently.
-6. Document engineering rules in `docs/` and this README.
-
-### 8.5 Coding standards
-
-- Prefer isolated module packages; do not couple PC grammar into DB inheritance code.
-- Keep HTTP handlers thin; put logic in services/engines.
-- Preserve existing Excel sheet contracts unless a versioned migration is planned.
-- Use shared `backend/excel/design.py` for visual consistency.
-- Log stage markers for long-running PDF jobs.
-- Avoid committing secrets; keep `.env*` local (already gitignored).
-
-### 8.6 Error handling & logging
-
-- Job status transitions to `failed` with `errors[]` on pipeline exceptions.
-- Heartbeats refresh `updated_at` so clients can detect stalled workers.
-- `GET /api/logs/{job_id}` returns plain-text operational logs.
-- Health endpoint probes filesystem writability for uploads/outputs/logs.
-
-### 8.7 Testing
-
-```bash
-pytest backend/tests -q
-```
-
-Critical suites include DB/PC parsers, record clubbing, Excel generators, comparator, address arrangement, engineering template, and API smoke tests.
-
----
-
-## 9. Engineering Modules
-
-## Module 1 — DB Element Converter
-
-### Purpose
-
-Extract supported I/O element instances from ABB AC450 **DB Element** PDF dumps, resolve default-parameter inheritance, club related tags, and export a Valmet-ready `Clubbed_IO` workbook.
-
-### Input
-
-- One or more DB Element PDF files
-
-### Processing highlights
-
-- Multi-strategy PDF text extraction
-- Family detection limited to eight I/O types
-- Parameter parsing (`:KEY VALUE`)
-- `.DEFAULT` / hardware-software default merge
-- Loop Tag derivation from Device Tag (strip final `.EXTENSION`)
-- Record clubbing and section sequencing
-- Category indicator columns (`AI`…`DO800_`) populated with `1` when matched
-
-### Output
-
-| Sheet | Contents |
+| Topic | Guidance |
 |-------|----------|
-| `Clubbed_IO` | Clubbed engineering I/O rows with Valmet-oriented headers |
-
-### Engineering rules
-
-- Ignore non-I/O object types in the DB dump for this converter
-- Preserve overrides over inherited defaults
-- Club AI with AO (and 800 equivalents) under the same Loop Tag
-- Club DO ahead of DI (and 800 equivalents) under the same Loop Tag
-
-### Validation
-
-- Unsupported categories rejected/skipped
-- Duplicate collapse according to mapper rules
-- Status metrics expose AI/AO/DI/DO counts, duplicates, missing descriptions, inheritance stats
-
-### Key paths
-
-- `backend/parser/*`
-- `backend/extractor/parameter_extractor.py`
-- `backend/mapper/*`
-- `backend/excel/*`
-
----
-
-## Module 2 — PC Element Converter
-
-### Purpose
-
-Parse ABB **PC Diagram** PDFs for hardwired I/O address references and produce a Valmet `I_O_List`, plus an independent **Function Block Summary**.
-
-### Input
-
-- PC Diagram PDF (function-block / hardwired drawings)
-
-### Complete pipeline
-
-1. `PDFReader` — multi-layer text (light mode uses PyMuPDF primary)
-2. `PageCleaner` — strip title-block / copyright noise
-3. `IOReferenceDetector` — candidate scan (regex + spatial tokens)
-4. `GrammarParser` — Category, Card, Channel, Device Tag, Loop Tag
-5. `DescriptionMapper` — nearby description when present
-6. `MetadataExtractor` — controller / process area
-7. `DuplicateDetector` — collapse exact/attribute variants
-8. `Validator` — keep supported eight families
-9. `CompletenessAuditor` — inventory vs extraction report
-10. `RecordClubber` + `OutputFormatter` — club & order
-11. `FunctionBlockExtractor` — declaration counts (independent)
-12. `ExcelGenerator` — `I_O_List` + `Function Block Summary`
-
-### Device Tag & Loop Tag logic
-
-Typical address patterns:
-
-```text
-Standard:   [=|-|P-=]* PREFIX CARD . CHANNEL / DEVICE_TAG
-Port-style: [=|-|P-=]* PREFIX CARD : PORT    / DEVICE_TAG[:ATTR]
-No-channel: [=|-|P-=]* PREFIX CARD           / DEVICE_TAG
-800-series: PREFIX800_ CARD . CHANNEL / DEVICE_TAG
-```
-
-- Device Tag is the token after `/`
-- Colon attributes (`KEY:SELECTED`) are stripped for Device Tag normalization
-- Loop Tag is Device Tag without the final `.EXTENSION`
-
-### Supported I/O families
-
-`AI`, `AO`, `DI`, `DO`, `AI800`, `AO800`, `DI800`, `DO800`
-
-### Function Block Summary
-
-| Functional Block | Detection |
-|------------------|-----------|
-| PIDCON | `PIDCON(` declaration only |
-| MOTCON | `MOTCON(` declaration only |
-| VALVECON | `VALVECON(` declaration only |
-| MANSTN | `MANSTN(` declaration only |
-
-**Counted:** `PIDCON(0,0,1,1,1,0)`  
-**Not counted:** `=PIDCON1:94/940LC391:PARAM1`, `PIDCON1:55/...`
-
-Implementation: `backend/pc_element/parser/function_block_extractor.py`  
-Extensibility: append to `SUPPORTED_FUNCTION_BLOCKS`.
-
-### Output sheets
-
-| Sheet | Columns (summary) |
-|-------|-------------------|
-| `I_O_List` | Sr. No., Loop Tag, Description, Device Tag, AI/AO/DI/DO/AI800_/AO800_/DI800_/DO800_, Slot/Card, Channel |
-| `Function Block Summary` | Functional Block, Total Count |
-
-### Key paths
-
-- `backend/pc_element/parser/*`
-- `docs/pc_element_module.md`
-
----
-
-## Module 3 — Engineering Tag Comparator
-
-### Purpose
-
-Compare Device Tag inventories across two Excel workbooks to identify matches and gaps during migration validation.
-
-### Matching algorithm
-
-- Extract `$(DEVICETAG)` (or equivalent Device Tag columns) from each workbook
-- Normalize case for set comparison
-- Deduplicate within each source file
-- Compute intersection and asymmetric differences
-
-### Comparison engine outputs
-
-| Sheet | Meaning |
-|-------|---------|
-| `Summary` | Aggregate matched / unmatched metrics |
-| `Unmatched Records` | Tags present in only one worksheet/file |
-
-### Validation
-
-- Reports worksheet record counts, matched count, unmatched count
-- Preview data available through status API for UI grids
-
-### Key paths
-
-- `backend/excel_compare/comparator.py`
-- `backend/excel_compare/column_extractor.py`
-- `backend/excel_compare/report_generator.py`
-
----
-
-## Module 4 — I/O Address Generator
-
-### Purpose
-
-Re-pack Device Tags from an existing Clubbed/I_O workbook into category worksheets that reflect ABB hardware channel capacities and Valmet address presentation conventions.
-
-### Card allocation & hardware limits
-
-| Family | Channels per card (engine rule) |
-|--------|----------------------------------|
-| AI / AO | 16 |
-| AI800_ / AO800_ | 8 |
-| DI / DO / DI800_ / DO800_ | 32 |
-
-### Address generation behavior
-
-- Reads Device Tag plus Category or indicator columns
-- Creates one sheet per populated category
-- Layout uses repeating tag/device columns with separators
-- Tags themselves are not rewritten; allocation is organizational
-
-### Output
-
-Dynamic sheets named among: `AI`, `AO`, `DI`, `DO`, `AI800_`, `AO800_`, `DI800_`, `DO800_` (only categories with records).
-
-### Key paths
-
-- `backend/io_address_arrangement/arranger.py`
-
----
-
-## Module 5 — ABB Engineering Template Generator
-
-### Purpose
-
-Transform clubbed I/O rows into a Valmet-oriented **Engineering Template** used for structured import workflows.
-
-### Template mapping concepts
-
-- Prefer source sheets `Clubbed_IO` or `I_O_List`
-- Pair adjacent compatible categories sharing Loop Tag:
-  - AI–AO, DO–DI, AI800_–AO800_, DO800_–DI800_
-- Map into placeholders such as `$(PACKAGE)`, `$(TAG)`, `$(CARDTYPE1/2)`, `$(DEVICETAG1/2)`, range/unit fields
-
-### Output
-
-| Sheet | Role |
-|-------|------|
-| `Engineering_Template` | Import-ready paired engineering rows |
-
-### Key paths
-
-- `backend/engineering_template/generator.py`
-
----
-
-## 10. Data Processing Pipeline
-
-### 10.1 Unified orchestration view
-
-```mermaid
-sequenceDiagram
-  participant UI as Frontend
-  participant UP as /api/upload
-  participant PR as /api/process
-  participant ST as /api/status
-  participant CS as ConversionService
-  participant EN as Module Engine
-  participant XL as Excel Generator
-  participant DL as /api/download
-
-  UI->>UP: multipart files
-  UP-->>UI: job_id
-  UI->>PR: job_id + conversion_type
-  PR->>CS: background run
-  loop Poll
-    UI->>ST: job_id
-    ST-->>UI: progress + metrics
-  end
-  CS->>EN: execute pipeline
-  EN->>XL: rows + sheets
-  XL-->>CS: excel path
-  UI->>DL: job_id
-  DL-->>UI: .xlsx stream
-```
-
-### 10.2 DB pipeline detail
-
-Text extract → clean → detect families → parse objects → extract parameters → resolve defaults → map categories → club → format → Excel.
-
-### 10.3 PC pipeline detail
-
-Text extract → clean → detect I/O candidates → grammar parse → descriptions/metadata → dedupe/validate → completeness audit → club/format → function-block counts → multi-sheet Excel.
-
-### 10.4 Excel-native modules
-
-Comparator / Address / Template skip PDF extraction and operate on workbook structures, then emit specialized sheets through the same job/download lifecycle.
-
----
-
-## 11. API Documentation
-
-Base URL (local): `http://127.0.0.1:8000`  
-API prefix: `/api`  
-Interactive docs: `/docs` (Swagger UI)
-
-### 11.1 Health
-
-| Item | Detail |
-|------|--------|
-| **Methods / Paths** | `GET /health`, `GET /api/health` |
-| **Purpose** | Liveness + filesystem writability probe |
-| **Success response** | `{ "status": "online", "project": "...", "version": "1.0.0", "filesystem": { ... } }` |
-| **Degraded** | `status: "degraded"` when temp dirs are not writable |
-
-### 11.2 Upload
-
-| Item | Detail |
-|------|--------|
-| **Method / Path** | `POST /api/upload` |
-| **Body** | `multipart/form-data` file fields |
-| **Success (200)** | `FileUploadResponse` |
-
-```json
-{
-  "job_id": "uuid-or-job-id",
-  "uploaded_files": ["diagram.pdf"],
-  "total_files": 1,
-  "message": "Upload successful"
-}
-```
-
-| Status | Meaning |
-|--------|---------|
-| 200 | Files stored for job |
-| 4xx | Validation / empty upload / unsupported payload |
-| 5xx | Storage or server failure |
-
-### 11.3 Process
-
-| Item | Detail |
-|------|--------|
-| **Method / Path** | `POST /api/process` |
-| **Body (JSON)** | `{ "job_id": "...", "conversion_type": "DB|PC|COMPARE|IO_ARRANGE|ENG_TEMPLATE" }` |
-
-```json
-{
-  "job_id": "abc123",
-  "conversion_type": "PC"
-}
-```
-
-Starts background conversion. Clients should poll status.
-
-### 11.4 Status
-
-| Item | Detail |
-|------|--------|
-| **Method / Path** | `GET /api/status/{job_id}` |
-| **Purpose** | Progress, metrics, preview, sheet names, errors |
-
-Key fields include `status`, `progress_percentage`, `current_phase`, `message`, `conversion_type`, category counts, comparator metrics, `generated_sheets`, `preview_data`, `warnings`, `errors`, `excel_file_path`, `updated_at`.
-
-Typical `status` values used by the UI: `idle`, `reading_pdf`, `extracting_text`, `detecting_elements`, `grouping_elements`, `generating_excel`, `completed`, `failed`.
-
-### 11.5 Download
-
-| Item | Detail |
-|------|--------|
-| **Method / Path** | `GET /api/download/{job_id}` |
-| **Success** | Excel file download (`application/vnd.openxmlformats-officedocument.spreadsheetml.sheet`) |
-| **Errors** | 404 if job missing / not complete / file absent |
-
-### 11.6 Logs
-
-| Item | Detail |
-|------|--------|
-| **Method / Path** | `GET /api/logs/{job_id}` |
-| **Success** | Plain-text job log body |
-| **Use** | Debugging extraction stages and failures |
-
-### 11.7 Error response conventions
-
-- Transport failures and validation errors return FastAPI/HTTPException payloads.
-- Pipeline soft failures populate `errors` / `warnings` on the status object while keeping the HTTP status endpoint reachable.
-- Stale jobs may be marked failed by status polling logic when heartbeats stop.
-
----
-
-## 12. Frontend Architecture
-
-### 12.1 App structure
-
-| Path | Role |
-|------|------|
-| `frontend/app/page.tsx` | Renders landing/workflow shell |
-| `frontend/app/layout.tsx` | Global chrome, fonts, metadata, favicon |
-| `frontend/app/providers.tsx` | React Query provider + log modal host |
-| `frontend/app/globals.css` | Global styles |
-
-### 12.2 Key components
-
-| Component | Responsibility |
-|-----------|----------------|
-| `framer_landing.tsx` | Primary page composition |
-| `dropzone.tsx` | Module selection + file intake |
-| `processing_view.tsx` | Progress visualization |
-| `results_view.tsx` | Metrics, download, completion messaging |
-| `data_grid_preview.tsx` | Tabular preview of sheet rows |
-| `workflow_cards.tsx` | Pipeline step presentation |
-| `feature_cards.tsx` | Marketing/feature highlights |
-| `header.tsx` | Branding header |
-| `log_modal.tsx` | Job log viewer |
-
-### 12.3 State management
-
-- **Zustand store** (`converter_store.ts`): stage (`upload` / `processing` / `results`), selected conversion type, files, job id, status payload, logs.
-- **React Query**: shared query client for async patterns.
-- **Hooks**: `use_file_upload`, `use_status_polling`, `use_converter_job` orchestrate the job lifecycle.
-
-### 12.4 Routing & UI workflow
-
-Single-page App Router experience with stage-driven views rather than multi-route navigation. Users move linearly:
-
-`upload → processing → results`
-
-API base resolution prefers `NEXT_PUBLIC_API_URL`, falling back to local `http://127.0.0.1:8000/api` in development.
-
----
-
-## 13. Backend Architecture
-
-### 13.1 Entrypoint
-
-`backend/main.py` constructs the FastAPI app, enables CORS, mounts routers under `/api`, and exposes health probes.
-
-### 13.2 Routes
-
-| Router file | Endpoints |
-|-------------|-----------|
-| `api/upload.py` | `POST /upload` |
-| `api/process.py` | `POST /process` |
-| `api/status.py` | `GET /status/{job_id}` |
-| `api/download.py` | `GET /download/{job_id}` |
-| `api/logs.py` | `GET /logs/{job_id}` |
-
-### 13.3 Services
-
-- **ConversionService** — selects and executes module pipelines; updates job metrics and sheet lists.
-- **JobManager** — in-memory job registry and status transitions.
-- **pipeline_executor** — helper execution/heartbeat patterns for long jobs.
-
-### 13.4 Processing engines
-
-| Engine | Package |
-|--------|---------|
-| DB PDF parser | `backend/parser` |
-| PC Element parser | `backend/pc_element/parser` |
-| Excel compare | `backend/excel_compare` |
-| I/O address arrange | `backend/io_address_arrangement` |
-| Engineering template | `backend/engineering_template` |
-
-### 13.5 Utilities & shared Excel
-
-- `backend/utils/file_utils.py` — sanitize names, unique output paths
-- `backend/excel/design.py` — shared workbook styling
-- `backend/excel/header_postprocessor.py` — Valmet header renames (`$(TAG)`, `$(DEVICETAG)`, …)
-- `backend/core/config.py` — settings from environment
-- `backend/core/logging.py` — structured logger access
-
-### 13.6 Validation philosophy
-
-Validators are family-aware and conservative: unsupported engineering object types are skipped for I/O export rather than forcing incorrect Valmet rows. PC completeness auditing quantifies misses without mutating the I/O grammar.
-
----
-
-## 14. Deployment Guide
-
-### 14.1 Local development
-
-See [Developer Guide](#8-developer-guide). Recommended smoke checklist:
-
-1. `/api/health` online
-2. Frontend loads module picker
-3. Upload sample PDF/Excel
-4. Process completes
-5. Download opens in Excel
-
-### 14.2 GitHub
-
-Canonical repository:
-
-https://github.com/vedantlanjekar-official/ABB-AC450-Migration-Studio
-
-`render.yaml` is configured for `branch: main` with `autoDeploy: true`.
-
-### 14.3 Vercel (frontend)
-
-Configured by `vercel.json`:
-
-- Install: `cd frontend && npm install`
-- Build: `cd frontend && npm run build`
-- Output: `frontend/.next`
-
-Set `NEXT_PUBLIC_API_URL` to the Render backend API base, for example:
-
-```text
-https://abb-ac450-migration-studio-backend.onrender.com/api
-```
-
-### 14.4 Render (backend)
-
-Configured by `render.yaml`:
-
-- Service name: `abb-ac450-migration-studio-backend`
-- Build: `pip install -r requirements.txt`
-- Start: `uvicorn backend.main:app --host 0.0.0.0 --port $PORT --workers 1`
-- Health check: `/health`
-- Region: Oregon
-- Env: `PYTHON_VERSION=3.11.0`, light PDF flags, OCR disabled by default
-
-### 14.5 Production architecture
-
-```text
-Users
-  → Vercel (Next.js UI)
-      → Render FastAPI (/api/*)
-          → Temp filesystem (uploads/outputs/logs)
-          → Generated .xlsx download
-```
-
-### 14.6 Production notes
-
-- Free-tier Render instances may cold-start; health/warmup monitors are recommended.
-- Keep `PC_LIGHT_PDF_READ=1` / `DB_LIGHT_PDF_READ=1` on memory-constrained hosts.
-- `api/index.py` is a deprecated Vercel serverless path; production backend is Render.
-
----
-
-## 15. Performance
-
-| Dimension | Guidance (v1) |
-|-----------|----------------|
-| **Processing speed** | Small PC/DB PDFs often complete in seconds to low minutes depending on page count and host CPU |
-| **Large drawings** | Multi-dozen page PC diagrams are dominated by PDF text fusion and candidate scanning |
-| **Memory usage** | Light PDF modes reduce dual-engine peaks; pandas/openpyxl add transient workbook memory |
-| **Concurrency** | Single Uvicorn worker in Render config; in-memory JobManager is process-local |
-| **Scalability** | Horizontal scale requires shared job store + shared object storage (future) |
-| **Reliability** | Stage logging, heartbeats, completeness reports, and explicit failed states |
-
-Practical tip: for big PC PDFs, prefer hosts with ≥1 GB RAM and keep OCR off unless selectable text density is poor.
-
----
-
-## 16. Security
+| **Speed** | Small AAX/PDF: seconds. Large PC PDFs: minutes (text fusion + candidate scan) |
+| **Scalability** | Single Uvicorn worker; in-memory jobs — horizontal scale needs shared store + object storage |
+| **Memory** | Light PDF flags on; OCR off on free Render (512 MB class) |
+| **Large files** | 100 MB cap; detector caps (`MAX_SOURCE_CHARS`, `MAX_LINE_CHARS`) |
+| **Recovery** | Heartbeats; stale fail; user re-upload |
+
+### Security
 
 | Control | Implementation |
 |---------|----------------|
-| **File validation** | Upload path accepts expected document types; size governed by `MAX_UPLOAD_SIZE_MB` |
-| **Input validation** | Pydantic request models for process payloads |
-| **Temporary storage** | Job files under system temp namespaces, not committed to git |
-| **CORS** | Enabled for browser clients (open origins in current config — tighten for hardened enterprise installs) |
-| **Safe Excel writes** | Cell sanitization avoids formula injection from strings beginning with `=`, `+`, `@`, etc. |
-| **Error handling** | Exceptions logged server-side; client receives structured errors/warnings |
-| **Secrets** | Environment-based configuration; `.env*` gitignored |
-| **AuthN/AuthZ** | Not bundled in v1 (job IDs act as capability tokens) — add SSO/API keys for multi-tenant production |
+| **File validation** | Extension allow-list + 100 MB |
+| **Input validation** | Pydantic bodies; sanitized filenames |
+| **Temp storage** | Job-scoped dirs under system temp; not committed |
+| **Excel safety** | Strings starting with `=`, `+`, `@` stripped before write |
+| **CORS** | Open `*` for this public engineering tool — tighten if the service is locked to a corporate origin |
+| **Auth** | None in v1 — treat as an internal workstation, not a multi-tenant SaaS |
+| **Secrets** | `.env*` local files gitignored; never commit Vercel OIDC / tokens |
+
+### Future Scope
+
+- AI-assisted description / low-confidence tag review  
+- Learned layout models for degraded scans  
+- OCR on by default only on hosts with ≥ 2 GB RAM  
+- Additional ABB families (MasterPiece variants, AC800M extracts)  
+- Project-level batch queues and consolidated coverage reports  
+- Shared object storage so downloads survive Render sleep  
+- Multi-language UI (engineering tags stay ASCII)  
+- Optional SSO and stricter CORS for plant networks  
+- Docker Compose for air-gapped engineering laptops  
+
+Non-goals of v1: live OPC/DCS, push-to-Valmet-without-review, billing, mobile apps.
 
 ---
 
-## 17. Engineering Design Decisions
+## System Ratings
 
-| Decision | Rationale |
-|----------|-----------|
-| **FastAPI** | Fast Python API, native async, excellent OpenAPI docs for engineering stakeholders |
-| **Next.js App Router** | Production React hosting, simple Vercel deployment, single-page workflow shell |
-| **Zustand + React Query** | Lightweight UI state for stages; polling-friendly server state |
-| **Modular backend packages** | Each engineering module can evolve without breaking others |
-| **openpyxl** | Fine-grained multi-sheet styling and header control for Valmet layouts |
-| **pdfplumber + PyMuPDF** | Complementary PDF text recall on CAD/vector drawings |
-| **Declaration-only FB detection** | Prevents false positives from dense PC cross-reference labels |
-| **In-memory JobManager** | Simple operational model for single-worker deployments |
-| **Vercel + Render split** | Matches free/low-cost hosting strengths of FE vs long-running Python jobs |
-| **Shared Excel design system** | Visual consistency across DB/PC/compare/template outputs |
+Ratings reflect the **shipped v1.0.0** on 15 August 2026 (local pytest + production AAX smoke on Render). They are engineering judgments, not marketing scores.
 
----
+### Table 1 — Engineering modules
 
-## 18. Future Scope
+| Component | Rating (/10) | Comments |
+|-----------|-------------:|----------|
+| DB Element Converter | 8.6 | Strong default inheritance, clubbing, and multi-file combine. Still PDF-quality dependent. |
+| PC Element Converter | 8.7 | AAX stages 4F/4G plus PDF grammar; Slot/Card visible in results. Soft rows correctly stay blank. |
+| Engineering Tag Comparator | 8.1 | Correct set semantics; limited when headers drift from aliases. |
+| I/O Address Generator | 8.2 | Clear channel map; grows cards instead of inventing a fake hardware cap. |
+| ABB Engineering Template Generator | 8.0 | Placeholder coverage is solid; optional plant columns need clean source headers. |
 
-| Theme | Candidates |
-|-------|------------|
-| **OCR / AI assist** | Stronger recovery for scanned-only diagrams; selective ENABLE flags already exist |
-| **Machine learning** | Description association, noisy-label cleanup, block-type classification |
-| **Additional ABB platforms** | Broader AC family coverage beyond AC450-focused rules |
-| **Other DCS vendors** | DeltaV, Honeywell, Yokogawa mapping packs |
-| **Batch conversion** | Multi-PDF project queues with consolidated reporting |
-| **Cloud processing** | Object storage, Redis job bus, horizontal workers |
-| **Security hardening** | Auth, signed URLs, stricter CORS, retention policies |
-| **Localization** | Multi-language UI for global engineering centers |
-| **Deeper Valmet integration** | Direct import adapters beyond Excel intermediaries |
-| **Richer Function Block analytics** | Expand beyond PIDCON/MOTCON/VALVECON/MANSTN |
+### Table 2 — Platform qualities
 
----
+| Component | Rating (/10) | Comments |
+|-----------|-------------:|----------|
+| Frontend | 8.3 | Clear three-stage UX; Slot/Card highlighted. No deep linking per module. |
+| Backend | 8.6 | Clean engine isolation and job heartbeats. Ephemeral storage is the main ops constraint. |
+| API Layer | 8.5 | Small, consistent surface; stale-job retry is production-aware. |
+| UI/UX | 8.2 | Valmet visual language; horizontal address columns no longer hide off-screen. |
+| Processing Accuracy | 8.4 | Golden AAX spots hold; 26/32 corpus files have no HW tokens by nature of PC vs DB split. |
+| Architecture | 8.6 | Five engines, one job API, shared Excel design. |
+| Maintainability | 8.3 | Tests around AAX, multi-file Excel, clubbing. Dual `pc_parser` vs `pc_element` needs discipline. |
+| Deployment Readiness | 8.4 | Live Vercel↔Render path proven. Cold start and disk loss must be explained to users. |
+| Documentation | 8.8 | This README plus `docs/` module reports. |
+| **Overall Project** | **8.5** | Fit for supervised mill migration work; not an unattended DCS writer. |
 
-## 19. System Ratings
+**Overall strengths.** Encoded ABB/Valmet rules; AAX hardware join without fabricating cards; combined multi-file Excel; observable jobs; production link verified.
 
-Professional evaluation of the current v1.0.0 codebase as an enterprise migration accelerator (not a certified DCS product).
+**Areas for improvement.** Persist outputs off the dyno; optional auth; retire leftover `pc_parser` confusion; screenshot pack in `docs/screenshots/`; OCR only on larger hosts.
 
-| Module / Area | Rating | Comments |
-|---------------|-------:|----------|
-| DB Element Converter | **8.5 / 10** | Strong inheritance + clubbing; deep parser surface area |
-| PC Element Converter | **8.7 / 10** | Production grammar, completeness audit, FB summary addition |
-| Engineering Tag Comparator | **8.0 / 10** | Clear set-based Device Tag reconciliation |
-| I/O Address Generator | **8.0 / 10** | Hardware channel rules encoded; category sheet outputs |
-| ABB Engineering Template Generator | **8.2 / 10** | Practical Valmet placeholder mapping |
-| Frontend | **8.3 / 10** | Cohesive workflow UX; single-page clarity |
-| Backend | **8.6 / 10** | Clean FastAPI modularization |
-| API | **8.5 / 10** | Consistent job lifecycle endpoints + OpenAPI |
-| UI/UX | **8.0 / 10** | Professional industrial aesthetic; screenshot pack still optional |
-| Overall Architecture | **8.6 / 10** | Module isolation is a major strength |
-| Code Maintainability | **8.2 / 10** | Good package boundaries; dual PC stacks need discipline |
-| Deployment Readiness | **8.0 / 10** | Vercel/Render ready; free-tier cold starts & no auth in v1 |
+**Production readiness.** Yes, as an **internal engineering workstation** with human review of every workbook.
 
-### Overall project rating
-
-## **8.4 / 10 — Production-capable engineering tool**
-
-### Strengths
-
-- Five complementary modules covering extract → compare → arrange → template
-- Engineering rules encoded explicitly (families, clubbing, channel limits, FB declarations)
-- Clear API job model with preview and logs
-- Documented PC module and shared Excel design language
-
-### Weaknesses
-
-- No first-class authentication/authorization
-- In-memory jobs do not survive multi-instance scale-out
-- Legacy `pc_parser` coexists with `pc_element` (cognitive overhead)
-- OCR path is optional and environment-sensitive
-
-### Areas of improvement
-
-- Persist jobs and artifacts in shared storage
-- Add enterprise auth and audit trails
-- Expand automated golden-file PDF fixtures
-- Publish screenshot gallery and sample datasets
-- Collapse/retire legacy PC stack after verification
-
-### Production readiness
-
-Suitable for **controlled enterprise use** by engineering teams that understand AC450/Valmet conventions, with recommended hosting hardening before broad multi-tenant exposure.
+**Final engineering evaluation.** The Studio is a serious conversion compiler: parsers are conservative, Excel is contractual, and the five-module sequence matches how migration teams actually work. Protect those contracts more than you chase new UI chrome.
 
 ---
 
-## 20. Contributors
+## A Message to Developers
 
-| Role | Details |
+If you are reading this because you inherited the Studio — welcome. Engineering software is a strange craft. You will spend an afternoon proving that `82PIC972.MV` is slot 7 channel 10, then another afternoon explaining why two hundred other rows have no slot at all. Both outcomes can be correct. The file simply never stored a board.
+
+That is the work: sit with the source, refuse to invent data, write the join that *is* in the AAX, and leave a test so the next person does not re-learn it at 01:00 before a cutover.
+
+You will debug a clubbing sort that looked cosmetic until a valve pair imported in the wrong order. You will rename a header and break a Valmet template. You will restart Render and wonder where the Excel went. You will also, once in a while, watch a whole area convert in seconds and remember why this tool exists — so a mill engineer does not retype a thousand tags.
+
+Leave the engines isolated. Put new regex in the reader, not in the spreadsheet writer. Add a pytest when you change a family. Write the warning instead of a guessed card number. Refactor when the names lie. Review like the workbook will be printed and signed.
+
+Build things that help people who will never read this repository. Then leave the repository kinder than you found it.
+
+---
+
+## Contributors
+
+| Role | Name |
+|------|------|
+| Author / primary maintainer | [vedantlanjekar-official](https://github.com/vedantlanjekar-official) |
+| Product context | Valmet / ABB AC450 migration engineering |
+| Platform | Vercel (UI), Render (API), GitHub (`main`) |
+
+Pull requests should name the module, the sheet contract impact, and the test that locks the behavior.
+
+---
+
+## Related Documentation
+
+| Document | Contents |
+|----------|----------|
+| [`docs/architecture.md`](docs/architecture.md) | Historical converter architecture notes |
+| [`docs/pc_element_module.md`](docs/pc_element_module.md) | PC pipeline design |
+| [`docs/aax_parser_upgrade_report.md`](docs/aax_parser_upgrade_report.md) | AAX engine before/after |
+| [`docs/aax_slot_channel_report.md`](docs/aax_slot_channel_report.md) | Slot/Card and Channel extraction |
+| [`docs/deployment_analysis.md`](docs/deployment_analysis.md) | Cloud constraints and env contract |
+| [`render.yaml`](render.yaml) | Backend blueprint |
+| [`vercel.json`](vercel.json) | Frontend build |
+
+---
+
+## Appendix — Glossary, Contracts, and Onboarding
+
+### Glossary
+
+| Term | Meaning |
 |------|---------|
-| **Author / Primary maintainer** | [vedantlanjekar-official](https://github.com/vedantlanjekar-official) |
-| **Repository** | [ABB-AC450-Migration-Studio](https://github.com/vedantlanjekar-official/ABB-AC450-Migration-Studio) |
-| **Contact** | Via GitHub issues / repository owner profile |
-| **Copyright notice (UI)** | © 2026 ABB AC450 Migration Studio |
+| **AC450** | ABB Advant Controller 450 / MasterPiece-class DCS |
+| **DB Element** | Database object listing (cards, parameters, defaults) |
+| **PC Element** | Function-block / logic diagram or AAX export |
+| **AAX** | PC application export (`PCD-PAGE`, PIDCON, MOVE, PCU-I/O) |
+| **BAX** | DB native export |
+| **Loop Tag** | Clubbing identity (`$(TAG)`) |
+| **Device Tag** | Signal identity (`$(DEVICETAG)`) |
+| **Slot/Card** | Board or PCU module address |
+| **Channel** | Point on that board/module |
+| **Clubbing** | Pairing I/O of one loop for import |
+| **800-series** | `AI800_` / `AO800_` / `DI800_` / `DO800_` families |
 
-### Version history
+### Stable contracts (do not break silently)
 
-| Version | Highlights |
-|---------|------------|
-| **1.0.0** | DB + PC converters, comparator, I/O address generator, engineering template generator, Vercel/Render deployment topology, PC Function Block Summary worksheet |
+1. `ConversionType` in TypeScript matches backend routing strings.  
+2. PC `I_O_List` includes Slot/Card and Channel immediately after Device Tag.  
+3. Category indicators are the eight named columns; matching cell is `1`, others blank.  
+4. Export header aliases: Loop Tag → `$(TAG)`, Device Tag → `$(DEVICETAG)`, Description → `$(NAME_40)`.  
+5. Function Block Summary is independent of I/O row counts.  
+6. Multi-file DB/PC jobs write **one** workbook.  
+7. Soft AAX rows must not receive fabricated card numbers.
 
-Contributions should follow the Developer Guide: typed API contracts, module isolation, tests, and engineering-rule documentation.
+### Change impact
 
----
+| Change | Verify |
+|--------|--------|
+| PC/AAX regex or 4F/4G join | `test_aax_parser.py` + golden tags |
+| Clubbing order | Clubber tests + Excel visual |
+| Header mapping | Header post-processor + template tests |
+| Status DTO fields | `converter.ts` + results view |
+| Env flags | Render health + one large PDF |
 
-## 21. Troubleshooting
+### Onboarding (four days)
 
-| Symptom | Likely cause | Action |
-|---------|--------------|--------|
-| Frontend loads but processing fails | Backend down or wrong `NEXT_PUBLIC_API_URL` | Check `/api/health`; fix `.env.local` |
-| Upload rejected | File type/size | Use supported PDF/Excel; check `MAX_UPLOAD_SIZE_MB` |
-| Empty PC I/O list | Scanned PDF / low text density | Enable OCR carefully; verify selectable text |
-| Inflated FB counts | Unexpected | Confirm only `NAME(` declarations; update extractor tests |
-| Render timeouts / cold start | Free tier sleep | Warm `/health`; consider paid instance |
-| Excel formula-looking cells | Leading `=` in tags | Sanitizer strips formula triggers; verify latest generator |
-| `python` / `node` missing locally | Toolchain not installed | Install Python 3.11+ and Node 18+, or use portable toolchains |
+1. Read this README through Complete Workflow. Run one DB and one PC job on production or local.  
+2. Execute compare → address → template on those outputs.  
+3. Clone, `pytest backend/tests -q`, step through `ConversionService`.  
+4. Agree site tag conventions and acceptance thresholds with the migration lead.
 
----
+### Release checklist
 
-## 22. Related Documentation
+1. Bump `VERSION` and the README badge together.  
+2. Note sheet/API contract deltas.  
+3. Pytest green.  
+4. Smoke DB + PC + one Excel module.  
+5. Confirm Vercel build and Render `/health` after merge to `main`.  
+6. Archive a sample workbook with the release.
 
-| Document | Focus |
-|----------|-------|
-| [`docs/architecture.md`](docs/architecture.md) | System architecture notes |
-| [`docs/pc_element_module.md`](docs/pc_element_module.md) | PC Element deep dive + Function Block Summary |
-| [`docs/deployment_analysis.md`](docs/deployment_analysis.md) | Deployment analysis & module checklists |
-| [`backend/pc_element/parser/function_block_extractor.py`](backend/pc_element/parser/function_block_extractor.py) | FB declaration detection source |
-| Swagger UI `/docs` | Live API schema |
+### Frequently asked questions
 
----
+**Why do most AAX rows have a blank Slot/Card?**  
+PC AAX files are function-block diagrams. Hardware cards are stored in the DB (`:ADDR`). The PC reader only fills Slot/Card when the AAX itself contains `=AIcard.channel` or PCU `:IOADDR` + `:CHANNEL`. Blank is an honest answer.
 
-## Appendix A — Engineering Glossary
+**Why is Function Block Summary not equal to I/O row count?**  
+Declarations (how many PIDCON blocks exist) are not the same as I/O records (how many tagged signals were emitted). Both are useful; they answer different questions.
 
-| Term | Meaning in this project |
-|------|-------------------------|
-| **Loop Tag** | Logical loop identity derived from a Device Tag by removing the final `.EXTENSION` |
-| **Device Tag** | Full engineering tag after `/` in an address reference (attributes may be stripped) |
-| **Card / Slot** | Numeric hardware address preceding `.` / `:` / `/` in ABB I/O notation |
-| **Channel / Port** | Sub-address after `.` or `:`; may be `0` when omitted |
-| **800-series** | Compact I/O families encoded as `AI800_`, `AO800_`, `DI800_`, `DO800_` |
-| **Clubbing** | Grouping related I/O rows that share a Loop Tag into engineering presentation order |
-| **Category indicators** | Eight Excel columns containing `1` when a row matches that family |
-| **Declaration** | Function block header of the form `BLOCKNAME(` inside an engineering box |
-| **Cross-reference label** | Wire/parameter text such as `PIDCON1:55/TAG:PARAM` that must not be counted as a declaration |
-| **Completeness audit** | Inventory of detectable references vs successfully exported rows |
-| **Valmet placeholder headers** | Export headers like `$(TAG)` and `$(DEVICETAG)` used by downstream Valmet tooling |
+**Can I upload PDF and AAX in one PC job?**  
+Yes. Each file is parsed, objects are concatenated, function-block counts are summed, and one workbook is written.
 
----
+**Why did download fail after I left the tab open?**  
+Render’s filesystem is ephemeral. After idle spin-down the `.xlsx` is gone. Re-run the conversion.
 
-## Appendix B — Detailed API Examples
+**Where is Vite / ShadCN?**  
+This product uses Next.js 15 and a custom Valmet Tailwind UI. Those names appear in generic stacks; they are not dependencies here. Do not add Vite alongside Next.js.
 
-### B.1 Upload then process a PC Diagram
+**Which requirements file does Render install?**  
+The **root** `requirements.txt` (includes `pydantic-settings`). `backend/requirements.txt` is a subset and is not what the blueprint uses.
 
-```bash
-# 1) Upload
-curl -X POST "http://127.0.0.1:8000/api/upload" \
-  -F "files=@O2-PC32.pdf"
+**How do I add a new I/O family?**  
+Extend `GrammarParser.PREFIX_MAP`, detector prefix alternation, validator family set, and `CATEGORY_INDICATOR_COLUMNS`. Add tests. Do not special-case the family only in Excel.
 
-# Example response
-# {
-#   "job_id": "9f2c1a...",
-#   "uploaded_files": ["O2-PC32.pdf"],
-#   "total_files": 1,
-#   "message": "Upload successful"
-# }
+**How do I add a function block to the summary?**  
+Add the name to `SUPPORTED_FUNCTION_BLOCKS` in `function_block_extractor.py` and assert it in `test_aax_parser.py`. I/O extraction must not change.
 
-# 2) Process as PC Element
-curl -X POST "http://127.0.0.1:8000/api/process" \
-  -H "Content-Type: application/json" \
-  -d "{\"job_id\":\"9f2c1a...\",\"conversion_type\":\"PC\"}"
+### Detailed API examples
 
-# 3) Poll status
-curl "http://127.0.0.1:8000/api/status/9f2c1a..."
+Upload (PowerShell):
 
-# 4) Download workbook
-curl -L "http://127.0.0.1:8000/api/download/9f2c1a..." -o PC_Output.xlsx
-
-# 5) Fetch logs if needed
-curl "http://127.0.0.1:8000/api/logs/9f2c1a..."
+```powershell
+$api = "https://abb-ac450-migration-studio-backend.onrender.com"
+$up = Invoke-RestMethod -Method Post -Uri "$api/api/upload" -Form @{
+  files = Get-Item ".\backend\tests\fixtures\sample_pc.aax"
+}
+$up.job_id
 ```
 
-### B.2 Expected status payload fields (illustrative)
+Process and poll:
+
+```powershell
+Invoke-RestMethod -Method Post -Uri "$api/api/process" -ContentType "application/json" -Body (@{
+  job_id = $up.job_id
+  conversion_type = "PC"
+} | ConvertTo-Json)
+
+do {
+  Start-Sleep 3
+  $st = Invoke-RestMethod "$api/api/status/$($up.job_id)"
+  $st.status
+} while ($st.status -notin @("completed", "failed"))
+```
+
+Example completed fragment:
 
 ```json
 {
-  "job_id": "9f2c1a...",
   "status": "completed",
-  "progress_percentage": 100,
-  "current_phase": "completed",
-  "message": "PC Element Conversion complete!",
   "conversion_type": "PC",
-  "total_objects": 233,
-  "ai_count": 5,
-  "ao_count": 0,
-  "di_count": 0,
-  "do_count": 0,
+  "total_objects": 11,
+  "ai_count": 2,
+  "ao_count": 4,
   "generated_sheets": ["I_O_List", "Function Block Summary"],
-  "preview_data": [],
-  "warnings": [],
-  "errors": [],
-  "processing_time_seconds": 42.5,
-  "updated_at": "2026-08-11T08:50:00Z"
+  "preview_data": {
+    "I_O_List": [
+      {
+        "Sr. No.": 1,
+        "Loop Tag": "82PIC972",
+        "Device Tag": "82PIC972.MV",
+        "Slot/Card": 7,
+        "Channel": 10,
+        "AI": 1
+      }
+    ]
+  }
 }
 ```
 
-Exact numeric metrics vary by document. Comparator jobs additionally populate `worksheet1_records`, `worksheet2_records`, `matched_records`, and `unmatched_records`. DB jobs populate inheritance-related counters such as `default_sections_found` and `parameters_filled_from_defaults`.
+`conversion_type` aliases accepted by some Excel pipelines include `EXCEL` / `EXCEL_COMPARE` (compare), `IO_ADDRESS` / `ARRANGE` (arranger), `ENGINEERING_TEMPLATE` / `ABB_TEMPLATE` / `TEMPLATE` (template). Prefer the canonical five strings from the UI.
 
-### B.3 Conversion type aliases accepted by the backend
+### PC Element engineering deep dive
 
-| Canonical type | Accepted aliases (service layer) |
-|----------------|----------------------------------|
-| `DB` | default when omitted |
-| `PC` | — |
-| `COMPARE` | `EXCEL`, `EXCEL_COMPARE` |
-| `IO_ARRANGE` | `IO_ADDRESS`, `ARRANGE` |
-| `ENG_TEMPLATE` | `ENGINEERING_TEMPLATE`, `ABB_TEMPLATE`, `TEMPLATE` |
+PC diagrams print fragments such as `=AI7.10` on one line and `/82PIC972.MV` on the next. The detector stitches those. AAX is cleaner structurally but harder semantically: `:MV =AI7.10` does not include the plant tag on the same token. Stage 4G binds `:DBINST =82PIC972` to that hardware. MOVE blocks pair a plant port (`:21 =82PIC972:POUT`) with a hardware port (`:22 =AO3.9`). PCU-I/O never print `=AI192.1`; they print `:IOADDR 192` and `:CHANNEL 1` on a page titled `82M140: Reel Drum Speed`, which becomes `82M140.SPEEDMV`.
 
-Frontend TypeScript uses the canonical union: `'DB' | 'PC' | 'COMPARE' | 'IO_ARRANGE' | 'ENG_TEMPLATE'`.
+Downstream, `DuplicateDetector` keeps both a soft `0.0` row and a hardwired row if they are different keys. Clubbing groups by Loop Tag so the engineer sees AI then AO for the same loop. `OutputFormatter` then sections analog, digital, analog800, digital800. Excel and preview must copy `card_number` / `channel_number` unchanged — the display bug that hid addresses was column order, not missing extraction.
 
----
+### DB Element engineering deep dive
 
-## Appendix C — PC Element Engineering Deep Dive
+DB listings are object-centric. A card object `AI1` may define defaults; instance `AI1.1` overrides `:NAME` and `:ADDR`. The inheritance builder merges hardware and software default profiles, counts fills vs overrides, and drops header/footer repetition. Clubbing uses the same Loop Tag derivation as PC so a later comparator can align Device Tags across the two workbooks. If you change Loop Tag derivation in one engine only, comparison quality collapses.
 
-### C.1 Why declaration parentheses matter
+### Comparator, address, and template notes
 
-PC Diagrams are visually dense. The string `PIDCON` appears in many contexts:
+Comparator extra-in-file-2 vs unmatched-in-file-1 are both first-class. Do not collapse them into a single “diff” column if Valmet reviewers need directionality.
 
-- Inside the rectangular function block as `PIDCON(0,0,1,1,1,0)` — **true declaration**
-- On incoming parameter wires as `=PIDCON1:94/940LC391:PARAM1` — **reference**
-- In comments, defaults lists, or identity text — **non-declaration**
+Address generator preview is capped per family in the arranger (see `preview_rows[:100]` pattern). The downloaded workbook is complete; the UI preview is a sample.
 
-A naive word count would massively overstate control-block usage. The Studio therefore requires an opening parenthesis immediately after the block name (optional whitespace permitted for CAD text splits):
+Template `$(CARDTYPE1)` is the category of the input member of the pair. If a club is AO-only, the generator still emits a row — confirm with the project whether unpaired outputs are allowed in the import file.
 
-```regex
-\bPIDCON\s*\(
-\bMOTCON\s*\(
-\bVALVECON\s*\(
-\bMANSTN\s*\(
-```
+### Frontend / backend contract checklist
 
-### C.2 I/O extraction remains independent
+- [ ] `ConversionType` union matches process body  
+- [ ] Preview keys for PC include `Slot/Card` and `Channel` after `Device Tag`  
+- [ ] Results grid does not treat numeric `0` as empty for real cards (production writes blanks for unresolved 0)  
+- [ ] Download URL uses the same API host as upload  
+- [ ] `generated_sheets` includes `Function Block Summary` even when that sheet has no preview rows  
+- [ ] Warnings array is rendered, not only errors  
 
-Function Block counting reads the same page text objects produced by `PDFReader`, but it does not share mutable state with `IOReferenceDetector`, `GrammarParser`, `RecordClubber`, or `OutputFormatter`. Excel generation appends the summary sheet after I/O header post-processing so Valmet header renames cannot mutate summary column titles.
+### Local smoke test (manual)
 
-### C.3 Example workbook expectation
+1. Run `start_dev.bat`.  
+2. DB: upload a small PDF or `backend/tests/fixtures/sample_db.bax`.  
+3. PC: upload `backend/tests/fixtures/sample_pc.aax`. Confirm Slot 7 / Channel 10 on `82PIC972.MV`.  
+4. Compare the two Excels.  
+5. Arrange the PC Excel.  
+6. Template the PC Excel.  
+7. `pytest backend/tests/test_aax_parser.py backend/tests/test_multi_file_combined_excel.py -q`.
 
-After converting a PC Diagram containing three PID controllers, two motor controllers, one valve controller, and five manual stations (as declarations), the summary sheet should read:
+### Repository hygiene
 
-| Functional Block | Total Count |
-|------------------|------------:|
-| PIDCON | 3 |
-| MOTCON | 2 |
-| VALVECON | 1 |
-| MANSTN | 5 |
+Do not commit `.AXX Data/` mill exports, `Guide Materials/`, `.tools/`, `.env.local`, or generated `.xlsx`. Keep fixtures tiny (`backend/tests/fixtures`). `.vercelignore` should exclude corpus and toolchains so CLI deploys stay small; GitHub auto-deploy is the supported production path.
 
-All four rows are always emitted even when a count is zero, which stabilizes downstream reporting scripts.
+### Troubleshooting (operators)
 
-### C.4 Completeness auditor relationship
-
-The completeness auditor measures hardwired I/O inventory recall. It is complementary to Function Block Summary:
-
-- Auditor answers: “Did we extract the I/O references that exist in the drawing text?”
-- Summary answers: “How many engineering control blocks of each supported type are declared?”
-
-Both are valuable in project reviews but must not be conflated.
-
----
-
-## Appendix D — DB Element Engineering Deep Dive
-
-### D.1 Supported vs skipped object types
-
-DB dumps contain many ABB object classes. For Valmet I/O migration, only the eight I/O families are exported. Types such as `PIDCON`, `MANSTN`, `DAT`, and `TEXT` remain visible in source PDFs but are skipped by the DB I/O converter. This is intentional product scope, not a parser defect.
-
-### D.2 Default inheritance
-
-AC450 DB listings often define parameter defaults in `.DEFAULT` sections. The parser detects hardware/software/standalone default blocks, merges profiles, and applies inherited values unless an object overrides them. Status metrics expose how many parameters were filled from defaults versus overridden—useful evidence during engineering peer review.
-
-### D.3 Clubbing consequences for Valmet
-
-Clubbing is not merely sorting. It encodes how engineers expect to read paired signals:
-
-- An analog measurement (`AI` / `AI800`) appears before its related output (`AO` / `AO800`) when they share a Loop Tag.
-- Digital outputs often lead digital inputs in presentation order for the same loop.
-- Unpaired signals remain present; the engine does not invent placeholder partners.
-
-Getting this order wrong creates costly manual cleanup in Valmet import templates, which is why DB and PC share conceptual clubbing rules even though their parsers differ.
-
----
-
-## Appendix E — Comparator, Address, and Template Notes
-
-### E.1 Comparator pitfalls
-
-Because comparison is set-based on Device Tags:
-
-- Duplicate tags within one file collapse before matching.
-- Case differences do not create false unmatched rows.
-- Column naming must resolve to Device Tag fields; unusual custom sheets may need preprocessing.
-
-### E.2 Address generator hardware model
-
-Channel capacities are encoded as engineering constants, not UI settings:
-
-- Analog standard cards: 16 channels
-- Analog 800-series: 8 channels
-- Digital families: 32 channels
-
-Changing plant hardware standards requires a deliberate code/config change and regression tests—not an ad-hoc spreadsheet tweak inside the generator.
-
-### E.3 Template pairing rules
-
-The engineering template generator looks for adjacent compatible category pairs that share Loop Tag and maps them into CARDTYPE/DEVICETAG slot pairs. Input-side tags are prioritized as first members of a pair. This mirrors common Valmet import expectations for bidirectional loops.
-
----
-
-## Appendix F — Frontend / Backend Contract Checklist
-
-When extending the platform, keep these contracts stable unless versioning deliberately:
-
-1. `ConversionType` union in TypeScript matches backend routing.
-2. `generated_sheets` lists exact Excel tab titles.
-3. `preview_data` remains JSON-serializable row dictionaries.
-4. Download endpoint only succeeds for completed jobs with an existing file.
-5. Health endpoint remains unauthenticated for uptime monitors.
-6. PC module continues to emit both `I_O_List` and `Function Block Summary`.
-7. Excel sanitization continues to neutralize formula-leading characters.
-
-Breaking any of the above without a migration note will disrupt Vercel clients and automation scripts.
-
----
-
-## Appendix G — Local Smoke Test Script (Manual)
-
-1. Start backend on `:8000` and frontend on `:5173`.
-2. Open Chrome to http://localhost:5173.
-3. Confirm http://127.0.0.1:8000/api/health → `online`.
-4. Run **DB Element Converter** on a small sample PDF → download `Clubbed_IO`.
-5. Run **PC Element Converter** on a PC Diagram → confirm both sheets exist; verify FB counts manually against one page.
-6. Run **Engineering Tag Comparator** on two Excel extracts → inspect unmatched sheet.
-7. Feed Clubbed/I_O into **I/O Address Generator** → confirm category sheets.
-8. Feed Clubbed/I_O into **ABB Engineering Template Generator** → open `Engineering_Template`.
-9. Force a bad upload (unsupported file) and confirm UI error handling.
-10. Open job logs for a successful run and archive them with project documentation.
-
----
-
-## Appendix H — Repository Hygiene
-
-- Do not commit `.tools/` portable toolchains, `node_modules/`, `.next/`, or temp uploads.
-- Keep sample PDFs with customer data out of public forks unless sanitized.
-- Prefer golden-file tests for parser changes affecting production PDFs.
-- Update `docs/pc_element_module.md` when PC grammar or FB catalogs change.
-- Keep README version badge synchronized with `backend/core/config.py` `VERSION`.
-
----
-
-## Appendix I — Frequently Asked Questions
-
-### Is this tool certified by ABB or Valmet?
-
-No. It is an independent engineering acceleration platform that encodes commonly used migration conventions. Final configuration responsibility remains with the project engineering authority and applicable site procedures.
-
-### Can it replace Control Builder or Valmet DNA Engineering?
-
-No. It prepares structured Excel deliverables that engineers review and import. Runtime control logic, safety configuration, and commissioning remain outside its scope.
-
-### Why are PIDCON objects skipped in DB I/O export but counted in PC Summary?
-
-Because they answer different questions. DB I/O export focuses on hardwired/800-series signal rows for Valmet I/O lists. PC Function Block Summary inventories control-block declarations for program characterization. Mixing those concerns historically produced confusing spreadsheets.
-
-### What happens if a PDF is scanned with no selectable text?
-
-Light extraction may yield low-density pages. Optional OCR (`ENABLE_PC_OCR=1`) can help but is disabled by default on constrained hosts. Prefer native selectable-text PDF exports from engineering tools whenever possible.
-
-### Can multiple users share one Render free instance safely?
-
-Only with caution. Jobs are in-memory and file paths are job-scoped, but there is no authentication boundary. For multi-user enterprise use, add auth, private networking, and durable storage.
-
-### Why Next.js instead of a simpler static React app?
-
-Next.js provides a production deployment path on Vercel, App Router structure, and a maintainable TypeScript frontend while still supporting a single-page workflow UX for converters.
-
-### Why keep openpyxl instead of only pandas Excel writers?
-
-openpyxl offers precise multi-sheet styling, header control, and post-processing needed for Valmet-looking workbooks. pandas remains useful for tabular manipulation in some paths, but presentation fidelity matters to engineering customers.
-
-### How do I verify Function Block counts manually?
-
-Open a representative PDF page, locate rectangular function blocks, and count headers matching `NAME(`. Ignore wire labels containing `NAME1:` patterns. Compare against the summary sheet.
-
-### Where are uploads stored?
-
-Under system temporary directories configured in settings (commonly beneath a platform temp root such as `abb_ac450/uploads`). They are not part of the git repository.
+| Observation | Likely cause | Action |
+|-------------|--------------|--------|
+| First production click hangs | Render cold start | Wait on `/health`, retry once |
+| Preview has tags, Excel missing Slot/Card | Looking at Function Block Summary or an old download | Open `I_O_List`; re-run after 15 Aug 2026 deploy |
+| `unsupported PC source` | File is BAX on a PC job | Use DB module or convert to PDF/AAX |
+| Clubbing looks “wrong” | Different Loop Tags (suffix kept) | Check Device Tag derivation, not Excel sort |
+| pytest collect errors | Wrong Python | Use repo `.tools/python` or 3.11+ with root requirements |
 
 ### How should release notes be written?
 
-Document module impacts, sheet contract changes, env var changes, and any parser rule changes that alter counts on known golden PDFs. Include before/after metrics when possible.
+Name the module, the sheet or API field that changed, before/after counts on a golden file, and whether Valmet import headers moved. A parser change that alters row counts without a test is not ready to merge.
 
 ---
 
-## Appendix J — Onboarding Guide for New Engineers
+## Environment Variable Catalog
 
-### Day 1 — Orientation
+| Name | Where | Required | Purpose |
+|------|--------|----------|---------|
+| `NEXT_PUBLIC_API_URL` | Vercel (build) / `.env.local` | Production yes | Browser API base; must end with `/api` |
+| `BACKEND_URL` | Next.js rewrite (dev) | No | Server-side rewrite target; default `http://127.0.0.1:8002/api/:path*` |
+| `PYTHON_VERSION` | Render | Yes (blueprint) | `3.11.0` |
+| `PC_LIGHT_PDF_READ` | Render / process | Recommended `1` | Skip dual PDF engines on PC |
+| `DB_LIGHT_PDF_READ` | Render / process | Recommended `1` | Reduce DB PDF memory |
+| `ENABLE_PC_OCR` | Render / process | Keep `0` on free tier | OCR enrichment for low-density pages |
+| `PORT` | Render | Provided by host | Uvicorn bind port |
 
-1. Read Sections 1–4 of this README.
-2. Run the application locally or open the deployed UI.
-3. Process one sample DB PDF and one sample PC PDF.
-4. Open outputs in Excel and map columns to Valmet expectations used by your project.
-
-### Day 2 — Module depth
-
-1. Read Module sections for Comparator, Address Generator, and Template Generator.
-2. Execute the recommended cross-module sequence on a sanitized mini dataset.
-3. Compare unmatched tags with a senior engineer and document false positives/negatives.
-
-### Day 3 — Developer path (optional)
-
-1. Set up Python/Node toolchains.
-2. Run `pytest backend/tests -q`.
-3. Place a breakpoint or log in `ConversionService` routing and watch a PC job.
-4. Propose one improvement with a test case (for example, an additional FB type or a clearer warning).
-
-### Day 4 — Project integration
-
-1. Align naming conventions with site Loop Tag standards.
-2. Establish a folder structure for source PDFs, generated Excel, and log archives.
-3. Define acceptance criteria: minimum parser accuracy, allowed unmatched tags, required sheets.
+Do not put localhost into Vercel production env. `api_client.ts` already refuses local URLs when the page is not on localhost.
 
 ---
 
-## Appendix K — Non-Goals (Explicit)
+## Excel Column Contracts
 
-To prevent scope creep, the following are **not** goals of v1.0.0:
+These tables are the import surface. Changing a header without a versioned migration breaks Valmet loaders.
 
-- Real-time DCS communication or OPC connectivity
-- Automatic download of configurations from live controllers
-- Automatic push into Valmet databases without human review
-- Full recreation of ABB function-block internals beyond declaration counting
-- Guaranteeing 100% extraction on arbitrarily degraded scans without OCR investment
-- Multi-tenant SaaS billing, roles, and org isolation
-- Mobile-native applications
+### PC `I_O_List`
 
-Teams evaluating the Studio should treat these non-goals as future product decisions, not defects.
+| Order | Header after export | Source field |
+|------:|---------------------|--------------|
+| 1 | `Sr. No.` | Sequential after clubbing/format |
+| 2 | `$(TAG)` | `loop_tag` |
+| 3 | `$(NAME_40)` | `description` |
+| 4 | `$(DEVICETAG)` | `device_tag` |
+| 5 | `Slot/Card` | `card_number` if > 0 else blank |
+| 6 | `Channel` | `channel_number` if > 0 else blank |
+| 7–14 | `AI` … `DO800_` | `1` in the matching family column |
 
----
+### PC `Function Block Summary`
 
-## Appendix L — Change Impact Matrix
+| Header | Meaning |
+|--------|---------|
+| Functional Block | Catalog name (PIDCON, MOTCON, …) |
+| Total Count | Declarations in the source text |
 
-Use this matrix when proposing code changes:
+### DB clubbed sheet (conceptual)
 
-| Change type | Likely impacted surfaces | Required verification |
-|-------------|--------------------------|------------------------|
-| PC grammar regex | `I_O_List` row counts | Golden PC PDF + completeness audit |
-| FB catalog addition | `Function Block Summary` only | Declaration vs reference unit tests |
-| DB inheritance merge | Parameter fill metrics | DB sample with defaults + overrides |
-| Clubbing order | Row sequence in Excel | Clubber unit tests + visual Excel review |
-| Excel header mapping | Downstream Valmet import | Header post-processor tests |
-| API status fields | Frontend results cards | TypeScript types + UI smoke |
-| Env flag defaults | Cloud memory/CPU behavior | Render health + large PDF trial |
-| Auth introduction | All API routes | Security review + CORS revisit |
+Identity columns, description, eight indicators, then family-specific parameters collected across the group (ranges, units, addresses when present). Header post-processor applies `DB_HEADER_MAPPING` (`NAME` → `$(DEVICETAG)`, `LOOP TAG` → `$(TAG)`, `DESCR` → `$(NAME_40)`, min/max/unit aliases).
 
-A change that touches more than two rows in this matrix should be split into smaller pull requests whenever practical. Smaller diffs are easier for ABB/Valmet domain reviewers to validate against engineering expectations.
+### Comparison report
 
-### Release checklist (short)
+Numeric summary plus tag lists. Directional unmatched lists must remain separate.
 
-1. Version bump in config + README badge
-2. Changelog notes for sheet/API contract deltas
-3. pytest green on parser and Excel suites
-4. Manual smoke on DB + PC + one Excel module
-5. Confirm Vercel build and Render health after merge
-6. Archive a sample output workbook with the release tag for regression reference
+### I/O address sheets
 
-Maintaining this discipline keeps the Studio trustworthy for long-running migration programs where parser behavior must remain explainable months after the original conversion run.
+Repeating triples: `$(TAG) n`, `$(DEVICETAG) n`, spacer — one card per triple, channels down the rows.
+
+### Engineering template
+
+Exactly `TEMPLATE_COLUMNS` in `generator.py`. Do not insert columns in the middle without updating tests in `test_engineering_template.py`.
+
+### Code style for contributors
+
+- Python: type hints on public engine functions; no wildcard imports in parsers.  
+- TypeScript: update `converter.ts` in the same PR as `api_schemas.py`.  
+- Tests: one golden assertion per engineering fact (tag → slot.channel), not only “row count > 0”.  
+- Logs: include `job_id` and filename; never log file bytes.  
+- Comments: explain *why* a join exists (PCU has no `=AIx.y`), not *what* the next line does.
+
+### Why conservative extraction is a feature
+
+Migration sign-off is a legal and safety process. An invented card number that looks complete is worse than a blank cell that forces an engineer to open the DB. The Studio’s reputation inside a mill depends on that conservatism. If a stakeholder asks for “100% Slot/Card fill,” the correct response is to run the DB converter on the matching listing — not to guess from page titles.
+
+### Support model
+
+v1 is an engineering workstation. There is no SLA bot. Operators should capture: module, filenames, `job_id`, status JSON, and a redacted log excerpt. Developers should reproduce with the smallest fixture that fails, then add a pytest before the fix.
+
+### Versioning policy
+
+`1.0.0` is the first production cut (15 August 2026) with AAX address join, visible Slot/Card columns, multi-file combined Excel, and live Vercel↔Render wiring. Increment:
+
+- **Patch** — bugfix that does not change headers or family sets  
+- **Minor** — new optional column or FB catalog entry with backward-compatible headers  
+- **Major** — rename/move `$(TAG)` / Slot/Card / indicator columns  
+
+Keep the README badge, `Settings.VERSION`, and release notes in lockstep.
+
+The Studio is handed to Valmet and site engineering teams as a **reviewed compiler**, not as an unsupervised writer into a live DCS. Every number in Excel should be traceable to a token in PDF, BAX, or AAX — or honestly blank. That is the quality bar for v1 and the standard future contributors are asked to protect. When in doubt, add a test, write a warning, and leave the cell empty rather than invent a complete-looking value. This README is the handover document: a new engineer should be able to run, explain, and extend the Studio from these pages plus the linked `docs/` reports.
 
 ---
 
 <p align="center">
   <strong>ABB AC450 Migration Studio</strong><br/>
   Enterprise Engineering Migration Platform<br/>
-  <em>From ABB AC450 source truth → Valmet-ready engineering deliverables</em>
+  <em>ABB AC450 source truth → Valmet-ready engineering deliverables</em>
 </p>
