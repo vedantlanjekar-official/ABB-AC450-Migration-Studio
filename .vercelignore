@@ -12,6 +12,12 @@ scripts
 *.bax
 *.pdf
 *.xlsx
+# Keep the published User Manual in the Vercel static bundle (both
+# monorepo-root and frontend-root Vercel project layouts).
+!frontend/public/*.pdf
+!frontend/public/ABB-AC450-Migration-Studio-User-Manual.pdf
+!public/*.pdf
+!public/ABB-AC450-Migration-Studio-User-Manual.pdf
 node_modules
 frontend/node_modules
 frontend/.next

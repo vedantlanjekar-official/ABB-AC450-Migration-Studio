@@ -196,18 +196,36 @@ def test_excel_preserves_clubbed_order(tmp_path):
     assert wb.sheetnames == ["I_O_List", "Function Block Summary"]
     ws = wb["I_O_List"]
 
-    categories_ai = [ws.cell(row=r, column=5).value for r in range(2, 6)]
-    categories_ao = [ws.cell(row=r, column=6).value for r in range(2, 6)]
-    categories_di = [ws.cell(row=r, column=7).value for r in range(2, 6)]
-    categories_do = [ws.cell(row=r, column=8).value for r in range(2, 6)]
-    devices = [ws.cell(row=r, column=4).value for r in range(2, 6)]
-    loops = [ws.cell(row=r, column=2).value for r in range(2, 6)]
+    header_row = [ws.cell(row=1, column=c).value for c in range(1, ws.max_column + 1)]
 
-    # Indicator columns replace Category: AI→AO→DO→DI order
+    def col(name: str) -> int:
+        aliases = {
+            "Device Tag": ("Device Tag", "$(DEVICETAG)"),
+            "Loop Tag": ("Loop Tag", "$(TAG)"),
+        }
+        candidates = aliases.get(name, (name,))
+        for candidate in candidates:
+            if candidate in header_row:
+                return header_row.index(candidate) + 1
+        raise AssertionError(f"Missing column {name!r} in {header_row}")
+
+    categories_ai = [ws.cell(row=r, column=col("AI")).value for r in range(2, 6)]
+    categories_ao = [ws.cell(row=r, column=col("AO")).value for r in range(2, 6)]
+    categories_di = [ws.cell(row=r, column=col("DI")).value for r in range(2, 6)]
+    categories_do = [ws.cell(row=r, column=col("DO")).value for r in range(2, 6)]
+    devices = [ws.cell(row=r, column=col("Device Tag")).value for r in range(2, 6)]
+    loops = [ws.cell(row=r, column=col("Loop Tag")).value for r in range(2, 6)]
+    slots = [ws.cell(row=r, column=col("Slot/Card")).value for r in range(2, 6)]
+    channels = [ws.cell(row=r, column=col("Channel")).value for r in range(2, 6)]
+
+    # Indicator columns replace Category: AI→AO then DO→DI clubbing order.
+    # Slot/Card and Channel sit immediately after Device Tag.
     assert categories_ai == [1, None, None, None]
     assert categories_ao == [None, 1, None, None]
     assert categories_do == [None, None, 1, None]
     assert categories_di == [None, None, None, 1]
+    assert slots == [1, 2, 4, 3]
+    assert channels == [1, 1, 1, 1]
     assert devices == [
         "940FQ390.MV",
         "940FQ390.OUT",
