@@ -20,6 +20,7 @@ import { useConverterStore } from '../store/converter_store';
 import { Dropzone } from './dropzone';
 import { ProcessingView } from './processing_view';
 import { ResultsView } from './results_view';
+import { UserManualSection } from './user_manual_section';
 
 export function FramerLanding() {
   const { stage } = useConverterStore();
@@ -64,6 +65,12 @@ export function FramerLanding() {
                 className="px-6 py-3 bg-white hover:bg-slate-50 text-slate-700 font-semibold text-sm rounded-lg border border-slate-300 transition"
               >
                 Explore Features
+              </a>
+              <a
+                href="#user-manual"
+                className="px-6 py-3 bg-white hover:bg-slate-50 text-valmet-green font-semibold text-sm rounded-lg border border-valmet-green/30 transition"
+              >
+                User Manual
               </a>
             </div>
           </div>
@@ -208,7 +215,12 @@ export function FramerLanding() {
       </section>
 
       {/* ============================================================ */}
-      {/* 5. CONTACT SECTION                                           */}
+      {/* 5. USER MANUAL                                               */}
+      {/* ============================================================ */}
+      <UserManualSection />
+
+      {/* ============================================================ */}
+      {/* 6. CONTACT SECTION                                           */}
       {/* ============================================================ */}
       <section id="contact" className="scroll-mt-24 border-t border-slate-200 pt-16">
         <div className="max-w-4xl mx-auto text-center mb-12">
