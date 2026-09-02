@@ -71,13 +71,7 @@ export function useFileUpload() {
         return;
       }
     } else if (!selectedFiles || selectedFiles.length === 0) {
-      setError(
-        requestedType === 'DB'
-          ? 'Please select at least one PDF or BAX file.'
-          : requestedType === 'PC'
-          ? 'Please select at least one PDF or AAX file.'
-          : 'Please select at least one PDF file.'
-      );
+      setError('Please select at least one PDF, AAX, or BAX file.');
       return;
     }
 

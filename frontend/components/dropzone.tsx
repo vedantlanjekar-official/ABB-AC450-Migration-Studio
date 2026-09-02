@@ -4,7 +4,6 @@ import React, { useRef, useState } from 'react';
 import {
   AlertCircle,
   ArrowRight,
-  Cpu,
   FileSpreadsheet,
   FileText,
   GitCompare,
@@ -14,13 +13,16 @@ import {
   UploadCloud,
 } from 'lucide-react';
 
+import { ElementTypeDialog } from './element_type_dialog';
 import { useFileUpload } from '../hooks/use_file_upload';
 import { useConverterStore } from '../store/converter_store';
 import { ConversionType } from '../types/converter';
 import { formatBytes } from '../utils/formatters';
 
+type ServiceId = 'ELEMENT' | ConversionType;
+
 type ServiceOption = {
-  type: ConversionType;
+  id: ServiceId;
   label: string;
   icon: React.ComponentType<{ className?: string }>;
 };
@@ -33,24 +35,29 @@ type WorkflowUploadBoxProps = {
 };
 
 const DATA_SERVICES: ServiceOption[] = [
-  { type: 'DB', label: 'DB Element Converter', icon: Layers },
-  { type: 'PC', label: 'PC Element Converter', icon: Cpu },
-  { type: 'COMPARE', label: 'Engineering Tag Comparator', icon: GitCompare },
+  { id: 'ELEMENT', label: 'Element Converter', icon: Layers },
+  { id: 'COMPARE', label: 'Engineering Tag Comparator', icon: GitCompare },
 ];
 
 const DELIVERABLE_SERVICES: ServiceOption[] = [
-  { type: 'IO_ARRANGE', label: 'I/O Address Generator', icon: FileSpreadsheet },
+  { id: 'IO_ARRANGE', label: 'I/O Address Generator', icon: FileSpreadsheet },
   {
-    type: 'ENG_TEMPLATE',
+    id: 'ENG_TEMPLATE',
     label: 'ABB Engineering Template Generator',
     icon: LayoutTemplate,
   },
 ];
 
 const WORKFLOW_COPY: Record<
-  ConversionType,
+  ServiceId,
   { title: string; description: string; action: string }
 > = {
+  ELEMENT: {
+    title: 'Element Converter',
+    description:
+      'Upload ABB AC450 PDF, AAX, or BAX files. When you convert, choose whether to run DB Element or PC Element processing.',
+    action: 'Convert',
+  },
   DB: {
     title: 'DB Element Converter',
     description:
@@ -95,12 +102,8 @@ function isAaxFile(file: File): boolean {
   return file.name.toLowerCase().endsWith('.aax');
 }
 
-function isDbSourceFile(file: File): boolean {
-  return isPdfFile(file) || isBaxFile(file);
-}
-
-function isPcSourceFile(file: File): boolean {
-  return isPdfFile(file) || isAaxFile(file);
+function isElementSourceFile(file: File): boolean {
+  return isPdfFile(file) || isBaxFile(file) || isAaxFile(file);
 }
 
 function isExcelFile(file: File, allowLegacy = false): boolean {
@@ -118,8 +121,9 @@ function WorkflowUploadBox({
   services,
   tone,
 }: WorkflowUploadBoxProps) {
-  const [activeType, setActiveType] = useState<ConversionType>(services[0].type);
+  const [activeService, setActiveService] = useState<ServiceId>(services[0].id);
   const [isDragOver, setIsDragOver] = useState(false);
+  const [isTypeDialogOpen, setIsTypeDialogOpen] = useState(false);
   const pdfInputRef = useRef<HTMLInputElement>(null);
   const compare1Ref = useRef<HTMLInputElement>(null);
   const compare2Ref = useRef<HTMLInputElement>(null);
@@ -142,30 +146,41 @@ function WorkflowUploadBox({
   } = useConverterStore();
   const { startConversion, isUploading, error } = useFileUpload();
 
-  const copy = WORKFLOW_COPY[activeType];
-  const isDbWorkflow = activeType === 'DB';
-  const isPcWorkflow = activeType === 'PC';
-  const isPdfWorkflow = isDbWorkflow || isPcWorkflow;
-  const isCompare = activeType === 'COMPARE';
-  const isArrangement = activeType === 'IO_ARRANGE';
-  const isTemplate = activeType === 'ENG_TEMPLATE';
+  const copy = WORKFLOW_COPY[activeService];
+  const isElementWorkflow = activeService === 'ELEMENT';
+  const isCompare = activeService === 'COMPARE';
+  const isArrangement = activeService === 'IO_ARRANGE';
+  const isTemplate = activeService === 'ENG_TEMPLATE';
 
-  const selectService = (type: ConversionType) => {
-    setActiveType(type);
-    setConversionType(type);
+  const selectService = (id: ServiceId) => {
+    setActiveService(id);
+    if (id !== 'ELEMENT') {
+      setConversionType(id);
+    }
   };
 
-  const beginConversion = () => {
-    setConversionType(activeType);
-    void startConversion(activeType);
+  const beginDirectConversion = (type: ConversionType) => {
+    setConversionType(type);
+    void startConversion(type);
+  };
+
+  const handleConvertClick = () => {
+    if (isElementWorkflow) {
+      setIsTypeDialogOpen(true);
+      return;
+    }
+    beginDirectConversion(activeService as ConversionType);
+  };
+
+  const handleElementTypeConfirm = (type: Extract<ConversionType, 'DB' | 'PC'>) => {
+    setConversionType(type);
+    void startConversion(type).finally(() => {
+      setIsTypeDialogOpen(false);
+    });
   };
 
   const handleDocumentFiles = (files: File[]) => {
-    const accepted = isDbWorkflow
-      ? files.filter(isDbSourceFile)
-      : isPcWorkflow
-      ? files.filter(isPcSourceFile)
-      : files.filter(isPdfFile);
+    const accepted = files.filter(isElementSourceFile);
     if (accepted.length) {
       setSelectedFiles([...selectedFiles, ...accepted]);
     }
@@ -174,7 +189,7 @@ function WorkflowUploadBox({
   const handleDrop = (event: React.DragEvent) => {
     event.preventDefault();
     setIsDragOver(false);
-    if (isPdfWorkflow) {
+    if (isElementWorkflow) {
       handleDocumentFiles(Array.from(event.dataTransfer.files || []));
     }
   };
@@ -257,15 +272,13 @@ function WorkflowUploadBox({
   );
 
   const canStart =
-    (isPdfWorkflow && selectedFiles.length > 0) ||
+    (isElementWorkflow && selectedFiles.length > 0) ||
     (isCompare && Boolean(compareFile1 && compareFile2)) ||
     (isArrangement && Boolean(arrangementFile)) ||
     (isTemplate && Boolean(templateFile));
 
   return (
-    <section
-      className="rounded-xl border border-slate-200 bg-white shadow-[0_8px_30px_rgba(15,23,42,0.06)] overflow-hidden"
-    >
+    <section className="rounded-xl border border-slate-200 bg-white shadow-[0_8px_30px_rgba(15,23,42,0.06)] overflow-hidden">
       <div
         className={`p-5 sm:p-6 border-b border-slate-200 ${
           tone === 'emerald' ? 'border-t-2 border-t-valmet-green' : 'border-t-2 border-t-slate-700'
@@ -298,20 +311,20 @@ function WorkflowUploadBox({
             services.length === 3 ? 'sm:grid-cols-3' : 'sm:grid-cols-2'
           }`}
         >
-          {services.map(({ type, label, icon: Icon }) => (
+          {services.map(({ id, label, icon: Icon }) => (
             <button
-              key={type}
+              key={id}
               type="button"
-              onClick={() => selectService(type)}
+              onClick={() => selectService(id)}
               className={`min-h-14 flex items-center justify-start gap-3 rounded-md border px-3.5 py-2.5 text-xs font-bold transition ${
-                activeType === type
+                activeService === id
                   ? 'bg-white text-slate-900 border-slate-200 shadow-sm'
                   : 'bg-transparent text-slate-500 border-transparent hover:bg-white/70 hover:text-slate-800'
               }`}
             >
               <span
                 className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-md ${
-                  activeType === type
+                  activeService === id
                     ? 'bg-emerald-50 text-valmet-green'
                     : 'bg-white text-slate-500'
                 }`}
@@ -335,7 +348,7 @@ function WorkflowUploadBox({
           <p className="text-xs text-slate-500 mt-1 max-w-3xl">{copy.description}</p>
         </div>
 
-        {isPdfWorkflow && (
+        {isElementWorkflow && (
           <div className="space-y-4">
             <div
               onDragOver={(event) => {
@@ -354,13 +367,7 @@ function WorkflowUploadBox({
               <input
                 ref={pdfInputRef}
                 type="file"
-                accept={
-                  isDbWorkflow
-                    ? '.pdf,.bax,application/pdf'
-                    : isPcWorkflow
-                    ? '.pdf,.aax,application/pdf'
-                    : '.pdf,application/pdf'
-                }
+                accept=".pdf,.aax,.bax,application/pdf"
                 multiple
                 onChange={(event) => {
                   handleDocumentFiles(Array.from(event.target.files || []));
@@ -372,25 +379,15 @@ function WorkflowUploadBox({
                 <UploadCloud className="w-6 h-6" />
               </span>
               <p className="text-sm font-bold text-slate-800">
-                {isDbWorkflow
-                  ? 'Drag and drop PDF or BAX files'
-                  : isPcWorkflow
-                  ? 'Drag and drop PDF or AAX files'
-                  : 'Drag and drop PDF files'}
+                Drag and drop PDF, AAX, or BAX files
               </p>
               <p className="text-xs text-slate-400 mt-1">
-                or <span className="font-semibold text-valmet-green">browse files</span> · up to 100MB each
+                or <span className="font-semibold text-valmet-green">browse files</span> · up to
+                100MB each
               </p>
-              {isDbWorkflow && (
-                <p className="text-[11px] font-semibold text-slate-500 mt-2 tracking-wide">
-                  Supported Formats: PDF, BAX
-                </p>
-              )}
-              {isPcWorkflow && (
-                <p className="text-[11px] font-semibold text-slate-500 mt-2 tracking-wide">
-                  Supported Formats: PDF, AAX
-                </p>
-              )}
+              <p className="text-[11px] font-semibold text-slate-500 mt-2 tracking-wide">
+                Supported Formats: PDF, AAX, BAX
+              </p>
             </div>
 
             {selectedFiles.length > 0 && (
@@ -402,9 +399,7 @@ function WorkflowUploadBox({
                   >
                     <div className="flex items-center gap-2 min-w-0">
                       <FileText className="w-4 h-4 text-valmet-green shrink-0" />
-                      <span className="font-medium text-slate-800 truncate">
-                        {file.name}
-                      </span>
+                      <span className="font-medium text-slate-800 truncate">{file.name}</span>
                       <span className="text-slate-400 shrink-0">
                         ({formatBytes(file.size)})
                       </span>
@@ -479,7 +474,7 @@ function WorkflowUploadBox({
           <div className="mt-6 flex justify-end border-t border-slate-100 pt-5">
             <button
               type="button"
-              onClick={beginConversion}
+              onClick={handleConvertClick}
               disabled={isUploading}
               className="w-full sm:w-auto flex items-center justify-center gap-2 rounded-md bg-valmet-green px-6 py-3 text-sm font-bold text-white shadow-sm hover:bg-valmet-darkgreen transition disabled:opacity-50"
             >
@@ -489,6 +484,13 @@ function WorkflowUploadBox({
           </div>
         )}
       </div>
+
+      <ElementTypeDialog
+        open={isTypeDialogOpen}
+        isStarting={isUploading}
+        onClose={() => setIsTypeDialogOpen(false)}
+        onConfirm={handleElementTypeConfirm}
+      />
     </section>
   );
 }
