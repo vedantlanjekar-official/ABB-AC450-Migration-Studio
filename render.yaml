@@ -1,6 +1,6 @@
 services:
   - type: web
-    name: abb-ac450-migration-studio-backend
+    name: valmet-abb-ac450-api
     runtime: python
     region: oregon
     plan: free
