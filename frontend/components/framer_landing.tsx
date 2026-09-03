@@ -11,6 +11,7 @@ import {
   Zap, 
   Mail, 
   Globe, 
+  MapPin,
   Shield,
   Layers,
   Sliders,
@@ -20,7 +21,6 @@ import { useConverterStore } from '../store/converter_store';
 import { Dropzone } from './dropzone';
 import { ProcessingView } from './processing_view';
 import { ResultsView } from './results_view';
-import { UserManualSection } from './user_manual_section';
 
 export function FramerLanding() {
   const { stage } = useConverterStore();
@@ -67,7 +67,10 @@ export function FramerLanding() {
                 Explore Features
               </a>
               <a
-                href="#user-manual"
+                href="/ABB-AC450-Migration-Studio-User-Manual.pdf"
+                download="ABB-AC450-Migration-Studio-User-Manual.pdf"
+                target="_blank"
+                rel="noreferrer"
                 className="px-6 py-3 bg-white hover:bg-slate-50 text-valmet-green font-semibold text-sm rounded-lg border border-valmet-green/30 transition"
               >
                 User Manual
@@ -215,12 +218,7 @@ export function FramerLanding() {
       </section>
 
       {/* ============================================================ */}
-      {/* 5. USER MANUAL                                               */}
-      {/* ============================================================ */}
-      <UserManualSection />
-
-      {/* ============================================================ */}
-      {/* 6. CONTACT SECTION                                           */}
+      {/* 5. CONTACT SECTION                                           */}
       {/* ============================================================ */}
       <section id="contact" className="scroll-mt-24 border-t border-slate-200 pt-16">
         <div className="max-w-4xl mx-auto text-center mb-12">
@@ -248,8 +246,8 @@ export function FramerLanding() {
                 <Mail className="w-4 h-4 text-valmet-green shrink-0" />
                 <div>
                   <span className="font-semibold text-slate-500 block">Email</span>
-                  <a href="mailto:vedantlanjekar456@gmail.com" className="text-slate-900 hover:text-valmet-green font-medium">
-                    vedantlanjekar456@gmail.com
+                  <a href="mailto:valmet.intern@gmail.com" className="text-slate-900 hover:text-valmet-green font-medium">
+                    valmet.intern@gmail.com
                   </a>
                 </div>
               </div>
@@ -266,18 +264,22 @@ export function FramerLanding() {
             </div>
           </div>
 
-          {/* Card 2: Development Team */}
+          {/* Card 2: Headquarters */}
           <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm space-y-4">
             <h3 className="text-sm font-bold text-slate-900 uppercase tracking-wider font-mono text-valmet-green">
-              Development Team
+              Headquarters
             </h3>
 
-            <div className="space-y-1 text-xs text-slate-700">
-              <div className="font-bold text-slate-900 text-sm">ABB AC450 Migration Studio</div>
-              <div className="text-slate-500 font-medium">Engineering Automation Platform</div>
-              <p className="text-slate-600 mt-2 leading-relaxed">
-                Designed for industrial control system migration, engineering data conversion, and Valmet integration.
-              </p>
+            <div className="flex items-start space-x-3 text-xs text-slate-700">
+              <MapPin className="w-4 h-4 text-valmet-green shrink-0 mt-0.5" />
+              <div className="space-y-1 leading-relaxed">
+                <div className="font-bold text-slate-900 text-sm">Valmet Technologies Private Limited</div>
+                <p className="text-slate-600">
+                  301, Global Port,<br />
+                  Mumbai–Bangalore Highway, Baner,<br />
+                  Pune – 411045
+                </p>
+              </div>
             </div>
           </div>
         </div>

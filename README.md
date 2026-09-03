@@ -19,8 +19,8 @@
   <img src="https://img.shields.io/badge/status-production-brightgreen.svg" alt="Project Status"/>
   <img src="https://img.shields.io/badge/production-live-success.svg" alt="Production Status"/>
   <img src="https://img.shields.io/badge/license-proprietary-lightgrey.svg" alt="License"/>
-  <img src="https://img.shields.io/badge/author-vedantlanjekar--official-informational.svg" alt="Author"/>
-  <img src="https://img.shields.io/badge/updated-15%20Aug%202026-blue.svg" alt="Last Updated"/>
+  <img src="https://img.shields.io/badge/org-valmet--intern--official-informational.svg" alt="Organization"/>
+  <img src="https://img.shields.io/badge/updated-3%20Sep%202026-blue.svg" alt="Last Updated"/>
   <img src="https://img.shields.io/badge/repo-ABB--AC450--Migration--Studio-24292f.svg" alt="Repository"/>
   <img src="https://img.shields.io/badge/frontend-Next.js%2015-black.svg" alt="Frontend"/>
   <img src="https://img.shields.io/badge/backend-FastAPI-009688.svg" alt="Backend"/>
@@ -31,11 +31,12 @@
 |-----------|-------|
 | **Current Version** | `1.0.0` (`backend/core/config.py` → `VERSION`) |
 | **Project Status** | Production-ready engineering workstation (v1) |
-| **Production Status** | Live — Vercel frontend connected to Render API |
+| **Production Status** | Live — Vercel frontend connected to Render API (`valmet-abb-ac450-api`) |
 | **License** | Proprietary / project-defined (no public `LICENSE` file is shipped) |
-| **Author / Maintainer** | [vedantlanjekar-official](https://github.com/vedantlanjekar-official) |
-| **Last Updated** | 15 August 2026 |
-| **Repository Name** | [ABB-AC450-Migration-Studio](https://github.com/vedantlanjekar-official/ABB-AC450-Migration-Studio) |
+| **Organization** | [valmet-intern-official](https://github.com/valmet-intern-official) |
+| **Maintainer** | Valmet Technologies Private Limited |
+| **Last Updated** | 3 September 2026 |
+| **Repository Name** | [ABB-AC450-Migration-Studio](https://github.com/valmet-intern-official/ABB-AC450-Migration-Studio) |
 
 ---
 
@@ -98,7 +99,7 @@ This section is the single inventory of technologies that actually ship in the r
 | Technology | Role in this project |
 |------------|----------------------|
 | **Cursor IDE** | Primary engineering workstation for this repository |
-| **Git** | Version control (`main` tracks `origin`) |
+| **Git** | Version control (`main` tracks `valmet` / GitHub org remote) |
 | **npm** | Frontend install / `next dev` / `next build` |
 | **pip** | `pip install -r requirements.txt` (root file is what Render uses) |
 | **pytest** | Backend regression (`backend/tests`) |
@@ -134,10 +135,11 @@ This section is the single inventory of technologies that actually ship in the r
 9. [System Ratings](#system-ratings)
 10. [A Message to Developers](#a-message-to-developers)
 11. [Contributors](#contributors)
-12. [Related Documentation](#related-documentation)
-13. [Appendix — Glossary, Contracts, and Onboarding](#appendix--glossary-contracts-and-onboarding)
-14. [Environment Variable Catalog](#environment-variable-catalog)
-15. [Excel Column Contracts](#excel-column-contracts)
+12. [Contact](#contact)
+13. [Related Documentation](#related-documentation)
+14. [Appendix — Glossary, Contracts, and Onboarding](#appendix--glossary-contracts-and-onboarding)
+15. [Environment Variable Catalog](#environment-variable-catalog)
+16. [Excel Column Contracts](#excel-column-contracts)
 
 ---
 
@@ -153,15 +155,15 @@ Production URLs only. Local workstation ports belong in the [Developer Guide](#d
 
 | Surface | URL |
 |---------|-----|
-| **Production Website** | [https://abb-ac450-migration-studio.vercel.app](https://abb-ac450-migration-studio.vercel.app) |
-| **Frontend (Vercel)** | [https://abb-ac450-migration-studio.vercel.app](https://abb-ac450-migration-studio.vercel.app) |
-| **Backend API (Render)** | [https://abb-ac450-migration-studio-backend.onrender.com](https://abb-ac450-migration-studio-backend.onrender.com) |
-| **Health Probe** | [https://abb-ac450-migration-studio-backend.onrender.com/health](https://abb-ac450-migration-studio-backend.onrender.com/health) |
-| **OpenAPI (Render)** | [https://abb-ac450-migration-studio-backend.onrender.com/docs](https://abb-ac450-migration-studio-backend.onrender.com/docs) |
-| **GitHub Repository** | [https://github.com/vedantlanjekar-official/ABB-AC450-Migration-Studio](https://github.com/vedantlanjekar-official/ABB-AC450-Migration-Studio) |
-| **Release Page** | [https://github.com/vedantlanjekar-official/ABB-AC450-Migration-Studio/releases](https://github.com/vedantlanjekar-official/ABB-AC450-Migration-Studio/releases) |
+| 🌐 **Production Website** | [https://abb-ac450-migration-studio.vercel.app](https://abb-ac450-migration-studio.vercel.app) |
+| ⚡ **Frontend (Vercel)** | [https://abb-ac450-migration-studio.vercel.app](https://abb-ac450-migration-studio.vercel.app) |
+| 🔧 **Backend API (Render)** | [https://valmet-abb-ac450-api.onrender.com](https://valmet-abb-ac450-api.onrender.com) |
+| ❤️ **Health Check** | [https://valmet-abb-ac450-api.onrender.com/health](https://valmet-abb-ac450-api.onrender.com/health) |
+| 📘 **API Documentation** | [https://valmet-abb-ac450-api.onrender.com/docs](https://valmet-abb-ac450-api.onrender.com/docs) |
+| 💻 **GitHub Repository** | [https://github.com/valmet-intern-official/ABB-AC450-Migration-Studio](https://github.com/valmet-intern-official/ABB-AC450-Migration-Studio) |
+| **Release Page** | [https://github.com/valmet-intern-official/ABB-AC450-Migration-Studio/releases](https://github.com/valmet-intern-official/ABB-AC450-Migration-Studio/releases) |
 
-The browser calls `https://abb-ac450-migration-studio-backend.onrender.com/api` (see `frontend/services/api_client.ts`). CORS allows the Vercel origin. Render free-tier instances may cold-start; the first request after idle can take about thirty seconds.
+In the browser on Vercel, the UI calls same-origin `/api/*`; Next.js rewrites proxy to Render (`BACKEND_URL` / default `https://valmet-abb-ac450-api.onrender.com/api/:path*` — see `frontend/next.config.js` and `frontend/services/api_client.ts`). Direct API clients use `https://valmet-abb-ac450-api.onrender.com/api`. CORS allows the Vercel origin. Render free-tier instances may cold-start; the first request after idle can take about thirty seconds.
 
 ---
 
@@ -191,7 +193,7 @@ Multi-file DB or PC uploads concatenate into **one** workbook (`DB_Element.xlsx`
 ```mermaid
 flowchart TB
   User([Control Engineer / Migration Lead]) --> FE[Next.js 15 Frontend<br/>Vercel]
-  FE -->|HTTPS REST Axios<br/>NEXT_PUBLIC_API_URL/api| API[FastAPI API Layer<br/>/upload /process /status /download /logs]
+  FE -->|HTTPS REST Axios<br/>same-origin /api → Render| API[FastAPI API Layer<br/>/upload /process /status /download /logs]
   API --> JM[JobManager<br/>RAM + JSON on disk]
   API --> CS[ConversionService]
   CS --> DB[DB Engine<br/>PDF + BAX]
@@ -586,7 +588,7 @@ Temp uploads/outputs/logs are **not** in git. They are created under the OS temp
 
 **State.** `converter_store.ts` — files per module, `jobId`, `statusResponse`, log modal.
 
-**API integration.** `api_client.ts` — localhost → `http://127.0.0.1:8002/api`; production → Render `/api` unless `NEXT_PUBLIC_API_URL` is a non-local https URL.
+**API integration.** `api_client.ts` — localhost → `http://127.0.0.1:8002/api`; production browser → same-origin `/api` (Vercel rewrite to Render). Fallback production host: `https://valmet-abb-ac450-api.onrender.com/api`.
 
 **Upload.** Dropzone builds `File[]` (or two files for compare). `uploadFiles` posts field name `files`.
 
@@ -594,7 +596,7 @@ Temp uploads/outputs/logs are **not** in git. They are created under the OS temp
 
 ### APIs
 
-Base path: `{host}/api`. Host in production: `https://abb-ac450-migration-studio-backend.onrender.com`.
+Base path: `{host}/api`. Host in production: `https://valmet-abb-ac450-api.onrender.com`.
 
 #### `GET /health` and `GET /api/health`
 
@@ -685,23 +687,24 @@ Verified 15 August 2026 against Render with `sample_pc.aax`: 11 I/O rows; `82PIC
 ### Deployment
 
 ```text
-GitHub main
-   ├─ Vercel  → Next.js UI
-   └─ Render  → uvicorn backend.main:app --host 0.0.0.0 --port $PORT --workers 1
-         UI ──HTTPS──► Render /api
+GitHub main (valmet-intern-official)
+   ├─ Vercel  → Next.js UI (abb-ac450-migration-studio.vercel.app)
+   │              /api/* rewrite → Render
+   └─ Render  → uvicorn backend.main:app (valmet-abb-ac450-api)
 ```
 
-**GitHub.** Canonical remote: `https://github.com/vedantlanjekar-official/ABB-AC450-Migration-Studio.git`. `render.yaml` `autoDeploy: true` on `main`.
+**GitHub.** Canonical remote: `https://github.com/valmet-intern-official/ABB-AC450-Migration-Studio.git` (see `render.yaml` `repo`). `autoDeploy: true` on `main`.
 
 **Vercel.** Project `abb-ac450-migration-studio`. Root `vercel.json` installs/builds `frontend`. Set **production** env:
 
 | Variable | Value |
 |----------|--------|
-| `NEXT_PUBLIC_API_URL` | `https://abb-ac450-migration-studio-backend.onrender.com/api` |
+| `NEXT_PUBLIC_API_URL` | `https://valmet-abb-ac450-api.onrender.com/api` |
+| `BACKEND_URL` | `https://valmet-abb-ac450-api.onrender.com/api/:path*` |
 
-Must include `/api`. This is inlined at **build** time.
+`NEXT_PUBLIC_API_URL` must include `/api` (build-time). `BACKEND_URL` drives the Next.js `/api/*` rewrite to Render.
 
-**Render.** Service `abb-ac450-migration-studio-backend`.
+**Render.** Service `valmet-abb-ac450-api` (Oregon, free plan).
 
 | Item | Value |
 |------|--------|
@@ -774,7 +777,7 @@ Non-goals of v1: live OPC/DCS, push-to-Valmet-without-review, billing, mobile ap
 
 ## System Ratings
 
-Ratings reflect the **shipped v1.0.0** on 15 August 2026 (local pytest + production AAX smoke on Render). They are engineering judgments, not marketing scores.
+Ratings reflect the **shipped v1.0.0** platform (local pytest + production AAX smoke on Render `valmet-abb-ac450-api`). They are engineering judgments, not marketing scores. Last documentation refresh: 3 September 2026.
 
 ### Table 1 — Engineering modules
 
@@ -829,11 +832,25 @@ Build things that help people who will never read this repository. Then leave th
 
 | Role | Name |
 |------|------|
-| Author / primary maintainer | [vedantlanjekar-official](https://github.com/vedantlanjekar-official) |
+| Organization | [valmet-intern-official](https://github.com/valmet-intern-official) |
+| Product owner | Valmet Technologies Private Limited |
 | Product context | Valmet / ABB AC450 migration engineering |
-| Platform | Vercel (UI), Render (API), GitHub (`main`) |
+| Platform | Vercel (UI), Render (API `valmet-abb-ac450-api`), GitHub (`main`) |
 
 Pull requests should name the module, the sheet contract impact, and the test that locks the behavior.
+
+---
+
+## Contact
+
+| | |
+|--|--|
+| **Email** | [valmet.intern@gmail.com](mailto:valmet.intern@gmail.com) |
+| **Website** | [www.valmet.com](https://www.valmet.com) |
+| **Headquarters** | Valmet Technologies Private Limited |
+| **Address** | 301, Global Port, Mumbai–Bangalore Highway, Baner, Pune – 411045 |
+
+For production issues, include module name, filenames, `job_id`, status JSON, and a redacted log excerpt when contacting the team.
 
 ---
 
@@ -936,7 +953,7 @@ Add the name to `SUPPORTED_FUNCTION_BLOCKS` in `function_block_extractor.py` and
 Upload (PowerShell):
 
 ```powershell
-$api = "https://abb-ac450-migration-studio-backend.onrender.com"
+$api = "https://valmet-abb-ac450-api.onrender.com"
 $up = Invoke-RestMethod -Method Post -Uri "$api/api/upload" -Form @{
   files = Get-Item ".\backend\tests\fixtures\sample_pc.aax"
 }
@@ -1031,7 +1048,7 @@ Do not commit `.AXX Data/` mill exports, `Guide Materials/`, `.tools/`, `.env.lo
 | Observation | Likely cause | Action |
 |-------------|--------------|--------|
 | First production click hangs | Render cold start | Wait on `/health`, retry once |
-| Preview has tags, Excel missing Slot/Card | Looking at Function Block Summary or an old download | Open `I_O_List`; re-run after 15 Aug 2026 deploy |
+| Preview has tags, Excel missing Slot/Card | Looking at Function Block Summary or an old download | Open `I_O_List`; re-run on current `valmet-abb-ac450-api` deploy |
 | `unsupported PC source` | File is BAX on a PC job | Use DB module or convert to PDF/AAX |
 | Clubbing looks “wrong” | Different Loop Tags (suffix kept) | Check Device Tag derivation, not Excel sort |
 | pytest collect errors | Wrong Python | Use repo `.tools/python` or 3.11+ with root requirements |
@@ -1046,8 +1063,8 @@ Name the module, the sheet or API field that changed, before/after counts on a g
 
 | Name | Where | Required | Purpose |
 |------|--------|----------|---------|
-| `NEXT_PUBLIC_API_URL` | Vercel (build) / `.env.local` | Production yes | Browser API base; must end with `/api` |
-| `BACKEND_URL` | Next.js rewrite (dev) | No | Server-side rewrite target; default `http://127.0.0.1:8002/api/:path*` |
+| `NEXT_PUBLIC_API_URL` | Vercel (build) / `.env.local` | Production yes | Browser API base when not using same-origin rewrite; must end with `/api` |
+| `BACKEND_URL` | Vercel / Next.js rewrite | Production recommended | Server-side rewrite target; default production `https://valmet-abb-ac450-api.onrender.com/api/:path*` |
 | `PYTHON_VERSION` | Render | Yes (blueprint) | `3.11.0` |
 | `PC_LIGHT_PDF_READ` | Render / process | Recommended `1` | Skip dual PDF engines on PC |
 | `DB_LIGHT_PDF_READ` | Render / process | Recommended `1` | Reduce DB PDF memory |
@@ -1111,11 +1128,11 @@ Migration sign-off is a legal and safety process. An invented card number that l
 
 ### Support model
 
-v1 is an engineering workstation. There is no SLA bot. Operators should capture: module, filenames, `job_id`, status JSON, and a redacted log excerpt. Developers should reproduce with the smallest fixture that fails, then add a pytest before the fix.
+v1 is an engineering workstation. There is no SLA bot. Operators should capture: module, filenames, `job_id`, status JSON, and a redacted log excerpt, then email [valmet.intern@gmail.com](mailto:valmet.intern@gmail.com). Developers should reproduce with the smallest fixture that fails, then add a pytest before the fix.
 
 ### Versioning policy
 
-`1.0.0` is the first production cut (15 August 2026) with AAX address join, visible Slot/Card columns, multi-file combined Excel, and live Vercel↔Render wiring. Increment:
+`1.0.0` is the first production cut with AAX address join, visible Slot/Card columns, multi-file combined Excel, and live Vercel↔Render wiring (service `valmet-abb-ac450-api`). Documentation and production hosts refreshed 3 September 2026. Increment:
 
 - **Patch** — bugfix that does not change headers or family sets  
 - **Minor** — new optional column or FB catalog entry with backward-compatible headers  
@@ -1131,4 +1148,11 @@ The Studio is handed to Valmet and site engineering teams as a **reviewed compil
   <strong>ABB AC450 Migration Studio</strong><br/>
   Enterprise Engineering Migration Platform<br/>
   <em>ABB AC450 source truth → Valmet-ready engineering deliverables</em>
+</p>
+
+<p align="center">
+  <strong>Valmet Technologies Private Limited</strong><br/>
+  301, Global Port, Mumbai–Bangalore Highway, Baner, Pune – 411045<br/>
+  <a href="mailto:valmet.intern@gmail.com">valmet.intern@gmail.com</a> ·
+  <a href="https://www.valmet.com">www.valmet.com</a>
 </p>
